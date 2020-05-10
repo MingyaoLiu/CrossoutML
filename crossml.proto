@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+message CrossoutMLSetting {
+    int32 displayIndex = 1;
+    bool fullAuto = 2;
+    int32 shiftX = 3;
+    int32 shiftY = 4;
+}
