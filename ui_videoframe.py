@@ -673,7 +673,7 @@ def leftShortBackStir():
         global leftShortBackStirTimer2
         leftShortBackStirTimer1.cancel()
         InputTrigger.KeyPress("w", 2.55).start()
-        InputTrigger.KeyPress("a", 1.5).start()
+        InputTrigger.KeyPress("a", 1.65).start()
 
         leftShortBackStirTimer2 = threading.Timer(2.75, turnFinalRight)
         leftShortBackStirTimer2.start()
