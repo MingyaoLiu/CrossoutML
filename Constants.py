@@ -12,6 +12,7 @@ class BattleMode(enum.IntEnum):
     wire = 1
     battery = 2
     # patrol = 3
+    raven = 3
 
 scrap_btn_width = 40
 scrap_btn_height = 40
@@ -33,19 +34,24 @@ patrol_btn_height = 30
 patrol_btn_trigger_pos_x = int(screenWidth / 2 - patrol_btn_width / 2)
 patrol_btn_trigger_pos_y = int(screenHeight / 4 + 120 - patrol_btn_height / 2)
 
+raven_path_btn_width = 30
+raven_path_btn_height = 30
+raven_path_btn_trigger_pos_x = int(screenWidth / 2  + 200 - raven_path_btn_width / 2)
+raven_path_btn_trigger_pos_y = int(screenHeight / 4 - raven_path_btn_height / 2)
 
 class ScreenStep(enum.IntEnum):
     Login = 0
     WelcomeScreen = 1
-    ChallengeCompleteScreen = 2
-    MainMenu = 3
-    SelectMode = 4
-    GetResourceMenu = 5
-    BattlePrepareScreen = 6
-    InBattleNow = 7
-    DeathWaiting = 8
-    FinishBattleScreen = 9
-    debug = 10
+    MasterJackUpgradeScreen = 2
+    ChallengeCompleteScreen = 3
+    MainMenu = 4
+    SelectMode = 5
+    GetResourceMenu = 6
+    BattlePrepareScreen = 7
+    InBattleNow = 8
+    DeathWaiting = 9
+    FinishBattleScreen = 10
+    debug = 11
 
 
 
@@ -177,12 +183,12 @@ in_battle_front_view_trigger_pos_x = int(in_battle_front_view_width_start + in_b
 in_battle_front_view_trigger_pos_y = int(in_battle_front_view_height_start + in_battle_front_view_height / 2)
 
 
-in_battle_health_digit_width = 46
-in_battle_health_digit_width_start = int(screenWidth / 2 - 58 - in_battle_health_digit_width / 2)
-in_battle_health_digit_width_end = int(screenWidth / 2 - 58 + in_battle_health_digit_width / 2)
-in_battle_health_digit_height = 22
-in_battle_health_digit_height_start = int(screenHeight - 28 - in_battle_health_digit_height / 2)
-in_battle_health_digit_height_end = int(screenHeight - 28 + in_battle_health_digit_height / 2)
+in_battle_health_digit_width = 48
+in_battle_health_digit_width_start = int(screenWidth / 2 - 59 - in_battle_health_digit_width / 2)
+in_battle_health_digit_width_end = int(screenWidth / 2 - 59 + in_battle_health_digit_width / 2)
+in_battle_health_digit_height = 24
+in_battle_health_digit_height_start = int(screenHeight - 29 - in_battle_health_digit_height / 2)
+in_battle_health_digit_height_end = int(screenHeight - 29 + in_battle_health_digit_height / 2)
 in_battle_health_digit_trigger_pos_x = int(in_battle_health_digit_width_start + in_battle_health_digit_width / 2)
 in_battle_health_digit_trigger_pos_y = int(in_battle_health_digit_height_start + in_battle_health_digit_height / 2)
 
@@ -195,4 +201,14 @@ in_battle_mini_map_height_start = int(screenHeight - 180 - in_battle_mini_map_he
 in_battle_mini_map_height_end = int(screenHeight - 180 + in_battle_mini_map_height / 2)
 in_battle_mini_map_trigger_pos_x = int(in_battle_mini_map_width_start + in_battle_mini_map_width / 2)
 in_battle_mini_map_trigger_pos_y = int(in_battle_mini_map_height_start + in_battle_mini_map_height / 2)
+
+
+co_pilot_upgrade_close_width = 54
+co_pilot_upgrade_close_width_start = int(screenWidth / 2 + 8 - co_pilot_upgrade_close_width / 2)
+co_pilot_upgrade_close_width_end = int(screenWidth  / 2 + 8 + co_pilot_upgrade_close_width / 2)
+co_pilot_upgrade_close_height = 22
+co_pilot_upgrade_close_height_start = int(screenHeight / 1.527 - co_pilot_upgrade_close_height / 2)
+co_pilot_upgrade_close_height_end = int(screenHeight / 1.527 + co_pilot_upgrade_close_height / 2)
+co_pilot_upgrade_close_trigger_pos_x = int(co_pilot_upgrade_close_width_start + co_pilot_upgrade_close_width / 2)
+co_pilot_upgrade_close_trigger_pos_y = int(co_pilot_upgrade_close_height_start + co_pilot_upgrade_close_height / 2)
 
