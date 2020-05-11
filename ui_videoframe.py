@@ -470,6 +470,7 @@ def battleEnded():
     global battleStartDelay
     global calloutInterval
     global carJackInterval
+    global total_back_stir_count
 
     try:
         if calloutInterval: 
@@ -487,7 +488,7 @@ def battleEnded():
     except ValueError:
         pass
 
-
+    total_back_stir_count = 0
     battleStartDelay = True
     isBattleAlreadyActive = False
     isAlreadySelfDestruct = False
@@ -507,7 +508,7 @@ def calllOut():
 def carJack():
     InputTrigger.KeyPress("r").start()
 
-
+total_back_stir_count = 0
 left_short_back_stir_in_a_roll = 0
 right_long_back_stir_in_a_roll = 0
 
@@ -534,9 +535,14 @@ def determineBackStir():
     global isAlreadyBackStirring
     global left_short_back_stir_in_a_roll
     global right_long_back_stir_in_a_roll
+    global total_back_stir_count
 
-    print(isAlreadyBackStirring)    
-
+    
+    if isAlreadyBackStirring == False and total_back_stir_count < 6:
+        total_back_stir_count += 1
+    elif isAlreadyBackStirring == False and total_back_stir_count >= 6:
+        selfDesctruct()
+    
     if isAlreadyBackStirring:
         pass
 
@@ -596,7 +602,7 @@ def leftShortBackStir():
         global leftShortBackStirTimer3
         leftShortBackStirTimer2.cancel()
         InputTrigger.keyHold("w")
-        InputTrigger.KeyPress("d", 0.9).start()
+        InputTrigger.KeyPress("d", 0.7).start()
 
         leftShortBackStirTimer3 = threading.Timer(2, finish)
         leftShortBackStirTimer3.start()
@@ -605,15 +611,15 @@ def leftShortBackStir():
         global leftShortBackStirTimer1
         global leftShortBackStirTimer2
         leftShortBackStirTimer1.cancel()
-        InputTrigger.KeyPress("w", 2).start()
+        InputTrigger.KeyPress("w", 3).start()
         InputTrigger.KeyPress("a", 2).start()
 
-        leftShortBackStirTimer2 = threading.Timer(2.5, turnFinalRight)
+        leftShortBackStirTimer2 = threading.Timer(3.5, turnFinalRight)
         leftShortBackStirTimer2.start()
 
-    InputTrigger.KeyPress("s", 1.25).start()
+    InputTrigger.KeyPress("s", 1.4).start()
         
-    leftShortBackStirTimer1 = threading.Timer(1.5, turnForwardLeft)
+    leftShortBackStirTimer1 = threading.Timer(1.7, turnForwardLeft)
     leftShortBackStirTimer1.start()
         
 
@@ -650,7 +656,7 @@ def rightLongBackStir():
 
         rightLongBackStirTimer2.cancel()
         InputTrigger.keyHold("w")
-        InputTrigger.KeyPress("a", 1).start()
+        InputTrigger.KeyPress("a", 0.7).start()
 
         rightLongBackStirTimer3 = threading.Timer(2, finish)
         rightLongBackStirTimer3.start()
@@ -660,15 +666,15 @@ def rightLongBackStir():
         global rightLongBackStirTimer2
 
         rightLongBackStirTimer1.cancel()
-        InputTrigger.KeyPress("w", 3).start()
+        InputTrigger.KeyPress("w", 3.5).start()
         InputTrigger.KeyPress("d", 2).start()
 
-        rightLongBackStirTimer2 = threading.Timer(3.5, turnFinalLeft)
+        rightLongBackStirTimer2 = threading.Timer(3.8, turnFinalLeft)
         rightLongBackStirTimer2.start()
 
-    InputTrigger.KeyPress("s", 1.7).start()
+    InputTrigger.KeyPress("s", 2.2).start()
         
-    rightLongBackStirTimer1 = threading.Timer(2, turnForwardRight)
+    rightLongBackStirTimer1 = threading.Timer(2.5, turnForwardRight)
     rightLongBackStirTimer1.start()
         
 
@@ -729,73 +735,6 @@ shortBackStirCount = 0
 backStirDirection = "a"
 
 
-def backStir4():
-    global backStirTimer3
-    global shortBackStirCount
-    global needLongBackStir
-    try:
-        if backStirTimer3: 
-            backStirTimer3.cancel()
-    except ValueError:
-        pass
-    if shortBackStirCount >= 2:
-        needLongBackStir = True
-    shortBackStirCount = 0
-
-def backStir3():
-    global backStirDirection
-    global backStirTimer2
-    global backStirTimer3
-    global isAlreadyBackStirring
-
-    try:
-        if backStirTimer2: 
-            backStirTimer2.cancel()
-    except ValueError:
-        pass
-    isAlreadyBackStirring = False
-    backStirTimer3 = threading.Timer(20, backStir4)
-    backStirTimer3.start()
-
-def backStir2():
-    global backStirTimer1
-    global backStirTimer2
-    try:
-        if backStirTimer1: 
-            backStirTimer1.cancel()
-    except ValueError:
-        pass
-    InputTrigger.keyHold("w")
-    backStirTimer2 = threading.Timer(4, backStir3)
-    backStirTimer2.start()
-        
-def backStir():
-    # print("<< In Battle >> Backing")
-    global shortBackStirCount
-    global backStirDirection
-    global backStirTimer1
-    global isAlreadyBackStirring
-    global needLongBackStir
-
-    if isAlreadyBackStirring:
-        pass
-    else:
-        isAlreadyBackStirring = True
-        InputTrigger.keyRelease("w")
-
-        moveLst = ["a", "d"]
-        # ranPara = random.choice(moveLst)
-        backStirDirection = random.choice(moveLst)
-        InputTrigger.KeyPress("s", 2.15).start()
-        if needLongBackStir:
-            InputTrigger.KeyPress(backStirDirection, 1.75).start()
-            needLongBackStir = False
-        else:
-            InputTrigger.KeyPress(backStirDirection, 1.5).start()
-            shortBackStirCount += 1
-
-        backStirTimer1 = threading.Timer(2.25, backStir2)
-        backStirTimer1.start() 
         
 lastStir = "a"
 
