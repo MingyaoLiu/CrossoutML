@@ -840,7 +840,7 @@ def delayBattleStart():
     except ValueError:
         pass
     
-    stirInterval = setInterval(8, stirringHorizontal)
+    stirInterval = setInterval(6, stirringHorizontal)
     calloutInterval = setInterval(40, calllOut)
     carJackInterval = setInterval(10, carJack)
 
