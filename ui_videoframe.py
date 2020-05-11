@@ -604,12 +604,14 @@ def determineBackStir():
     global right_long_back_stir_in_a_roll
     global total_back_stir_count
 
-    if isAlreadyBackStirring:
-        pass
-    elif isAlreadyBackStirring == False and total_back_stir_count < 6:
+
+    if isAlreadyBackStirring == False and total_back_stir_count < 6:
         total_back_stir_count += 1
     elif isAlreadyBackStirring == False and total_back_stir_count >= 6:
-        stopMoving()
+        return stopMoving()
+
+    if isAlreadyBackStirring:
+        pass
     elif right_long_back_stir_in_a_roll >= 2:
         full_reverse_back_stir()
         left_short_back_stir_in_a_roll = 0
