@@ -19,6 +19,7 @@ import Constants as const
 
 
 def getCorrectPos(pos):
+    print(ProtoSetting.getGlobalSetting().settings.shiftX)
     return (int(ProtoSetting.getGlobalSetting().settings.shiftX + pos[0]), int(ProtoSetting.getGlobalSetting().settings.shiftY + pos[1]))
 
 
@@ -672,10 +673,10 @@ def leftShortBackStir():
         global leftShortBackStirTimer1
         global leftShortBackStirTimer2
         leftShortBackStirTimer1.cancel()
-        InputTrigger.KeyPress("w", 3).start()
+        InputTrigger.KeyPress("w", 2.75).start()
         InputTrigger.KeyPress("a", 2).start()
 
-        leftShortBackStirTimer2 = threading.Timer(3.5, turnFinalRight)
+        leftShortBackStirTimer2 = threading.Timer(3, turnFinalRight)
         leftShortBackStirTimer2.start()
 
     InputTrigger.KeyPress("s", 1.4).start()
