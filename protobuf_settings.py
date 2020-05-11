@@ -27,3 +27,20 @@ class Settings(object):
     def getSettings(self):
         return self.settings
 
+
+    def saveSettings(self):
+        settingsFile = open("settings.bin", "wb")
+        settingsFile.write(self.settings.SerializeToString())
+        settingsFile.close()
+
+
+global_settings = None
+
+
+def getGlobalSetting():
+    global global_settings
+    if global_settings:
+        return global_settings
+    else:
+        global_settings = Settings()
+        return global_settings

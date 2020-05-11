@@ -8,7 +8,7 @@ import pytesseract
 
 import InputTrigger
 
-from protobuf_settings import Settings
+import protobuf_settings as ProtoSetting
 
 import numpy as np
 
@@ -16,8 +16,10 @@ import Constants as const
 
 
 
+
+
 def getCorrectPos(pos):
-    return (int(Settings().settings.shiftX + pos[0]), int(Settings().settings.shiftY + pos[1]))
+    return (int(ProtoSetting.getGlobalSetting().settings.shiftX + pos[0]), int(ProtoSetting.getGlobalSetting().settings.shiftY + pos[1]))
 
 
 
@@ -307,10 +309,12 @@ def bot():
     d = d3dshot.create(capture_output='numpy')
     if (len(d.displays) > 1):
         d.display = d.displays[1]
-        Settings().settings.shiftX = -2560
+        ProtoSetting.getGlobalSetting().settings.shiftX = -2560
+        ProtoSetting.getGlobalSetting().saveSettings()
     else:
         d.display = d.displays[0]
-        Settings().settings.shiftX = 0
+        ProtoSetting.getGlobalSetting().settings.shiftX = 0
+        ProtoSetting.getGlobalSetting().saveSettings()
     d.capture(target_fps=10, region=(0, 0, const.screenWidth, const.screenHeight))
     time.sleep(1)
 
