@@ -168,7 +168,7 @@ def bot():
             2
         )
     ]
-    WelcomeScreen = Screen(const.ScreenStep.WelcomeScreen, welcome_crops, 10)
+    WelcomeScreen = Screen(const.ScreenStep.WelcomeScreen, welcome_crops, 20)
 
     mainmenu_master_jack_crops = [
         CropProperty(
