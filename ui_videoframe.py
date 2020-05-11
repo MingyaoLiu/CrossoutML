@@ -647,7 +647,7 @@ def leftShortBackStir():
     global leftShortBackStirTimer3
 
 
-    rollBackOneTimer = threading.Timer(30, setBackByOneLeftShortBackStirCount)
+    rollBackOneTimer = threading.Timer(20, setBackByOneLeftShortBackStirCount)
     rollBackOneTimer.start()
 
 
@@ -665,17 +665,17 @@ def leftShortBackStir():
         InputTrigger.keyHold("w")
         InputTrigger.KeyPress("d", 0.73).start()
 
-        leftShortBackStirTimer3 = threading.Timer(2, finish)
+        leftShortBackStirTimer3 = threading.Timer(1, finish)
         leftShortBackStirTimer3.start()
 
     def turnForwardLeft():
         global leftShortBackStirTimer1
         global leftShortBackStirTimer2
         leftShortBackStirTimer1.cancel()
-        InputTrigger.KeyPress("w", 2.75).start()
+        InputTrigger.KeyPress("w", 2.55).start()
         InputTrigger.KeyPress("a", 2).start()
 
-        leftShortBackStirTimer2 = threading.Timer(3, turnFinalRight)
+        leftShortBackStirTimer2 = threading.Timer(2.75, turnFinalRight)
         leftShortBackStirTimer2.start()
 
     InputTrigger.KeyPress("s", 1.4).start()
@@ -700,7 +700,7 @@ def rightLongBackStir():
     global rightLongBackStirTimer3
 
 
-    rollBackOneTimer = threading.Timer(40, setBackByOneRightLongBackStirCount)
+    rollBackOneTimer = threading.Timer(30, setBackByOneRightLongBackStirCount)
     rollBackOneTimer.start()
 
 
@@ -717,9 +717,9 @@ def rightLongBackStir():
 
         rightLongBackStirTimer2.cancel()
         InputTrigger.keyHold("w")
-        InputTrigger.KeyPress("a", 0.7).start()
+        InputTrigger.KeyPress("a", 0.72).start()
 
-        rightLongBackStirTimer3 = threading.Timer(2, finish)
+        rightLongBackStirTimer3 = threading.Timer(1, finish)
         rightLongBackStirTimer3.start()
 
     def turnForwardRight():
