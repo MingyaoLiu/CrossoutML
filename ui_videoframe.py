@@ -592,6 +592,12 @@ def checkFullStuck():
     if left_short_back_stir_in_a_roll > 0:
         selfDesctruct()
 
+def stopMoving():
+    InputTrigger.keyRelease("w")
+    InputTrigger.keyRelease("a")
+    InputTrigger.keyRelease("s")
+    InputTrigger.keyRelease("d")
+
 def determineBackStir():
     global isAlreadyBackStirring
     global left_short_back_stir_in_a_roll
@@ -602,7 +608,7 @@ def determineBackStir():
     if isAlreadyBackStirring == False and total_back_stir_count < 6:
         total_back_stir_count += 1
     elif isAlreadyBackStirring == False and total_back_stir_count >= 6:
-        selfDesctruct()
+        stopMoving()
     
     if isAlreadyBackStirring:
         pass
@@ -633,9 +639,10 @@ leftShortBackStirTimer1 = None
 leftShortBackStirTimer2 = None
 leftShortBackStirTimer3 = None
 
-# class backStir():
+class backStir():
 
-#     def __init__(self, direction, duration,):
+    def __init__(self, direction, duration,):
+        self.direction = direction
 
 
 
@@ -841,7 +848,7 @@ def delayBattleStart():
         pass
     
     stirInterval = setInterval(6, stirringHorizontal)
-    calloutInterval = setInterval(40, calllOut)
+    # calloutInterval = setInterval(40, calllOut)
     carJackInterval = setInterval(10, carJack)
 
 
