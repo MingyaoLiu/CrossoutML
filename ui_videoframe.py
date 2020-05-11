@@ -19,7 +19,6 @@ import Constants as const
 
 
 def getCorrectPos(pos):
-    print(ProtoSetting.getGlobalSetting().settings.shiftX)
     return (int(ProtoSetting.getGlobalSetting().settings.shiftX + pos[0]), int(ProtoSetting.getGlobalSetting().settings.shiftY + pos[1]))
 
 
@@ -260,7 +259,7 @@ def bot():
             1
         )
     ]
-    BattlePreparationScreen = Screen(const.ScreenStep.BattlePrepareScreen, battle_preparation_crops, 5000)
+    BattlePreparationScreen = Screen(const.ScreenStep.BattlePrepareScreen, battle_preparation_crops, 1500)
 
     # in_battle_crops = [
     #     CropProperty(
@@ -305,7 +304,7 @@ def bot():
         )
     ]
 
-    FinishBattleScreen = Screen(const.ScreenStep.FinishBattleScreen, finish_battle_crops, 8000)
+    FinishBattleScreen = Screen(const.ScreenStep.FinishBattleScreen, finish_battle_crops, 3000)
 
     d = d3dshot.create(capture_output='numpy')
     if (len(d.displays) > 1):
@@ -664,7 +663,7 @@ def leftShortBackStir():
         global leftShortBackStirTimer3
         leftShortBackStirTimer2.cancel()
         InputTrigger.keyHold("w")
-        InputTrigger.KeyPress("d", 0.7).start()
+        InputTrigger.KeyPress("d", 0.73).start()
 
         leftShortBackStirTimer3 = threading.Timer(2, finish)
         leftShortBackStirTimer3.start()
