@@ -11,14 +11,17 @@ import threading
 from ctypes import windll
 
 def char2key(c):
-    result = windll.User32.VkKeyScanW(ord(str(c)))
-    shift_state = (result & 0xFF00) >> 8
-    vk_key = result & 0xFF
+    if len(str(c)) == 1:
+        ord1 = ord(str(c))
+        result = windll.User32.VkKeyScanW(ord1)
+        shift_state = (result & 0xFF00) >> 8
+        vk_key = result & 0xFF
+        return vk_key
+    else:
+        print("Not A Single Char")
+        return c
 
-    return vk_key
-
-# Actuals Functions
-
+VK_ESCAPE = 0x1B
 
 class KeyPress:
 

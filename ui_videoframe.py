@@ -61,23 +61,38 @@ class Screen():
         self.allowedRetryCount = allowedRetryCount
         self.retryCount = 0
 
+    def checkSingleSatisfy(self, frame, index) -> bool:
+        crop = self.crops[index]
+        crop_frame = frame[crop.area.y:crop.area.ys, crop.area.x:crop.area.xs]
+        low_txt = pytesseract.image_to_string(crop_frame, lang='eng').lower()
+        if crop.requiredMatch and (low_txt not in crop.expectedStrs):
+            return False
+        return True
+    
+
     def checkSatisfy(self, frame) -> bool:
-        for crop in self.crops:
-            crop_frame = frame[crop.area.y:crop.area.ys, crop.area.x:crop.area.xs]
-            low_txt = pytesseract.image_to_string(crop_frame, lang='eng').lower()
-            if crop.requiredMatch and (low_txt not in crop.expectedStrs):
+        for i in range(len( self.crops)):
+            if self.checkSingleSatisfy(frame, i):
+                pass
+            else:
                 return False
-            pass
         print("Step", self.screenStep.name, ">>>> SATISFIED")
         return True
     
+    def executeSingleClick(self, index):
+        crop = self.crops[index]
+        if crop.willClick:
+            InputTrigger.mouseClick(getCorrectPos(crop.clickPos))
+            time.sleep(crop.clickWaitTime)
+
     def executeClick(self):
-        for crop in self.crops:
-            if crop.willClick:
-                InputTrigger.mouseClick(getCorrectPos(crop.clickPos))
-                time.sleep(crop.clickWaitTime)
+        for i in range(len(self.crops)):
+            self.executeSingleClick(i)
+
 
     def addFailCount(self) -> bool:
+        if self.retryCount == 0 or self.retryCount % 100 == 0:
+            print("Retrying Step: ", self.screenStep.name, self.retryCount)
         self.retryCount += 1
         if self.retryCount >= self.allowedRetryCount:
             print("Step", self.screenStep.name, ">>>> FAILED")
@@ -88,14 +103,21 @@ class Screen():
         self.retryCount = 0
         
 
+import win32api
+import win32con
+
+
+isFirstTimeAtLogin = True
 
 def bot():
 
     global isAlreadySelfDestruct
     global isAlreadyBackStirring
     global battleStartDelay
+    global isFirstTimeAtLogin
 
 
+    InputTrigger.mouseClick(getCorrectPos((100, 10)))
     ######################
     ## SET CURRENT STEP ##
     ######################
@@ -103,16 +125,35 @@ def bot():
 
     login_crops = [
         CropProperty(
+            "Exit No Button",
+            CropArea(const.login_exit_no_width_start, const.login_exit_no_height_start, const.login_exit_no_width_end, const.login_exit_no_height_end),
+            True,
+            Point(const.login_exit_no_trigger_pos_x, const.login_exit_no_trigger_pos_y),
+            True,
+            ["no"],
+            1
+        ),
+        CropProperty(
+            "Escape Return Button",
+            CropArea(const.esc_return_button_width_start, const.esc_return_button_height_start, const.esc_return_button_width_end, const.esc_return_button_height_end),
+            True,
+            Point(const.esc_return_button_trigger_pos_x, const.esc_return_button_trigger_pos_y),
+            True,
+            ["return", "toate"],
+            1
+        ),
+
+        CropProperty(
             "Login Button",
             CropArea(const.login_label_width_start, const.login_label_height_start, const.login_label_width_end, const.login_label_height_end),
             True,
             Point(const.login_label_trigger_pos_x, const.login_label_trigger_pos_y),
             True,
             ["login","log in", "log ln", "logln"],
-            5
+            10
         )
     ]
-    LoginScreen = Screen(const.ScreenStep.Login, login_crops, 30)
+    LoginScreen = Screen(const.ScreenStep.Login, login_crops, 10)
 
     welcome_crops = [
         CropProperty(
@@ -122,10 +163,10 @@ def bot():
             Point(const.welcome_promo_label_trigger_pos_x, const.welcome_promo_label_trigger_pos_y),
             True,
             ["close", "c1ose", "ciose"],
-            1
+            2
         )
     ]
-    WelcomeScreen = Screen(const.ScreenStep.WelcomeScreen, welcome_crops, 30)
+    WelcomeScreen = Screen(const.ScreenStep.WelcomeScreen, welcome_crops, 10)
 
     mainmenu_master_jack_crops = [
         CropProperty(
@@ -135,10 +176,10 @@ def bot():
             Point(const.co_pilot_upgrade_close_trigger_pos_x, const.co_pilot_upgrade_close_trigger_pos_x),
             True,
             ["close", "c1ose"],
-            1
+            2
         )
     ]
-    MasterJackUpgradeScreen = Screen(const.ScreenStep.MasterJackUpgradeScreen, mainmenu_master_jack_crops, 20)
+    MasterJackUpgradeScreen = Screen(const.ScreenStep.MasterJackUpgradeScreen, mainmenu_master_jack_crops, 10)
 
     mainmenu_challenge_crops = [
         CropProperty(
@@ -148,10 +189,10 @@ def bot():
             Point(const.mainmenu_challenge_complete_ok_trigger_pos_x, const.mainmenu_challenge_complete_ok_trigger_pos_y),
             True,
             ["ok", "0k"],
-            1
+            2
         )
     ]
-    ChallengeCompleteScreen = Screen(const.ScreenStep.ChallengeCompleteScreen, mainmenu_challenge_crops, 20)
+    ChallengeCompleteScreen = Screen(const.ScreenStep.ChallengeCompleteScreen, mainmenu_challenge_crops, 10)
     
     mainmenu_crops = [
         CropProperty(
@@ -266,8 +307,10 @@ def bot():
     d = d3dshot.create(capture_output='numpy')
     if (len(d.displays) > 1):
         d.display = d.displays[1]
+        Settings().settings.shiftX = -2560
     else:
         d.display = d.displays[0]
+        Settings().settings.shiftX = 0
     d.capture(target_fps=10, region=(0, 0, const.screenWidth, const.screenHeight))
     time.sleep(1)
 
@@ -277,7 +320,8 @@ def bot():
         prev_frame = d.get_frame(10)
         frame = cv2.cvtColor(np_frame, cv2.COLOR_BGR2RGB)
 
-        # test_frame = frame[ const.co_pilot_upgrade_close_height_start:const.co_pilot_upgrade_close_height_end, const.co_pilot_upgrade_close_width_start:const.co_pilot_upgrade_close_width_end ]
+
+        # test_frame = frame[ const.esc_return_button_height_start:const.esc_return_button_height_end,const.esc_return_button_width_start:const.esc_return_button_width_end ]
         # cv2.imshow("TestCrop", test_frame)
         # text = pytesseract.image_to_string(test_frame, lang='eng')
         # print(text)
@@ -285,9 +329,22 @@ def bot():
 
         if currentStep == const.ScreenStep.Login:
             screen = LoginScreen
-            if screen.checkSatisfy(frame):
+
+            if screen.retryCount == 0:
+                screen.addFailCount()
+                win32api.keybd_event(0x1B, 0, 0, 0)
+                win32api.keybd_event(0x1B, 0, win32con.KEYEVENTF_KEYUP, 0)
+                time.sleep(1)
+                win32api.keybd_event(0x1B, 0, 0, 0)
+                win32api.keybd_event(0x1B, 0, win32con.KEYEVENTF_KEYUP, 0)
+                time.sleep(1)
+            elif screen.checkSingleSatisfy(frame, 0):
+                screen.executeSingleClick(0)
+            elif screen.checkSingleSatisfy(frame, 1):
+                screen.executeSingleClick(1)
+            elif screen.checkSingleSatisfy(frame, 2):
                 screen.resetRetryCount()
-                screen.executeClick()
+                screen.executeSingleClick(2)
                 currentStep += 1
             elif screen.addFailCount():
                 pass
@@ -383,7 +440,7 @@ def bot():
                 battleEnded()
                 screen.resetRetryCount()
                 screen.executeClick()
-                currentStep = const.ScreenStep.MasterJackUpgradeScreen
+                currentStep = const.ScreenStep.Login
             elif screen.addFailCount():
                 if battleStartDelay == False:
                     InputTrigger.KeyPress("t").start()
@@ -415,7 +472,7 @@ def bot():
             else:
                 screen.resetRetryCount()
                 battleEnded()
-                currentStep = const.ScreenStep.MasterJackUpgradeScreen
+                currentStep = const.ScreenStep.Login
 
         else:
             # print("CURRENT STEP:", currentStep)

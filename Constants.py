@@ -54,6 +54,15 @@ class ScreenStep(enum.IntEnum):
     debug = 11
 
 
+esc_return_button_width = 90
+esc_return_button_width_start = int(screenWidth / 2 - esc_return_button_width / 2)
+esc_return_button_width_end = int(screenWidth / 2 + esc_return_button_width / 2)
+esc_return_button_height = 26
+esc_return_button_height_start = int(screenHeight / 2.27 - esc_return_button_height / 2)
+esc_return_button_height_end = int(screenHeight / 2.27 + esc_return_button_height / 2)
+esc_return_button_trigger_pos_x = int(esc_return_button_width_start + esc_return_button_width / 2)
+esc_return_button_trigger_pos_y = int(esc_return_button_height_start + esc_return_button_height / 2)
+
 
 login_label_width = 70
 login_label_width_start = int(screenWidth / 7.5 - login_label_width / 2)
@@ -63,6 +72,17 @@ login_label_height_start = int(screenHeight / 2 - login_label_height / 2)
 login_label_height_end = int(screenHeight / 2 + login_label_height / 2)
 login_label_trigger_pos_x = int(login_label_width_start + login_label_width / 2)
 login_label_trigger_pos_y = int(login_label_height_start + login_label_height / 2)
+
+
+login_exit_no_width = 35
+login_exit_no_width_start = int(screenWidth / 1.785 - login_exit_no_width / 2)
+login_exit_no_width_end = int(screenWidth / 1.785 + login_exit_no_width / 2)
+login_exit_no_height = 25
+login_exit_no_height_start = int(screenHeight / 1.75 - login_exit_no_height / 2)
+login_exit_no_height_end = int(screenHeight / 1.75 + login_exit_no_height / 2)
+login_exit_no_trigger_pos_x = int(login_exit_no_width_start + login_exit_no_width / 2)
+login_exit_no_trigger_pos_y = int(login_exit_no_height_start + login_exit_no_height / 2)
+
 
 welcome_promo_label_width = 70
 welcome_promo_label_width_start = int(screenWidth / 1.5 - welcome_promo_label_width / 2)
