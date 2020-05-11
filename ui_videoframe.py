@@ -604,15 +604,12 @@ def determineBackStir():
     global right_long_back_stir_in_a_roll
     global total_back_stir_count
 
-    
-    if isAlreadyBackStirring == False and total_back_stir_count < 6:
+    if isAlreadyBackStirring:
+        pass
+    elif isAlreadyBackStirring == False and total_back_stir_count < 6:
         total_back_stir_count += 1
     elif isAlreadyBackStirring == False and total_back_stir_count >= 6:
         stopMoving()
-    
-    if isAlreadyBackStirring:
-        pass
-
     elif right_long_back_stir_in_a_roll >= 2:
         full_reverse_back_stir()
         left_short_back_stir_in_a_roll = 0
@@ -767,9 +764,6 @@ def full_reverse_back_stir():
     global fullreverseBackStirTimer1
     global fullreverseBackStirTimer2
 
-
-    fullStuckTimer = threading.Timer(20, checkFullStuck)
-    fullStuckTimer.start()
 
 
 
