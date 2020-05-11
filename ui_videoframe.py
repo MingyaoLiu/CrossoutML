@@ -633,6 +633,12 @@ leftShortBackStirTimer1 = None
 leftShortBackStirTimer2 = None
 leftShortBackStirTimer3 = None
 
+class backStir():
+
+    def __init__(self, direction, duration,):
+
+
+
 def leftShortBackStir():
     global left_short_back_stir_in_a_roll
     global isAlreadyBackStirring
@@ -647,7 +653,7 @@ def leftShortBackStir():
     global leftShortBackStirTimer3
 
 
-    rollBackOneTimer = threading.Timer(20, setBackByOneLeftShortBackStirCount)
+    rollBackOneTimer = threading.Timer(25, setBackByOneLeftShortBackStirCount)
     rollBackOneTimer.start()
 
 
@@ -687,6 +693,9 @@ def leftShortBackStir():
 rightLongBackStirTimer1 = None
 rightLongBackStirTimer2 = None
 rightLongBackStirTimer3 = None
+
+
+
 
 def rightLongBackStir():
     global isAlreadyBackStirring
@@ -768,7 +777,7 @@ def full_reverse_back_stir():
         global fullreverseBackStirTimer2
         fullreverseBackStirTimer1.cancel()
         InputTrigger.keyHold("w")
-        InputTrigger.KeyPress("a", 2.2).start()
+        InputTrigger.KeyPress("a", 2.4).start()
 
         fullreverseBackStirTimer2 = threading.Timer(5, finish)
         fullreverseBackStirTimer2.start()
