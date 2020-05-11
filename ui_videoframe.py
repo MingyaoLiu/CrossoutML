@@ -728,7 +728,7 @@ def rightLongBackStir():
 
         rightLongBackStirTimer1.cancel()
         InputTrigger.KeyPress("w", 3.5).start()
-        InputTrigger.KeyPress("d", 2).start()
+        InputTrigger.KeyPress("d", 1.75).start()
 
         rightLongBackStirTimer2 = threading.Timer(3.8, turnFinalLeft)
         rightLongBackStirTimer2.start()
