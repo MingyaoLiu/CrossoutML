@@ -4,8 +4,7 @@ import crossml_pb2
 class Settings(object):
 
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self):
         self.settings = crossml_pb2.CrossoutMLSetting()
 
         with open('settings.bin', 'rb') as f:
