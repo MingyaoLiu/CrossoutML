@@ -633,9 +633,9 @@ leftShortBackStirTimer1 = None
 leftShortBackStirTimer2 = None
 leftShortBackStirTimer3 = None
 
-class backStir():
+# class backStir():
 
-    def __init__(self, direction, duration,):
+#     def __init__(self, direction, duration,):
 
 
 
