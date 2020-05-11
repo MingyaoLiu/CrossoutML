@@ -21,7 +21,7 @@ def getCorrectPos(pos):
 
 
 
-
+lastFullyCompleteStep = 0
 isAlreadySelfDestruct = False
 isBattleAlreadyActive = False
 isAlreadyBackStirring = False
@@ -80,10 +80,12 @@ class Screen():
     def addFailCount(self) -> bool:
         self.retryCount += 1
         if self.retryCount >= self.allowedRetryCount:
-            self.retryCount = 0
             print("Step", self.screenStep.name, ">>>> FAILED")
             return False
         return True
+
+    def resetRetryCount(self):
+        self.retryCount = 0
         
 
 
@@ -93,7 +95,11 @@ def bot():
     global isAlreadyBackStirring
     global battleStartDelay
 
-    currentStep = const.ScreenStep.MainMenu
+
+    ######################
+    ## SET CURRENT STEP ##
+    ######################
+    currentStep = const.ScreenStep.Login
 
     login_crops = [
         CropProperty(
@@ -120,7 +126,20 @@ def bot():
         )
     ]
     WelcomeScreen = Screen(const.ScreenStep.WelcomeScreen, welcome_crops, 30)
-    
+
+    mainmenu_master_jack_crops = [
+        CropProperty(
+            "Mainmenu MasterJack Upgrade level Close",
+            CropArea(const.co_pilot_upgrade_close_width_start, const.co_pilot_upgrade_close_height_start, const.co_pilot_upgrade_close_width_end, const.co_pilot_upgrade_close_height_end),
+            True,
+            Point(const.co_pilot_upgrade_close_trigger_pos_x, const.co_pilot_upgrade_close_trigger_pos_x),
+            True,
+            ["close", "c1ose"],
+            1
+        )
+    ]
+    MasterJackUpgradeScreen = Screen(const.ScreenStep.MasterJackUpgradeScreen, mainmenu_master_jack_crops, 20)
+
     mainmenu_challenge_crops = [
         CropProperty(
             "Mainmenu Challenge Complete OK Button",
@@ -132,7 +151,7 @@ def bot():
             1
         )
     ]
-    ChallengeCompleteScreen = Screen(const.ScreenStep.ChallengeCompleteScreen, mainmenu_challenge_crops, 30)
+    ChallengeCompleteScreen = Screen(const.ScreenStep.ChallengeCompleteScreen, mainmenu_challenge_crops, 20)
     
     mainmenu_crops = [
         CropProperty(
@@ -159,7 +178,8 @@ def bot():
     select_mode_click_pos = [
         getCorrectPos((const.scrap_btn_trigger_pos_x, const.scrap_btn_trigger_pos_y)),
         getCorrectPos((const.wire_btn_trigger_pos_x, const.wire_btn_trigger_pos_y)),
-        getCorrectPos((const.battery_btn_trigger_pos_x, const.battery_btn_trigger_pos_y))
+        getCorrectPos((const.battery_btn_trigger_pos_x, const.battery_btn_trigger_pos_y)),
+        getCorrectPos((const.raven_path_btn_trigger_pos_x, const.raven_path_btn_trigger_pos_y))
     ]
     SelectModeScreen = Screen(const.ScreenStep.SelectMode, [], 30)
 
@@ -196,7 +216,7 @@ def bot():
             1
         )
     ]
-    BattlePreparationScreen = Screen(const.ScreenStep.BattlePrepareScreen, battle_preparation_crops, 2000)
+    BattlePreparationScreen = Screen(const.ScreenStep.BattlePrepareScreen, battle_preparation_crops, 5000)
 
     # in_battle_crops = [
     #     CropProperty(
@@ -228,7 +248,7 @@ def bot():
             Point(const.finish_battle_close_label_trigger_pos_x, const.finish_battle_close_label_trigger_pos_y),
             True,
             ["close", "c1ose"],
-            3
+            1
         ),
         CropProperty(
             "Finish Battle BATTLE Button",
@@ -237,11 +257,11 @@ def bot():
             Point(const.finish_battle_battle_label_trigger_pos_x, const.finish_battle_battle_label_trigger_pos_y),
             False,
             ["battle", "batt1e"],
-            3
+            1
         )
     ]
 
-    FinishBattleScreen = Screen(const.ScreenStep.FinishBattleScreen, finish_battle_crops, 5000)
+    FinishBattleScreen = Screen(const.ScreenStep.FinishBattleScreen, finish_battle_crops, 8000)
 
     d = d3dshot.create(capture_output='numpy')
     if (len(d.displays) > 1):
@@ -257,54 +277,71 @@ def bot():
         prev_frame = d.get_frame(10)
         frame = cv2.cvtColor(np_frame, cv2.COLOR_BGR2RGB)
 
-        # test_frame = frame[ const.battle_victory_defeat_giant_width_height_start:const.battle_victory_defeat_giant_width_height_end, const.battle_victory_defeat_giant_width_start:const.battle_victory_defeat_giant_width_end ]
+        # test_frame = frame[ const.co_pilot_upgrade_close_height_start:const.co_pilot_upgrade_close_height_end, const.co_pilot_upgrade_close_width_start:const.co_pilot_upgrade_close_width_end ]
         # cv2.imshow("TestCrop", test_frame)
         # text = pytesseract.image_to_string(test_frame, lang='eng')
         # print(text)
-        # if (text.lower == "victory" or text.lower == "defeat"):
-        #     print("Good")
+
 
         if currentStep == const.ScreenStep.Login:
             screen = LoginScreen
             if screen.checkSatisfy(frame):
+                screen.resetRetryCount()
                 screen.executeClick()
                 currentStep += 1
             elif screen.addFailCount():
                 pass
             else:
+                screen.resetRetryCount()
                 currentStep += 1
 
         elif currentStep == const.ScreenStep.WelcomeScreen:
             screen = WelcomeScreen
             if screen.checkSatisfy(frame):
+                screen.resetRetryCount()
                 screen.executeClick()
                 currentStep += 1
             elif screen.addFailCount():
                 pass
             else:
+                screen.resetRetryCount()
                 currentStep += 1
-
+        elif currentStep == const.ScreenStep.MasterJackUpgradeScreen:
+            screen = MasterJackUpgradeScreen
+            if screen.checkSatisfy(frame):
+                screen.resetRetryCount()
+                screen.executeClick()
+            elif screen.addFailCount():
+                pass
+            else:
+                screen.resetRetryCount()
+                currentStep += 1
         elif currentStep == const.ScreenStep.ChallengeCompleteScreen:
             screen = ChallengeCompleteScreen
             if screen.checkSatisfy(frame):
+                screen.resetRetryCount()
                 screen.executeClick()
             elif screen.addFailCount():
                 pass
             else:
+                screen.resetRetryCount()
                 currentStep += 1
 
         elif currentStep == const.ScreenStep.MainMenu:
             screen = MainMenuScreen
             if screen.checkSatisfy(frame):
+                screen.resetRetryCount()
                 screen.executeClick()
                 currentStep += 1
             elif screen.addFailCount():
                 pass
             else:
+                screen.resetRetryCount()
                 currentStep += 1
 
         elif currentStep == const.ScreenStep.SelectMode:
             clickPos = random.choice(select_mode_click_pos)
+            # clickPos = select_mode_click_pos[3]
             InputTrigger.mouseClick(clickPos)
             time.sleep(1)
             currentStep += 1
@@ -312,27 +349,30 @@ def bot():
         elif currentStep == const.ScreenStep.GetResourceMenu:
             screen = ResourcePrepareBattleScreen
             if screen.checkSatisfy(frame):
+                screen.resetRetryCount()
                 screen.executeClick()
                 currentStep += 1
             elif screen.addFailCount():
                 pass
             else:
+                screen.resetRetryCount()
                 currentStep += 1
         
         elif currentStep == const.ScreenStep.BattlePrepareScreen:
             screen = BattlePreparationScreen
             if screen.checkSatisfy(frame):
+                screen.resetRetryCount()
                 screen.executeClick()
                 currentStep += 1
             elif screen.addFailCount():
                 pass
             else:
+                screen.resetRetryCount()
                 currentStep += 1
 
         elif currentStep == const.ScreenStep.InBattleNow:
-            screen = InBattleScreen
-            DoBattleNow()
             currentStep += 1
+            DoBattleNow()
 
         elif currentStep == const.ScreenStep.DeathWaiting:
             currentStep += 1
@@ -341,8 +381,9 @@ def bot():
             screen = FinishBattleScreen
             if screen.checkSatisfy(frame):
                 battleEnded()
+                screen.resetRetryCount()
                 screen.executeClick()
-                currentStep = const.ScreenStep.ChallengeCompleteScreen
+                currentStep = const.ScreenStep.MasterJackUpgradeScreen
             elif screen.addFailCount():
                 if battleStartDelay == False:
                     InputTrigger.KeyPress("t").start()
@@ -360,23 +401,25 @@ def bot():
                     comp = cv2.absdiff(front_frame, prev_front_frame)
                     res = comp.astype(np.uint8)
                     percentage = (np.count_nonzero(res) * 100) / res.size
-                    if percentage < 85:
-                        backStir()
+                    if percentage < 75:
+                        determineBackStir()
 
-                    health_frame = frame[ const.in_battle_health_digit_height_start:const.in_battle_health_digit_height_end, const.in_battle_health_digit_width_start:const.in_battle_health_digit_width_end ]
-                    a = pytesseract.image_to_string(health_frame)
-                    try:
-                        inta = int(a)
-                        if (inta <= 200):
-                            selfDesctruct()
-                    except ValueError:
-                        pass
+                    # health_frame = frame[ const.in_battle_health_digit_height_start:const.in_battle_health_digit_height_end, const.in_battle_health_digit_width_start:const.in_battle_health_digit_width_end ]
+                    # a = pytesseract.image_to_string(health_frame)
+                    # try:
+                    #     inta = int(a)
+                    #     if (inta <= 150):
+                    #         selfDesctruct()
+                    # except ValueError:
+                    #     pass
             else:
+                screen.resetRetryCount()
                 battleEnded()
-                currentStep = const.ScreenStep.ChallengeCompleteScreen
+                currentStep = const.ScreenStep.MasterJackUpgradeScreen
 
         else:
-            print("CURRENT STEP:", currentStep)
+            # print("CURRENT STEP:", currentStep)
+            pass
         
         if cv2.waitKey(1) & 0xFF == ord('q'):
             d.stop()
@@ -409,7 +452,6 @@ def destructComplete():
     InputTrigger.keyRelease("m")
     isAlreadySelfDestruct = True
     destructTimer.cancel()
-
 
 def selfDesctruct():
     global destructTimer
@@ -466,6 +508,213 @@ def carJack():
     InputTrigger.KeyPress("r").start()
 
 
+left_short_back_stir_in_a_roll = 0
+right_long_back_stir_in_a_roll = 0
+
+
+## Left 3, RIght 3, back
+
+def setBackByOneLeftShortBackStirCount():
+    global left_short_back_stir_in_a_roll
+    if left_short_back_stir_in_a_roll > 0:
+        left_short_back_stir_in_a_roll -= 1
+    print("Set back left, currently", left_short_back_stir_in_a_roll)
+
+def setBackByOneRightLongBackStirCount():
+    global right_long_back_stir_in_a_roll
+    if right_long_back_stir_in_a_roll > 0:
+        right_long_back_stir_in_a_roll -= 1
+    print("Set back right, currently", right_long_back_stir_in_a_roll)
+
+def checkFullStuck():
+    if left_short_back_stir_in_a_roll > 0:
+        selfDesctruct()
+
+def determineBackStir():
+    global isAlreadyBackStirring
+    global left_short_back_stir_in_a_roll
+    global right_long_back_stir_in_a_roll
+
+    print(isAlreadyBackStirring)    
+
+    if isAlreadyBackStirring:
+        pass
+
+    elif right_long_back_stir_in_a_roll >= 2:
+        full_reverse_back_stir()
+        left_short_back_stir_in_a_roll = 0
+        right_long_back_stir_in_a_roll = 0
+    elif left_short_back_stir_in_a_roll >= 2:
+        rightLongBackStir()
+        right_long_back_stir_in_a_roll += 1
+
+    elif right_long_back_stir_in_a_roll > 0:
+        rightLongBackStir()
+        right_long_back_stir_in_a_roll += 1
+
+    elif left_short_back_stir_in_a_roll > 0:
+        leftShortBackStir()
+        left_short_back_stir_in_a_roll += 1
+
+    else:
+        leftShortBackStir()
+        left_short_back_stir_in_a_roll += 1
+
+
+
+leftShortBackStirTimer1 = None
+leftShortBackStirTimer2 = None
+leftShortBackStirTimer3 = None
+
+def leftShortBackStir():
+    global left_short_back_stir_in_a_roll
+    global isAlreadyBackStirring
+
+
+    isAlreadyBackStirring = True
+
+    InputTrigger.keyRelease("w")
+
+    global leftShortBackStirTimer1
+    global leftShortBackStirTimer2
+    global leftShortBackStirTimer3
+
+
+    rollBackOneTimer = threading.Timer(30, setBackByOneLeftShortBackStirCount)
+    rollBackOneTimer.start()
+
+
+
+    def finish():
+        global isAlreadyBackStirring
+        global leftShortBackStirTimer3
+        leftShortBackStirTimer3.cancel()
+        isAlreadyBackStirring = False
+
+    def turnFinalRight():
+        global leftShortBackStirTimer2
+        global leftShortBackStirTimer3
+        leftShortBackStirTimer2.cancel()
+        InputTrigger.keyHold("w")
+        InputTrigger.KeyPress("d", 0.9).start()
+
+        leftShortBackStirTimer3 = threading.Timer(2, finish)
+        leftShortBackStirTimer3.start()
+
+    def turnForwardLeft():
+        global leftShortBackStirTimer1
+        global leftShortBackStirTimer2
+        leftShortBackStirTimer1.cancel()
+        InputTrigger.KeyPress("w", 2).start()
+        InputTrigger.KeyPress("a", 2).start()
+
+        leftShortBackStirTimer2 = threading.Timer(2.5, turnFinalRight)
+        leftShortBackStirTimer2.start()
+
+    InputTrigger.KeyPress("s", 1.25).start()
+        
+    leftShortBackStirTimer1 = threading.Timer(1.5, turnForwardLeft)
+    leftShortBackStirTimer1.start()
+        
+
+rightLongBackStirTimer1 = None
+rightLongBackStirTimer2 = None
+rightLongBackStirTimer3 = None
+
+def rightLongBackStir():
+    global isAlreadyBackStirring
+
+    isAlreadyBackStirring = True
+    InputTrigger.keyRelease("w")
+
+
+    global rightLongBackStirTimer1
+    global rightLongBackStirTimer2
+    global rightLongBackStirTimer3
+
+
+    rollBackOneTimer = threading.Timer(40, setBackByOneRightLongBackStirCount)
+    rollBackOneTimer.start()
+
+
+    def finish():
+        global isAlreadyBackStirring
+        global rightLongBackStirTimer3
+
+        rightLongBackStirTimer3.cancel()
+        isAlreadyBackStirring = False
+
+    def turnFinalLeft():
+        global rightLongBackStirTimer2
+        global rightLongBackStirTimer3
+
+        rightLongBackStirTimer2.cancel()
+        InputTrigger.keyHold("w")
+        InputTrigger.KeyPress("a", 1).start()
+
+        rightLongBackStirTimer3 = threading.Timer(2, finish)
+        rightLongBackStirTimer3.start()
+
+    def turnForwardRight():
+        global rightLongBackStirTimer1
+        global rightLongBackStirTimer2
+
+        rightLongBackStirTimer1.cancel()
+        InputTrigger.KeyPress("w", 3).start()
+        InputTrigger.KeyPress("d", 2).start()
+
+        rightLongBackStirTimer2 = threading.Timer(3.5, turnFinalLeft)
+        rightLongBackStirTimer2.start()
+
+    InputTrigger.KeyPress("s", 1.7).start()
+        
+    rightLongBackStirTimer1 = threading.Timer(2, turnForwardRight)
+    rightLongBackStirTimer1.start()
+        
+
+fullreverseBackStirTimer1 = None
+fullreverseBackStirTimer2 = None
+
+def full_reverse_back_stir():
+    global isAlreadyBackStirring
+
+    isAlreadyBackStirring = True
+    InputTrigger.keyRelease("w")
+
+    global fullreverseBackStirTimer1
+    global fullreverseBackStirTimer2
+
+
+    fullStuckTimer = threading.Timer(20, checkFullStuck)
+    fullStuckTimer.start()
+
+
+
+    def finish():
+        global isAlreadyBackStirring
+        global fullreverseBackStirTimer2
+        fullreverseBackStirTimer2.cancel()
+        isAlreadyBackStirring = False
+
+    def turnAround():
+        global fullreverseBackStirTimer1
+        global fullreverseBackStirTimer2
+        fullreverseBackStirTimer1.cancel()
+        InputTrigger.keyHold("w")
+        InputTrigger.KeyPress("a", 2.2).start()
+
+        fullreverseBackStirTimer2 = threading.Timer(5, finish)
+        fullreverseBackStirTimer2.start()
+
+
+
+    InputTrigger.KeyPress("s", 2.1).start()
+        
+    fullreverseBackStirTimer1 = threading.Timer(3, turnAround)
+    fullreverseBackStirTimer1.start()
+
+
+
 stirInterval = None
 calloutInterval = None
 carJackInterval = None
@@ -517,7 +766,7 @@ def backStir2():
     except ValueError:
         pass
     InputTrigger.keyHold("w")
-    backStirTimer2 = threading.Timer(3, backStir3)
+    backStirTimer2 = threading.Timer(4, backStir3)
     backStirTimer2.start()
         
 def backStir():
@@ -533,13 +782,11 @@ def backStir():
     else:
         isAlreadyBackStirring = True
         InputTrigger.keyRelease("w")
-        InputTrigger.keyRelease("a")
-        InputTrigger.keyRelease("s")
-        InputTrigger.keyRelease("d")
+
         moveLst = ["a", "d"]
         # ranPara = random.choice(moveLst)
         backStirDirection = random.choice(moveLst)
-        InputTrigger.KeyPress("s", 2.5).start()
+        InputTrigger.KeyPress("s", 2.15).start()
         if needLongBackStir:
             InputTrigger.KeyPress(backStirDirection, 1.75).start()
             needLongBackStir = False
@@ -547,7 +794,7 @@ def backStir():
             InputTrigger.KeyPress(backStirDirection, 1.5).start()
             shortBackStirCount += 1
 
-        backStirTimer1 = threading.Timer(2.65, backStir2)
+        backStirTimer1 = threading.Timer(2.25, backStir2)
         backStirTimer1.start() 
         
 lastStir = "a"
@@ -559,8 +806,7 @@ def stirringHorizontal():
     if isAlreadyBackStirring:
         pass
     else:
-        InputTrigger.keyRelease("a")
-        InputTrigger.keyRelease("d")
+
         if lastStir == "a":
             InputTrigger.KeyPress("d", 0.3).start()
             lastStir = "d"
@@ -585,7 +831,7 @@ def delayBattleStart():
     except ValueError:
         pass
     
-    stirInterval = setInterval(6, stirringHorizontal)
+    stirInterval = setInterval(8, stirringHorizontal)
     calloutInterval = setInterval(40, calllOut)
     carJackInterval = setInterval(10, carJack)
 
