@@ -608,6 +608,8 @@ def determineBackStir():
     if isAlreadyBackStirring == False and total_back_stir_count < 6:
         total_back_stir_count += 1
     elif isAlreadyBackStirring == False and total_back_stir_count >= 6:
+        fullStuckTimer = threading.Timer(20, selfDesctruct)
+        fullStuckTimer.start()
         return stopMoving()
 
     if isAlreadyBackStirring:
