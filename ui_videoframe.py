@@ -1,4 +1,9 @@
-import time, threading, random, operator
+import win32con
+import win32api
+import time
+import threading
+import random
+import operator
 
 import d3dshot
 
@@ -15,12 +20,8 @@ import numpy as np
 import Constants as const
 
 
-
-
-
 def getCorrectPos(pos):
     return (int(ProtoSetting.getGlobalSetting().settings.shiftX + pos[0]), int(ProtoSetting.getGlobalSetting().settings.shiftY + pos[1]))
-
 
 
 lastFullyCompleteStep = 0
@@ -30,11 +31,13 @@ isAlreadyBackStirring = False
 battleStartDelay = True
 battleStartDelayTimer = None
 
+
 class Point(tuple):
     def __new__(self, x, y):
         Point.x = property(operator.itemgetter(0))
         Point.y = property(operator.itemgetter(1))
         return tuple.__new__(Point, (x, y))
+
 
 class CropArea(tuple):
     def __new__(self, x, y, xs, ys):
@@ -43,6 +46,7 @@ class CropArea(tuple):
         CropArea.xs = property(operator.itemgetter(2))
         CropArea.ys = property(operator.itemgetter(3))
         return tuple.__new__(CropArea, (x, y, xs, ys))
+
 
 class CropProperty(tuple):
     def __new__(self, name: str, area: CropArea, requiredMatch: bool, clickPos: Point, willClick: bool, expectedStrs: [str],  clickWaitTime: int):
@@ -54,6 +58,7 @@ class CropProperty(tuple):
         CropProperty.expectedStrs = property(operator.itemgetter(5))
         CropProperty.clickWaitTime = property(operator.itemgetter(6))
         return tuple.__new__(CropProperty, (name, area, requiredMatch, clickPos, willClick, expectedStrs, clickWaitTime))
+
 
 class Screen():
 
@@ -70,17 +75,16 @@ class Screen():
         if crop.requiredMatch and (low_txt not in crop.expectedStrs):
             return False
         return True
-    
 
     def checkSatisfy(self, frame) -> bool:
-        for i in range(len( self.crops)):
+        for i in range(len(self.crops)):
             if self.checkSingleSatisfy(frame, i):
                 pass
             else:
                 return False
         print("Step", self.screenStep.name, ">>>> SATISFIED")
         return True
-    
+
     def executeSingleClick(self, index):
         crop = self.crops[index]
         if crop.willClick:
@@ -90,7 +94,6 @@ class Screen():
     def executeClick(self):
         for i in range(len(self.crops)):
             self.executeSingleClick(i)
-
 
     def addFailCount(self) -> bool:
         if self.retryCount == 0 or self.retryCount % 100 == 0:
@@ -103,13 +106,10 @@ class Screen():
 
     def resetRetryCount(self):
         self.retryCount = 0
-        
-
-import win32api
-import win32con
 
 
 isFirstTimeAtLogin = True
+
 
 def bot():
 
@@ -117,7 +117,6 @@ def bot():
     global isAlreadyBackStirring
     global battleStartDelay
     global isFirstTimeAtLogin
-
 
     InputTrigger.mouseClick(getCorrectPos((100, 10)))
     ######################
@@ -128,18 +127,22 @@ def bot():
     login_crops = [
         CropProperty(
             "Exit No Button",
-            CropArea(const.login_exit_no_width_start, const.login_exit_no_height_start, const.login_exit_no_width_end, const.login_exit_no_height_end),
+            CropArea(const.login_exit_no_width_start, const.login_exit_no_height_start,
+                     const.login_exit_no_width_end, const.login_exit_no_height_end),
             True,
-            Point(const.login_exit_no_trigger_pos_x, const.login_exit_no_trigger_pos_y),
+            Point(const.login_exit_no_trigger_pos_x,
+                  const.login_exit_no_trigger_pos_y),
             True,
             ["no"],
             1
         ),
         CropProperty(
             "Escape Return Button",
-            CropArea(const.esc_return_button_width_start, const.esc_return_button_height_start, const.esc_return_button_width_end, const.esc_return_button_height_end),
+            CropArea(const.esc_return_button_width_start, const.esc_return_button_height_start,
+                     const.esc_return_button_width_end, const.esc_return_button_height_end),
             True,
-            Point(const.esc_return_button_trigger_pos_x, const.esc_return_button_trigger_pos_y),
+            Point(const.esc_return_button_trigger_pos_x,
+                  const.esc_return_button_trigger_pos_y),
             True,
             ["return", "toate"],
             1
@@ -147,11 +150,13 @@ def bot():
 
         CropProperty(
             "Login Button",
-            CropArea(const.login_label_width_start, const.login_label_height_start, const.login_label_width_end, const.login_label_height_end),
+            CropArea(const.login_label_width_start, const.login_label_height_start,
+                     const.login_label_width_end, const.login_label_height_end),
             True,
-            Point(const.login_label_trigger_pos_x, const.login_label_trigger_pos_y),
+            Point(const.login_label_trigger_pos_x,
+                  const.login_label_trigger_pos_y),
             True,
-            ["login","log in", "log ln", "logln"],
+            ["login", "log in", "log ln", "logln"],
             10
         )
     ]
@@ -160,9 +165,11 @@ def bot():
     welcome_crops = [
         CropProperty(
             "Welcome Promo Close Button",
-            CropArea(const.welcome_promo_label_width_start, const.welcome_promo_label_height_start, const.welcome_promo_label_width_end, const.welcome_promo_label_height_end),
+            CropArea(const.welcome_promo_label_width_start, const.welcome_promo_label_height_start,
+                     const.welcome_promo_label_width_end, const.welcome_promo_label_height_end),
             True,
-            Point(const.welcome_promo_label_trigger_pos_x, const.welcome_promo_label_trigger_pos_y),
+            Point(const.welcome_promo_label_trigger_pos_x,
+                  const.welcome_promo_label_trigger_pos_y),
             True,
             ["close", "c1ose", "ciose"],
             2
@@ -173,44 +180,54 @@ def bot():
     mainmenu_master_jack_crops = [
         CropProperty(
             "Mainmenu MasterJack Upgrade level Close",
-            CropArea(const.co_pilot_upgrade_close_width_start, const.co_pilot_upgrade_close_height_start, const.co_pilot_upgrade_close_width_end, const.co_pilot_upgrade_close_height_end),
+            CropArea(const.co_pilot_upgrade_close_width_start, const.co_pilot_upgrade_close_height_start,
+                     const.co_pilot_upgrade_close_width_end, const.co_pilot_upgrade_close_height_end),
             True,
-            Point(const.co_pilot_upgrade_close_trigger_pos_x, const.co_pilot_upgrade_close_trigger_pos_x),
+            Point(const.co_pilot_upgrade_close_trigger_pos_x,
+                  const.co_pilot_upgrade_close_trigger_pos_x),
             True,
             ["close", "c1ose"],
             2
         )
     ]
-    MasterJackUpgradeScreen = Screen(const.ScreenStep.MasterJackUpgradeScreen, mainmenu_master_jack_crops, 10)
+    MasterJackUpgradeScreen = Screen(
+        const.ScreenStep.MasterJackUpgradeScreen, mainmenu_master_jack_crops, 10)
 
     mainmenu_challenge_crops = [
         CropProperty(
             "Mainmenu Challenge Complete OK Button",
-            CropArea(const.mainmenu_challenge_complete_ok_width_start, const.mainmenu_challenge_complete_ok_height_start, const.mainmenu_challenge_complete_ok_width_end, const.mainmenu_challenge_complete_ok_height_end),
+            CropArea(const.mainmenu_challenge_complete_ok_width_start, const.mainmenu_challenge_complete_ok_height_start,
+                     const.mainmenu_challenge_complete_ok_width_end, const.mainmenu_challenge_complete_ok_height_end),
             True,
-            Point(const.mainmenu_challenge_complete_ok_trigger_pos_x, const.mainmenu_challenge_complete_ok_trigger_pos_y),
+            Point(const.mainmenu_challenge_complete_ok_trigger_pos_x,
+                  const.mainmenu_challenge_complete_ok_trigger_pos_y),
             True,
             ["ok", "0k"],
             2
         )
     ]
-    ChallengeCompleteScreen = Screen(const.ScreenStep.ChallengeCompleteScreen, mainmenu_challenge_crops, 10)
-    
+    ChallengeCompleteScreen = Screen(
+        const.ScreenStep.ChallengeCompleteScreen, mainmenu_challenge_crops, 10)
+
     mainmenu_crops = [
         CropProperty(
             "Main Menu Battle Button",
-            CropArea(const.mainmenu_battle_label_width_start, const.mainmenu_battle_label_height_start, const.mainmenu_battle_label_width_end, const.mainmenu_battle_label_height_end),
+            CropArea(const.mainmenu_battle_label_width_start, const.mainmenu_battle_label_height_start,
+                     const.mainmenu_battle_label_width_end, const.mainmenu_battle_label_height_end),
             False,
-            Point(const.mainmenu_battle_label_trigger_pos_x, const.mainmenu_battle_label_trigger_pos_y),
+            Point(const.mainmenu_battle_label_trigger_pos_x,
+                  const.mainmenu_battle_label_trigger_pos_y),
             False,
             ["battle", "batt1e"],
             1
         ),
         CropProperty(
             "Main Menu Select Mode Button",
-            CropArea(const.mainmenu_select_mode_label_width_start, const.mainmenu_select_mode_label_height_start, const.mainmenu_select_mode_label_width_end, const.mainmenu_select_mode_label_height_end),
+            CropArea(const.mainmenu_select_mode_label_width_start, const.mainmenu_select_mode_label_height_start,
+                     const.mainmenu_select_mode_label_width_end, const.mainmenu_select_mode_label_height_end),
             True,
-            Point(const.mainmenu_select_mode_label_trigger_pos_x, const.mainmenu_select_mode_label_trigger_pos_y),
+            Point(const.mainmenu_select_mode_label_trigger_pos_x,
+                  const.mainmenu_select_mode_label_trigger_pos_y),
             True,
             ["select mode", "selectmode", "se1ect mode"],
             1
@@ -219,47 +236,59 @@ def bot():
     MainMenuScreen = Screen(const.ScreenStep.MainMenu, mainmenu_crops, 30)
 
     select_mode_click_pos = [
-        getCorrectPos((const.scrap_btn_trigger_pos_x, const.scrap_btn_trigger_pos_y)),
-        getCorrectPos((const.wire_btn_trigger_pos_x, const.wire_btn_trigger_pos_y)),
-        getCorrectPos((const.battery_btn_trigger_pos_x, const.battery_btn_trigger_pos_y)),
-        getCorrectPos((const.raven_path_btn_trigger_pos_x, const.raven_path_btn_trigger_pos_y))
+        getCorrectPos((const.scrap_btn_trigger_pos_x,
+                       const.scrap_btn_trigger_pos_y)),
+        getCorrectPos((const.wire_btn_trigger_pos_x,
+                       const.wire_btn_trigger_pos_y)),
+        getCorrectPos((const.battery_btn_trigger_pos_x,
+                       const.battery_btn_trigger_pos_y)),
+        getCorrectPos((const.raven_path_btn_trigger_pos_x,
+                       const.raven_path_btn_trigger_pos_y))
     ]
     SelectModeScreen = Screen(const.ScreenStep.SelectMode, [], 30)
 
     resource_prepare_crops = [
         CropProperty(
             "Scrap/Wire/Battery Prepare to Battle Button",
-            CropArea(const.get_resource_battle_label_width_start, const.get_resource_battle_label_height_start, const.get_resource_battle_label_width_end, const.get_resource_battle_label_height_end),
+            CropArea(const.get_resource_battle_label_width_start, const.get_resource_battle_label_height_start,
+                     const.get_resource_battle_label_width_end, const.get_resource_battle_label_height_end),
             True,
-            Point(const.get_resource_battle_label_trigger_pos_x, const.get_resource_battle_label_trigger_pos_y),
+            Point(const.get_resource_battle_label_trigger_pos_x,
+                  const.get_resource_battle_label_trigger_pos_y),
             True,
             ["battle", "batt1e"],
             1
         ),
         CropProperty(
             "Patrol Mode Prepare to Battle Button",
-            CropArea(const.get_resource_battle_label_width_start, const.get_resource_patrol_battle_label_height_start, const.get_resource_battle_label_width_end, const.get_resource_patrol_battle_label_height_end),
+            CropArea(const.get_resource_battle_label_width_start, const.get_resource_patrol_battle_label_height_start,
+                     const.get_resource_battle_label_width_end, const.get_resource_patrol_battle_label_height_end),
             False,
-            Point(const.get_resource_patrol_battle_label_trigger_pos_x, const.get_resource_patrol_battle_label_trigger_pos_y),
+            Point(const.get_resource_patrol_battle_label_trigger_pos_x,
+                  const.get_resource_patrol_battle_label_trigger_pos_y),
             False,
             ["battle", "batt1e"],
             1
         )
     ]
-    ResourcePrepareBattleScreen = Screen(const.ScreenStep.GetResourceMenu, resource_prepare_crops, 30)
+    ResourcePrepareBattleScreen = Screen(
+        const.ScreenStep.GetResourceMenu, resource_prepare_crops, 30)
 
     battle_preparation_crops = [
         CropProperty(
             "Prepare to Battle Summary Screen Title",
-            CropArea(const.battle_type_title_label_width_start, const.battle_type_title_label_height_start, const.battle_type_title_label_width_end, const.battle_type_title_label_height_end),
+            CropArea(const.battle_type_title_label_width_start, const.battle_type_title_label_height_start,
+                     const.battle_type_title_label_width_end, const.battle_type_title_label_height_end),
             True,
-            Point(const.mainmenu_challenge_complete_ok_trigger_pos_x, const.mainmenu_challenge_complete_ok_trigger_pos_y),
+            Point(const.mainmenu_challenge_complete_ok_trigger_pos_x,
+                  const.mainmenu_challenge_complete_ok_trigger_pos_y),
             False,
             ["assault", "encounter", "domination"],
             1
         )
     ]
-    BattlePreparationScreen = Screen(const.ScreenStep.BattlePrepareScreen, battle_preparation_crops, 1500)
+    BattlePreparationScreen = Screen(
+        const.ScreenStep.BattlePrepareScreen, battle_preparation_crops, 1500)
 
     # in_battle_crops = [
     #     CropProperty(
@@ -286,25 +315,30 @@ def bot():
     finish_battle_crops = [
         CropProperty(
             "Finish Battle Close Button",
-            CropArea(const.finish_battle_close_label_width_start, const.finish_battle_close_label_height_start, const.finish_battle_close_label_width_end, const.finish_battle_close_label_height_end),
+            CropArea(const.finish_battle_close_label_width_start, const.finish_battle_close_label_height_start,
+                     const.finish_battle_close_label_width_end, const.finish_battle_close_label_height_end),
             True,
-            Point(const.finish_battle_close_label_trigger_pos_x, const.finish_battle_close_label_trigger_pos_y),
+            Point(const.finish_battle_close_label_trigger_pos_x,
+                  const.finish_battle_close_label_trigger_pos_y),
             True,
             ["close", "c1ose"],
             1
         ),
         CropProperty(
             "Finish Battle BATTLE Button",
-            CropArea(const.finish_battle_battle_label_width_start, const.finish_battle_battle_label_height_start, const.finish_battle_battle_label_width_end, const.finish_battle_battle_label_height_end),
+            CropArea(const.finish_battle_battle_label_width_start, const.finish_battle_battle_label_height_start,
+                     const.finish_battle_battle_label_width_end, const.finish_battle_battle_label_height_end),
             False,
-            Point(const.finish_battle_battle_label_trigger_pos_x, const.finish_battle_battle_label_trigger_pos_y),
+            Point(const.finish_battle_battle_label_trigger_pos_x,
+                  const.finish_battle_battle_label_trigger_pos_y),
             False,
             ["battle", "batt1e"],
             1
         )
     ]
 
-    FinishBattleScreen = Screen(const.ScreenStep.FinishBattleScreen, finish_battle_crops, 3000)
+    FinishBattleScreen = Screen(
+        const.ScreenStep.FinishBattleScreen, finish_battle_crops, 3000)
 
     d = d3dshot.create(capture_output='numpy')
     if (len(d.displays) > 1):
@@ -315,7 +349,8 @@ def bot():
         d.display = d.displays[0]
         ProtoSetting.getGlobalSetting().settings.shiftX = 0
         ProtoSetting.getGlobalSetting().saveSettings()
-    d.capture(target_fps=10, region=(0, 0, const.screenWidth, const.screenHeight))
+    d.capture(target_fps=10, region=(
+        0, 0, const.screenWidth, const.screenHeight))
     time.sleep(1)
 
     while True:
@@ -324,12 +359,10 @@ def bot():
         prev_frame = d.get_frame(10)
         frame = cv2.cvtColor(np_frame, cv2.COLOR_BGR2RGB)
 
-
         # test_frame = frame[ const.esc_return_button_height_start:const.esc_return_button_height_end,const.esc_return_button_width_start:const.esc_return_button_width_end ]
         # cv2.imshow("TestCrop", test_frame)
         # text = pytesseract.image_to_string(test_frame, lang='eng')
         # print(text)
-
 
         if currentStep == const.ScreenStep.Login:
             screen = LoginScreen
@@ -406,7 +439,7 @@ def bot():
             InputTrigger.mouseClick(clickPos)
             time.sleep(1)
             currentStep += 1
-            
+
         elif currentStep == const.ScreenStep.GetResourceMenu:
             screen = ResourcePrepareBattleScreen
             if screen.checkSatisfy(frame):
@@ -418,7 +451,7 @@ def bot():
             else:
                 screen.resetRetryCount()
                 currentStep += 1
-        
+
         elif currentStep == const.ScreenStep.BattlePrepareScreen:
             screen = BattlePreparationScreen
             if screen.checkSatisfy(frame):
@@ -448,16 +481,19 @@ def bot():
             elif screen.addFailCount():
                 if battleStartDelay == False:
                     InputTrigger.KeyPress("t").start()
-                    test_frame = frame[const.in_battle_mini_map_height_start:const.in_battle_mini_map_height_end, const.in_battle_mini_map_width_start:const.in_battle_mini_map_width_end ]
+                    test_frame = frame[const.in_battle_mini_map_height_start:const.in_battle_mini_map_height_end,
+                                       const.in_battle_mini_map_width_start:const.in_battle_mini_map_width_end]
                     hsv = cv2.cvtColor(test_frame, cv2.COLOR_BGR2HSV)
-                    lower_red = np.array([0,180,180])
-                    upper_red = np.array([10,255,255])
+                    lower_red = np.array([0, 180, 180])
+                    upper_red = np.array([10, 255, 255])
                     mask = cv2.inRange(hsv, lower_red, upper_red)
                     if cv2.countNonZero(mask) > 10:
                         executeOrder66()
-                        
-                    front_frame = np_frame[const.in_battle_front_view_height_start:const.in_battle_front_view_height_end, const.in_battle_front_view_width_start:const.in_battle_front_view_width_end]
-                    prev_front_frame = prev_frame[const.in_battle_front_view_height_start:const.in_battle_front_view_height_end, const.in_battle_front_view_width_start:const.in_battle_front_view_width_end]
+
+                    front_frame = np_frame[const.in_battle_front_view_height_start:const.in_battle_front_view_height_end,
+                                           const.in_battle_front_view_width_start:const.in_battle_front_view_width_end]
+                    prev_front_frame = prev_frame[const.in_battle_front_view_height_start:const.in_battle_front_view_height_end,
+                                                  const.in_battle_front_view_width_start:const.in_battle_front_view_width_end]
 
                     comp = cv2.absdiff(front_frame, prev_front_frame)
                     res = comp.astype(np.uint8)
@@ -481,49 +517,53 @@ def bot():
         else:
             # print("CURRENT STEP:", currentStep)
             pass
-        
+
         if cv2.waitKey(1) & 0xFF == ord('q'):
             d.stop()
             cv2.destroyAllWindows()
             break
 
 
-class setInterval :
-    def __init__(self,interval,action) :
-        self.interval=interval
-        self.action=action
-        self.stopEvent=threading.Event()
-        thread=threading.Thread(target=self.__setInterval)
+class setInterval:
+    def __init__(self, interval, action):
+        self.interval = interval
+        self.action = action
+        self.stopEvent = threading.Event()
+        thread = threading.Thread(target=self.__setInterval)
         thread.start()
 
-    def __setInterval(self) :
-        nextTime=time.time()+self.interval
-        while not self.stopEvent.wait(nextTime-time.time()) :
-            nextTime+=self.interval
+    def __setInterval(self):
+        nextTime = time.time()+self.interval
+        while not self.stopEvent.wait(nextTime-time.time()):
+            nextTime += self.interval
             self.action()
 
-    def cancel(self) :
+    def cancel(self):
         self.stopEvent.set()
 
+
 destructTimer = None
+
 
 def destructComplete():
     global destructTimer
     global isAlreadySelfDestruct
     InputTrigger.keyRelease("m")
-    isAlreadySelfDestruct = True
     destructTimer.cancel()
+
 
 def selfDesctruct():
     global destructTimer
     global isAlreadySelfDestruct
     if isAlreadySelfDestruct == False:
+        isAlreadySelfDestruct = True
         InputTrigger.keyHold("m")
-        destructTimer = threading.Timer(5.0, destructComplete )
+        destructTimer = threading.Timer(5.0, destructComplete)
         destructTimer.start()
-        
+
+
 def battleEnded():
-    
+
     global stirInterval
     global isAlreadySelfDestruct
     global isBattleAlreadyActive
@@ -534,17 +574,17 @@ def battleEnded():
     global total_back_stir_count
 
     try:
-        if calloutInterval: 
+        if calloutInterval:
             calloutInterval.cancel()
     except ValueError:
         pass
     try:
-        if carJackInterval: 
+        if carJackInterval:
             carJackInterval.cancel()
     except ValueError:
         pass
     try:
-        if stirInterval: 
+        if stirInterval:
             stirInterval.cancel()
     except ValueError:
         pass
@@ -566,15 +606,17 @@ def calllOut():
     callout = random.choice(list(calloutLst))
     InputTrigger.KeyPress(callout).start()
 
+
 def carJack():
     InputTrigger.KeyPress("r").start()
+
 
 total_back_stir_count = 0
 left_short_back_stir_in_a_roll = 0
 right_long_back_stir_in_a_roll = 0
 
 
-## Left 3, RIght 3, back
+# Left 3, RIght 3, back
 
 def setBackByOneLeftShortBackStirCount():
     global left_short_back_stir_in_a_roll
@@ -582,15 +624,13 @@ def setBackByOneLeftShortBackStirCount():
         left_short_back_stir_in_a_roll -= 1
     print("Set back left, currently", left_short_back_stir_in_a_roll)
 
+
 def setBackByOneRightLongBackStirCount():
     global right_long_back_stir_in_a_roll
     if right_long_back_stir_in_a_roll > 0:
         right_long_back_stir_in_a_roll -= 1
     print("Set back right, currently", right_long_back_stir_in_a_roll)
 
-def checkFullStuck():
-    if left_short_back_stir_in_a_roll > 0:
-        selfDesctruct()
 
 def stopMoving():
     InputTrigger.keyRelease("w")
@@ -598,12 +638,12 @@ def stopMoving():
     InputTrigger.keyRelease("s")
     InputTrigger.keyRelease("d")
 
+
 def determineBackStir():
     global isAlreadyBackStirring
     global left_short_back_stir_in_a_roll
     global right_long_back_stir_in_a_roll
     global total_back_stir_count
-
 
     if isAlreadyBackStirring == False and total_back_stir_count < 6:
         total_back_stir_count += 1
@@ -635,10 +675,10 @@ def determineBackStir():
         left_short_back_stir_in_a_roll += 1
 
 
-
 leftShortBackStirTimer1 = None
 leftShortBackStirTimer2 = None
 leftShortBackStirTimer3 = None
+
 
 class backStir():
 
@@ -646,11 +686,9 @@ class backStir():
         self.direction = direction
 
 
-
 def leftShortBackStir():
     global left_short_back_stir_in_a_roll
     global isAlreadyBackStirring
-
 
     isAlreadyBackStirring = True
 
@@ -660,11 +698,8 @@ def leftShortBackStir():
     global leftShortBackStirTimer2
     global leftShortBackStirTimer3
 
-
     rollBackOneTimer = threading.Timer(25, setBackByOneLeftShortBackStirCount)
     rollBackOneTimer.start()
-
-
 
     def finish():
         global isAlreadyBackStirring
@@ -693,16 +728,14 @@ def leftShortBackStir():
         leftShortBackStirTimer2.start()
 
     InputTrigger.KeyPress("s", 1.4).start()
-        
+
     leftShortBackStirTimer1 = threading.Timer(1.7, turnForwardLeft)
     leftShortBackStirTimer1.start()
-        
+
 
 rightLongBackStirTimer1 = None
 rightLongBackStirTimer2 = None
 rightLongBackStirTimer3 = None
-
-
 
 
 def rightLongBackStir():
@@ -711,15 +744,12 @@ def rightLongBackStir():
     isAlreadyBackStirring = True
     InputTrigger.keyRelease("w")
 
-
     global rightLongBackStirTimer1
     global rightLongBackStirTimer2
     global rightLongBackStirTimer3
 
-
     rollBackOneTimer = threading.Timer(30, setBackByOneRightLongBackStirCount)
     rollBackOneTimer.start()
-
 
     def finish():
         global isAlreadyBackStirring
@@ -751,13 +781,14 @@ def rightLongBackStir():
         rightLongBackStirTimer2.start()
 
     InputTrigger.KeyPress("s", 2.2).start()
-        
+
     rightLongBackStirTimer1 = threading.Timer(2.5, turnForwardRight)
     rightLongBackStirTimer1.start()
-        
+
 
 fullreverseBackStirTimer1 = None
 fullreverseBackStirTimer2 = None
+
 
 def full_reverse_back_stir():
     global isAlreadyBackStirring
@@ -767,9 +798,6 @@ def full_reverse_back_stir():
 
     global fullreverseBackStirTimer1
     global fullreverseBackStirTimer2
-
-
-
 
     def finish():
         global isAlreadyBackStirring
@@ -787,13 +815,10 @@ def full_reverse_back_stir():
         fullreverseBackStirTimer2 = threading.Timer(5, finish)
         fullreverseBackStirTimer2.start()
 
-
-
     InputTrigger.KeyPress("s", 2.1).start()
-        
+
     fullreverseBackStirTimer1 = threading.Timer(3, turnAround)
     fullreverseBackStirTimer1.start()
-
 
 
 stirInterval = None
@@ -810,8 +835,8 @@ shortBackStirCount = 0
 backStirDirection = "a"
 
 
-        
 lastStir = "a"
+
 
 def stirringHorizontal():
     # print("<< In Battle >> Stirring")
@@ -828,9 +853,11 @@ def stirringHorizontal():
             InputTrigger.KeyPress("a", 0.3).start()
             lastStir = "a"
 
+
 def executeOrder66():
     # print("<< In Battle >> Attack")
     InputTrigger.KeyPress("1").start()
+
 
 def delayBattleStart():
     global stirInterval
@@ -840,15 +867,14 @@ def delayBattleStart():
     global carJackInterval
     battleStartDelay = False
     try:
-        if battleStartDelayTimer: 
+        if battleStartDelayTimer:
             battleStartDelayTimer.cancel()
     except ValueError:
         pass
-    
+
     stirInterval = setInterval(6, stirringHorizontal)
     # calloutInterval = setInterval(40, calllOut)
     carJackInterval = setInterval(10, carJack)
-
 
 
 def DoBattleNow():
@@ -861,7 +887,5 @@ def DoBattleNow():
     else:
         isBattleAlreadyActive = True
         battleStartDelayTimer = threading.Timer(18, delayBattleStart)
-        battleStartDelayTimer.start() 
+        battleStartDelayTimer.start()
         InputTrigger.keyHold("w")
-
-
