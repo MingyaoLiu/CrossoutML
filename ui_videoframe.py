@@ -118,7 +118,7 @@ def bot():
     global battleStartDelay
     global isFirstTimeAtLogin
 
-    InputTrigger.mouseClick(getCorrectPos((100, 10)))
+    InputTrigger.mouseClick(getCorrectPos((400, 10)))
     ######################
     ## SET CURRENT STEP ##
     ######################
@@ -351,7 +351,10 @@ def bot():
         ProtoSetting.getGlobalSetting().saveSettings()
     d.capture(target_fps=10, region=(
         0, 0, const.screenWidth, const.screenHeight))
+
+    print(d.displays)
     time.sleep(1)
+    
 
     while True:
 
