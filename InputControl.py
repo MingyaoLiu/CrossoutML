@@ -12,7 +12,8 @@ from Constants import Point
 vk_key_dict = {
     "spacebar": 0x20,
     "esc": 0x1B,
-    "backspace": 0x08
+    "backspace": 0x08,
+    "tab": 0x09,
 }
 
 

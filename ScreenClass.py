@@ -13,17 +13,17 @@ class Screen():
         self.allowedRetryCount = allowedRetryCount
         self.retryCount = 0
 
-    def checkSingleSatisfy(self, frame, index) -> bool:
+    def checkSingleSatisfy(self, frame, index) -> (bool, str):
         crop = self.crops[index]
         crop_frame = frame[crop.area.y:crop.area.ys, crop.area.x:crop.area.xs]
         low_txt = pytesseract.image_to_string(crop_frame, lang='eng').lower()
         if crop.requiredMatch and (low_txt not in crop.expectedStrs):
-            return False
-        return True
+            return (False, low_txt)
+        return (True, low_txt)
 
     def checkSatisfy(self, frame) -> bool:
         for i in range(len(self.crops)):
-            if self.checkSingleSatisfy(frame, i):
+            if self.checkSingleSatisfy(frame, i)[0]:
                 pass
             else:
                 return False

@@ -83,6 +83,30 @@ class CropProperty(tuple):
 
 
 #######################################################
+##                      Dicts                        ##
+#######################################################
+
+map_mask_file_path = {
+    "engineer garage": "./assets/maps_masks/garage_map_1_mask.png",
+    "naukograd": "./assets/maps_masks/default_test.png",
+    "sandy gulf": "./assets/maps_masks/default_test.png",
+    "sector ex": "./assets/maps_masks/default_test.png",
+    "rock city": "./assets/maps_masks/default_test.png",
+    "founders canyon": "./assets/maps_masks/default_test.png",
+    "factory": "./assets/maps_masks/default_test.png",
+    "bridge": "./assets/maps_masks/bridgemask.png",
+    "powerplant": "./assets/maps_masks/default_test.png",
+    "old town": "./assets/maps_masks/default_test.png",
+    "broken arrow": "./assets/maps_masks/default_test.png",
+    "fortress": "./assets/maps_masks/default_test.png",
+    "“control-17” station": "./assets/maps_masks/default_test.png",
+    "ship graveyard": "./assets/maps_masks/default_test.png",
+    "desert valley": "./assets/maps_masks/default_test.png",
+    "nameless tower": "./assets/maps_masks/default_test.png",
+}
+
+
+#######################################################
 ##                      Constants                    ##
 #######################################################
 
@@ -562,8 +586,7 @@ battle_preparation_crops = [
         Point(battle_map_name_label_trigger_pos_x,
               battle_map_name_label_trigger_pos_y),
         True,
-        ["engineer garage", "naukograd", "sandy gulf", "sector ex", "rock city", "founders canyon", "factory", "bridge", "powerplant",
-         "old town", "broken arrow", "fortress", "“control-17” station", "ship graveyard", "desert valley", "nameless tower"],
+        list(map_mask_file_path.keys()),
         1
     )
 ]

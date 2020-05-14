@@ -2,7 +2,7 @@
 
 
 
-from ui_videoframe import CropArea
+from Constants import CropArea
 
 
 

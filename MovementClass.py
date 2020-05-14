@@ -3,6 +3,104 @@ import threading
 from InputControl import KBPress, kbDown, kbUp, MouseMove
 
 
+class MoveManagement():
+
+    def __init__(self, direction: MoveDirection, turnBlockTime):
+        print("New turn event received")
+        self.direction = direction
+        self.turnBlockTime = turnBlockTime
+
+    def calculateTurn():
+        left_pos = self.tentacle_pos_lst[0]
+        left_too_close = False if self.map_mask[left_pos[1],
+                                                left_pos[0]] == 0 else True
+        center_pos = self.tentacle_pos_lst[1]
+        center_too_close = False if self.map_mask[center_pos[1],
+                                                  center_pos[0]] == 0 else True
+        right_pos = self.tentacle_pos_lst[2]
+        right_too_close = False if self.map_mask[right_pos[1],
+                                                 right_pos[0]] == 0 else True
+
+        straight_block_time = 0
+        minor_turn_block_time = 0
+        right_angle_block_time = 1.2
+        extra_turn_block_time = 2
+        full_turn_block_time = 2.6
+
+        direction = const.MoveDirection.front
+        lastTurnCmd = const.MoveDirection.front
+        if len(turnCommandStack) > 0:
+            lastTurnCmd = turnCommandStack[0]
+
+        if center_too_close:
+            if left_too_close:
+                if right_too_close:  # 1 1 1
+                    if isInAllowedZone == False:
+                        direction = const.MoveDirection.front
+                        Move(
+                            direction, straight_block_time).start()
+                    else:
+                        if lastTurnCmd == const.MoveDirection.frontRight or lastTurnCmd == const.MoveDirection.right:
+                            direction = const.MoveDirection.backRight
+                            Move(
+                                direction, extra_turn_block_time).start()
+                        elif lastTurnCmd == const.MoveDirection.frontLeft or lastTurnCmd == const.MoveDirection.left:
+                            direction = const.MoveDirection.backLeft
+                            Move(
+                                direction, extra_turn_block_time).start()
+                        else:
+                            direction = const.MoveDirection.back
+                            Move(
+                                direction, full_turn_block_time).start()
+                else:  # 1 1 0
+                    direction = const.MoveDirection.right
+                    Move(
+                        direction, right_angle_block_time).start()
+            else:
+                if right_too_close:  # 0 1 1
+                    direction = const.MoveDirection.left
+                    Move(
+                        direction, right_angle_block_time).start()
+                else:  # 0 1 0
+                    if lastTurnCmd == const.MoveDirection.frontRight or lastTurnCmd == const.MoveDirection.right:
+                        direction = const.MoveDirection.right
+                        Move(
+                            direction, right_angle_block_time).start()
+                    elif lastTurnCmd == const.MoveDirection.frontLeft or lastTurnCmd == const.MoveDirection.left:
+                        direction = const.MoveDirection.left
+                        Move(
+                            direction, right_angle_block_time).start()
+        else:
+            isInAllowedZone = True
+            if left_too_close:
+                if right_too_close:  # 1 0 1
+                    direction = const.MoveDirection.front
+                    Move(
+                        direction, straight_block_time).start()
+                else:  # 1 0 0
+                    direction = const.MoveDirection.frontRight
+                    Move(
+                        direction, minor_turn_block_time).start()
+            else:
+                if right_too_close:  # 0 0 1
+                    direction = const.MoveDirection.frontLeft
+                    Move(
+                        direction, minor_turn_block_time).start()
+                else:  # 0 0 0
+                    if lastTurnCmd == const.MoveDirection.frontRight or lastTurnCmd == const.MoveDirection.right:
+                        direction = const.MoveDirection.frontLeft
+                        Move(
+                            direction, right_angle_block_time).start()
+                    elif lastTurnCmd == const.MoveDirection.frontLeft or lastTurnCmd == const.MoveDirection.left:
+                        direction = const.MoveDirection.frontRight
+                        Move(
+                            direction, right_angle_block_time).start()
+        print(direction)
+        turnCommandStack.insert(0, direction)
+        if len(turnCommandStack) >= 5:
+            turnCommandStack.pop()
+
+
 class Move():
 
     def __init__(self, direction: MoveDirection, turnBlockTime):
@@ -11,15 +109,8 @@ class Move():
         self.turnBlockTime = turnBlockTime
 
     def end(self):
-
         global isAlreadyExecutingTurn
-
         isAlreadyExecutingTurn = False
-
-        # kbUp("w")
-        # kbUp("a")
-        # kbUp("s")
-        # kbUp("d")
 
     def releaseAllButton(self):
         kbUp("w")
