@@ -10,8 +10,9 @@ import cv2
 
 import pytesseract
 
-import InputControl
+from InputControl import mouseClick, kbDown, kbUp, KBPress
 
+from MovementClass import Move
 
 import numpy as np
 
@@ -89,7 +90,7 @@ def bot():
     global isInAllowedZone
     global turnCommandStack
 
-    InputControl.mouseClick(getCorrectPos(Point(400, 10)))
+    mouseClick(getCorrectPos(Point(400, 10)))
     ######################
     ## SET CURRENT STEP ##
     ######################
@@ -198,7 +199,7 @@ def bot():
         elif currentStep == const.ScreenStep.SelectMode:
             clickPos = random.choice(select_mode_click_pos)
             # clickPos = select_mode_click_pos[3]
-            InputControl.mouseClick(clickPos)
+            mouseClick(clickPos)
             time.sleep(1)
             currentStep += 1
 
@@ -254,7 +255,6 @@ def bot():
                     # prev_frame = d.get_frame(10)
                     prev_1_frame = d.get_frame(10)
 
-                    # InputControl.KeyPress("t").start()
                     minimap_frame = frame[const.in_battle_mini_map_height_start:const.in_battle_mini_map_height_end,
                                           const.in_battle_mini_map_width_start: const.in_battle_mini_map_width_end]
 
@@ -407,63 +407,63 @@ def bot():
                                 if right_too_close:  # 1 1 1
                                     if isInAllowedZone == False:
                                         direction = const.MoveDirection.front
-                                        AutoGo(
+                                        Move(
                                             direction, straight_block_time).start()
                                     else:
                                         if lastTurnCmd == const.MoveDirection.frontRight or lastTurnCmd == const.MoveDirection.right:
                                             direction = const.MoveDirection.backRight
-                                            AutoGo(
+                                            Move(
                                                 direction, extra_turn_block_time).start()
                                         elif lastTurnCmd == const.MoveDirection.frontLeft or lastTurnCmd == const.MoveDirection.left:
                                             direction = const.MoveDirection.backLeft
-                                            AutoGo(
+                                            Move(
                                                 direction, extra_turn_block_time).start()
                                         else:
                                             direction = const.MoveDirection.back
-                                            AutoGo(
+                                            Move(
                                                 direction, full_turn_block_time).start()
                                 else:  # 1 1 0
                                     direction = const.MoveDirection.right
-                                    AutoGo(
+                                    Move(
                                         direction, right_angle_block_time).start()
                             else:
                                 if right_too_close:  # 0 1 1
                                     direction = const.MoveDirection.left
-                                    AutoGo(
+                                    Move(
                                         direction, right_angle_block_time).start()
                                 else:  # 0 1 0
                                     if lastTurnCmd == const.MoveDirection.frontRight or lastTurnCmd == const.MoveDirection.right:
                                         direction = const.MoveDirection.right
-                                        AutoGo(
+                                        Move(
                                             direction, right_angle_block_time).start()
                                     elif lastTurnCmd == const.MoveDirection.frontLeft or lastTurnCmd == const.MoveDirection.left:
                                         direction = const.MoveDirection.left
-                                        AutoGo(
+                                        Move(
                                             direction, right_angle_block_time).start()
                         else:
                             isInAllowedZone = True
                             if left_too_close:
                                 if right_too_close:  # 1 0 1
                                     direction = const.MoveDirection.front
-                                    AutoGo(
+                                    Move(
                                         direction, straight_block_time).start()
                                 else:  # 1 0 0
                                     direction = const.MoveDirection.frontRight
-                                    AutoGo(
+                                    Move(
                                         direction, minor_turn_block_time).start()
                             else:
                                 if right_too_close:  # 0 0 1
                                     direction = const.MoveDirection.frontLeft
-                                    AutoGo(
+                                    Move(
                                         direction, minor_turn_block_time).start()
                                 else:  # 0 0 0
                                     if lastTurnCmd == const.MoveDirection.frontRight or lastTurnCmd == const.MoveDirection.right:
                                         direction = const.MoveDirection.frontLeft
-                                        AutoGo(
+                                        Move(
                                             direction, right_angle_block_time).start()
                                     elif lastTurnCmd == const.MoveDirection.frontLeft or lastTurnCmd == const.MoveDirection.left:
                                         direction = const.MoveDirection.frontRight
-                                        AutoGo(
+                                        Move(
                                             direction, right_angle_block_time).start()
                         print(direction)
                         turnCommandStack.insert(0, direction)
@@ -479,7 +479,7 @@ def bot():
                     else:
                         # print("already in moving process")
                         pass
-                        # InputControl.KeyPress("w")
+                        # KBPress("w")
 
                     cv2.imshow("TrackingMaskMap", map_mask)
                     cv2.imshow("TrackingSourceMap", grey_src_map)
@@ -552,7 +552,7 @@ destructTimer = None
 def destructComplete():
     global destructTimer
     global isAlreadySelfDestruct
-    InputControl.keyRelease("m")
+    kbUp("m")
     destructTimer.cancel()
 
 
@@ -600,21 +600,21 @@ def battleEnded():
     isBattleAlreadyActive = False
     isAlreadySelfDestruct = False
     isAlreadyBackStirring = False
-    InputControl.keyRelease("w")
-    InputControl.keyRelease("a")
-    InputControl.keyRelease("s")
-    InputControl.keyRelease("d")
-    InputControl.keyRelease("m")
+    kbUp("w")
+    kbUp("a")
+    kbUp("s")
+    kbUp("d")
+    kbUp("m")
 
 
 def calllOut():
     calloutLst = ["b", "c", "x", "z"]
     callout = random.choice(list(calloutLst))
-    InputControl.KeyPress(callout).start()
+    KBPress(callout).start()
 
 
 def carJack():
-    InputControl.KeyPress("r").start()
+    KBPress("r").start()
 
 
 total_back_stir_count = 0
@@ -639,10 +639,10 @@ def setBackByOneRightLongBackStirCount():
 
 
 def stopMoving():
-    InputControl.keyRelease("w")
-    InputControl.keyRelease("a")
-    InputControl.keyRelease("s")
-    InputControl.keyRelease("d")
+    kbUp("w")
+    kbUp("a")
+    kbUp("s")
+    kbUp("d")
 
 
 def determineBackStir():
@@ -698,7 +698,7 @@ def leftShortBackStir():
 
     isAlreadyBackStirring = True
 
-    InputControl.keyRelease("w")
+    kbUp("w")
 
     global leftShortBackStirTimer1
     global leftShortBackStirTimer2
@@ -718,7 +718,7 @@ def leftShortBackStir():
         global leftShortBackStirTimer3
         leftShortBackStirTimer2.cancel()
         kbDown("w")
-        InputControl.KeyPress("d", 0.73).start()
+        KBPress("d", 0.73).start()
 
         leftShortBackStirTimer3 = threading.Timer(1, finish)
         leftShortBackStirTimer3.start()
@@ -727,13 +727,13 @@ def leftShortBackStir():
         global leftShortBackStirTimer1
         global leftShortBackStirTimer2
         leftShortBackStirTimer1.cancel()
-        InputControl.KeyPress("w", 2.65).start()
-        InputControl.KeyPress("a", 1.65).start()
+        KBPress("w", 2.65).start()
+        KBPress("a", 1.65).start()
 
         leftShortBackStirTimer2 = threading.Timer(2.75, turnFinalRight)
         leftShortBackStirTimer2.start()
 
-    InputControl.KeyPress("s", 1.6).start()
+    KBPress("s", 1.6).start()
 
     leftShortBackStirTimer1 = threading.Timer(1.7, turnForwardLeft)
     leftShortBackStirTimer1.start()
@@ -748,7 +748,7 @@ def rightLongBackStir():
     global isAlreadyBackStirring
 
     isAlreadyBackStirring = True
-    InputControl.keyRelease("w")
+    kbUp("w")
 
     global rightLongBackStirTimer1
     global rightLongBackStirTimer2
@@ -770,7 +770,7 @@ def rightLongBackStir():
 
         rightLongBackStirTimer2.cancel()
         kbDown("w")
-        InputControl.KeyPress("a", 0.72).start()
+        KBPress("a", 0.72).start()
 
         rightLongBackStirTimer3 = threading.Timer(1, finish)
         rightLongBackStirTimer3.start()
@@ -780,13 +780,13 @@ def rightLongBackStir():
         global rightLongBackStirTimer2
 
         rightLongBackStirTimer1.cancel()
-        InputControl.KeyPress("w", 3.5).start()
-        InputControl.KeyPress("d", 1.75).start()
+        KBPress("w", 3.5).start()
+        KBPress("d", 1.75).start()
 
         rightLongBackStirTimer2 = threading.Timer(3.6, turnFinalLeft)
         rightLongBackStirTimer2.start()
 
-    InputControl.KeyPress("s", 2.4).start()
+    KBPress("s", 2.4).start()
 
     rightLongBackStirTimer1 = threading.Timer(2.5, turnForwardRight)
     rightLongBackStirTimer1.start()
@@ -800,7 +800,7 @@ def full_reverse_back_stir():
     global isAlreadyBackStirring
 
     isAlreadyBackStirring = True
-    InputControl.keyRelease("w")
+    kbUp("w")
 
     global fullreverseBackStirTimer1
     global fullreverseBackStirTimer2
@@ -816,12 +816,12 @@ def full_reverse_back_stir():
         global fullreverseBackStirTimer2
         fullreverseBackStirTimer1.cancel()
         kbDown("w")
-        InputControl.KeyPress("a", 2.4).start()
+        KBPress("a", 2.4).start()
 
         fullreverseBackStirTimer2 = threading.Timer(3, finish)
         fullreverseBackStirTimer2.start()
 
-    InputControl.KeyPress("s", 2.1).start()
+    KBPress("s", 2.1).start()
 
     fullreverseBackStirTimer1 = threading.Timer(2.4, turnAround)
     fullreverseBackStirTimer1.start()
@@ -853,16 +853,16 @@ def stirringHorizontal():
     else:
 
         if lastStir == "a":
-            InputControl.KeyPress("d", 0.3).start()
+            KBPress("d", 0.3).start()
             lastStir = "d"
         else:
-            InputControl.KeyPress("a", 0.3).start()
+            KBPress("a", 0.3).start()
             lastStir = "a"
 
 
 def executeOrder66():
     # print("<< In Battle >> Attack")
-    InputControl.KeyPress("1").start()
+    KBPress("1").start()
 
 
 def delayBattleStart():
