@@ -19,6 +19,8 @@ import numpy as np
 
 import Constants as const
 
+import math
+
 
 def getCorrectPos(pos):
     return (int(ProtoSetting.getGlobalSetting().settings.shiftX + pos[0]), int(ProtoSetting.getGlobalSetting().settings.shiftY + pos[1]))
@@ -30,6 +32,9 @@ isBattleAlreadyActive = False
 isAlreadyBackStirring = False
 battleStartDelay = True
 battleStartDelayTimer = None
+
+
+
 
 
 class Point(tuple):
@@ -72,6 +77,7 @@ class Screen():
         crop = self.crops[index]
         crop_frame = frame[crop.area.y:crop.area.ys, crop.area.x:crop.area.xs]
         low_txt = pytesseract.image_to_string(crop_frame, lang='eng').lower()
+        print(low_txt)
         if crop.requiredMatch and (low_txt not in crop.expectedStrs):
             return False
         return True
@@ -96,7 +102,7 @@ class Screen():
             self.executeSingleClick(i)
 
     def addFailCount(self) -> bool:
-        if self.retryCount == 0 or self.retryCount % 100 == 0:
+        if self.retryCount != 0 and self.retryCount % 100 == 0:
             print("Retrying Step: ", self.screenStep.name, self.retryCount)
         self.retryCount += 1
         if self.retryCount >= self.allowedRetryCount:
@@ -109,6 +115,9 @@ class Screen():
 
 
 isFirstTimeAtLogin = True
+detectedMap  = None
+isAlreadyExecutingTurn = False
+isInAllowedZone = False
 
 
 def bot():
@@ -117,12 +126,20 @@ def bot():
     global isAlreadyBackStirring
     global battleStartDelay
     global isFirstTimeAtLogin
+    global detectedMap
+    global isAlreadyExecutingTurn
+    global isInAllowedZone
 
     InputTrigger.mouseClick(getCorrectPos((400, 10)))
     ######################
     ## SET CURRENT STEP ##
     ######################
-    currentStep = const.ScreenStep.Login
+    currentStep = const.ScreenStep.BattlePrepareScreen
+
+    garage_map_mask = cv2.imread("./assets/garage_map_1_mask_1.png", 0)
+
+
+
 
     login_crops = [
         CropProperty(
@@ -282,8 +299,19 @@ def bot():
             True,
             Point(const.mainmenu_challenge_complete_ok_trigger_pos_x,
                   const.mainmenu_challenge_complete_ok_trigger_pos_y),
-            False,
+            True,
             ["assault", "encounter", "domination"],
+            1
+        ),
+        CropProperty(
+            "Prepare to Battle Summary Screen Map Name",
+            CropArea(const.battle_map_name_label_width_start, const.battle_map_name_label_height_start,
+                     const.battle_map_name_label_width_end, const.battle_map_name_label_height_end),
+            True,
+            Point(const.battle_map_name_label_trigger_pos_x,
+                  const.battle_map_name_label_trigger_pos_y),
+            True,
+            ["engineer garage", "naukograd", "sandy gulf", "sector ex", "rock city", "founders canyon", "factory", "bridge", "powerplant", "old town", "broken arrow", "fortress", "control-17' station", "control-17 station", "ship graveyard", "desert valley", "nameless tower"],
             1
         )
     ]
@@ -357,13 +385,12 @@ def bot():
     
 
     while True:
-
         np_frame = d.get_latest_frame()
-        prev_frame = d.get_frame(10)
         frame = cv2.cvtColor(np_frame, cv2.COLOR_BGR2RGB)
+        
 
-        # test_frame = frame[ const.esc_return_button_height_start:const.esc_return_button_height_end,const.esc_return_button_width_start:const.esc_return_button_width_end ]
-        # cv2.imshow("TestCrop", test_frame)
+        # test_frame = frame[ const.battle_map_name_label_height_start:const.battle_map_name_label_height_end,const.battle_map_name_label_width_start:const.battle_map_name_label_width_end ]
+        # # cv2.imshow("TestCrop", test_frame)
         # text = pytesseract.image_to_string(test_frame, lang='eng')
         # print(text)
 
@@ -457,9 +484,15 @@ def bot():
 
         elif currentStep == const.ScreenStep.BattlePrepareScreen:
             screen = BattlePreparationScreen
-            if screen.checkSatisfy(frame):
+
+            if screen.retryCount % 100 == 0 and screen.retryCount != 0:
+                win32api.keybd_event(0x09, 0, 0, 0)
+                
+
+            if screen.checkSingleSatisfy(frame, 1):
+                detectedMap = frame[174:920, 587:1330]
+                win32api.keybd_event(0x09, 0, win32con.KEYEVENTF_KEYUP, 0)
                 screen.resetRetryCount()
-                screen.executeClick()
                 currentStep += 1
             elif screen.addFailCount():
                 pass
@@ -477,33 +510,200 @@ def bot():
         elif currentStep == const.ScreenStep.FinishBattleScreen:
             screen = FinishBattleScreen
             if screen.checkSatisfy(frame):
+                cv2.destroyWindow('TrackingSourceMap') 
                 battleEnded()
                 screen.resetRetryCount()
                 screen.executeClick()
                 currentStep = const.ScreenStep.Login
             elif screen.addFailCount():
                 if battleStartDelay == False:
-                    InputTrigger.KeyPress("t").start()
-                    test_frame = frame[const.in_battle_mini_map_height_start:const.in_battle_mini_map_height_end,
-                                       const.in_battle_mini_map_width_start:const.in_battle_mini_map_width_end]
-                    hsv = cv2.cvtColor(test_frame, cv2.COLOR_BGR2HSV)
+
+                    
+                    # prev_frame = d.get_frame(10)    
+                    prev_1_frame = d.get_frame(1)
+
+
+                    # InputTrigger.KeyPress("t").start()
+                    minimap_frame = frame[const.in_battle_mini_map_height_start:const.in_battle_mini_map_height_end,
+                                       const.in_battle_mini_map_width_start: const.in_battle_mini_map_width_end]
+                    
+                    ########## MINIMAP CHECK LOCATION #############
+                    srcmap = detectedMap.copy()
+                    grey_src_map = srcmap.copy()
+                    grey_src_map = cv2.cvtColor(srcmap, cv2.COLOR_RGB2GRAY)
+                    grey_minimap_frame = minimap_frame.copy()
+                    scale_percent = 80  # percent of original size
+                    new_width = int(grey_minimap_frame.shape[1] * scale_percent / 100)
+                    new_height = int(grey_minimap_frame.shape[0] * scale_percent / 100)
+                    dim = (new_width, new_height)
+                    grey_minimap_frame = cv2.resize(grey_minimap_frame, dim, interpolation=cv2.INTER_AREA)
+                    grey_minimap_frame = cv2.cvtColor(grey_minimap_frame, cv2.COLOR_RGB2GRAY)
+                    w, h = grey_minimap_frame.shape[::-1]
+                    method = eval('cv2.TM_CCOEFF')
+                    res = cv2.matchTemplate(grey_src_map,grey_minimap_frame,method)
+                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+                    if method in [cv2.TM_SQDIFF, cv2.TM_SQDIFF_NORMED]:
+                        top_left = min_loc
+                    else:
+                        top_left = max_loc
+                    # bottom_right = (top_left[0] + w, top_left[1] + h)
+                    # cv2.rectangle(grey_src_map, top_left, bottom_right, 255, 2)  ## Draw Template Rect on Src
+                    circle_center_x = int(top_left[0] + w / 2)
+                    circle_center_y = int(top_left[1] + h / 2)
+                    # cv2.circle(grey_src_map, (circle_center_x, circle_center_y), 2, (255, 0, 0), 2)
+
+
+                    ########## TRACK MOVING DIRECTION #############
+                    
+                    map_mask = garage_map_mask.copy()
+
+
+                    prev_1_minimap_frame = prev_1_frame[const.in_battle_mini_map_height_start:const.in_battle_mini_map_height_end,const.in_battle_mini_map_width_start: const.in_battle_mini_map_width_end]
+                    prev_grey_minimap_frame = prev_1_minimap_frame.copy()
+                    prev_grey_minimap_frame = cv2.cvtColor(prev_grey_minimap_frame, cv2.COLOR_BGR2GRAY)
+                    prev_grey_minimap_frame = cv2.resize(prev_grey_minimap_frame, dim, interpolation=cv2.INTER_AREA)
+                    res2 = cv2.matchTemplate(grey_src_map,prev_grey_minimap_frame,method)
+                    min_val2, max_val2, min_loc2, max_loc2 = cv2.minMaxLoc(res2)
+                    if method in [cv2.TM_SQDIFF, cv2.TM_SQDIFF_NORMED]:
+                        top_left2 = min_loc2
+                    else:
+                        top_left2 = max_loc2
+                    circle_center_x2 = int(top_left2[0] + w / 2)
+                    circle_center_y2 = int(top_left2[1] + h / 2)
+
+                    # cv2.circle(grey_src_map, (circle_center_x2, circle_center_y2), 3, (255, 0, 0), 3)
+
+
+                    if isAlreadyExecutingTurn is False:
+
+                        detect_angle_rad = math.radians(45)
+                        detect_distance = 30
+
+
+                        center_rad = 0
+                        
+                        if circle_center_x == circle_center_x2:
+                            if circle_center_y > circle_center_y2:
+                                center_rad = -1 * math.pi / 2
+                            else:
+                                center_rad = math.pi / 2
+                        else:
+                            center_tan = abs((circle_center_y - circle_center_y2) / (circle_center_x - circle_center_x2))
+                            if circle_center_x > circle_center_x2:
+
+                                if circle_center_y > circle_center_y2: ## BotRight
+                                    center_rad = -1 * math.atan(center_tan) 
+                                else: ## TopRight
+                                    center_rad = math.atan(center_tan)
+
+                            else:
+                                if circle_center_y > circle_center_y2: ## BotLeft
+                                    center_rad = math.pi + math.atan(center_tan)
+                                else: ## TopLeft
+                                    center_rad = math.pi - math.atan(center_tan)
+
+                        left_rad = center_rad + detect_angle_rad
+                        right_rad = center_rad - detect_angle_rad
+
+                        rad_list = [left_rad, center_rad, right_rad]
+
+                        pos_list = []
+
+                        print(left_rad, center_rad,right_rad)
+
+                        for rad in rad_list:
+                            if rad > 0 and rad <= math.pi / 2:
+                                pos_x = circle_center_x + detect_distance * abs(math.cos(rad))
+                                pos_y = circle_center_y - detect_distance * abs(math.sin(rad))
+                                pos_list.append((int(pos_x), int(pos_y)))
+                            elif rad > math.pi / 2 and rad <= math.pi:
+                                pos_x = circle_center_x - detect_distance * abs(math.cos(rad))
+                                pos_y = circle_center_y - detect_distance * abs(math.sin(rad))
+                                pos_list.append((int(pos_x), int(pos_y)))
+                            elif (rad > math.pi and rad <= math.pi / 2 * 3) or (rad <= -1 * math.pi / 2):
+                                pos_x = circle_center_x - detect_distance * abs(math.cos(rad))
+                                pos_y = circle_center_y + detect_distance * abs(math.sin(rad))
+                                pos_list.append((int(pos_x), int(pos_y)))
+                            elif (rad > -1 * math.pi / 2 and rad <= 0) or (rad > math.pi / 2 * 3 and rad <= math.pi * 2):
+                                pos_x = circle_center_x + detect_distance * abs(math.cos(rad))
+                                pos_y = circle_center_y + detect_distance * abs(math.sin(rad))
+                                pos_list.append((int(pos_x), int(pos_y)))
+                            else:
+                                print("Check Rad Failed")
+
+                        left_pos = pos_list[0]
+                        center_pos = pos_list[1]
+                        right_pos = pos_list[2]
+                        
+                        print(map_mask[center_pos[0], center_pos[1]] == 0)
+                        print(map_mask[left_pos[0], left_pos[1]] == 0)
+                        print(map_mask[right_pos[0], right_pos[1]] == 0)
+
+                        fullTurnDuration = 1
+                        if map_mask[center_pos[0], center_pos[1]] != 0:
+
+                            if map_mask[left_pos[0], left_pos[1]] != 0:
+
+                                if map_mask[right_pos[0], right_pos[1]] != 0:
+                                    if isInAllowedZone == False:
+                                        print("Go Straight")
+                                        AutoGo(const.MoveDirection.front, fullTurnDuration).start()
+                                    else:
+                                        isInAllowedZone = False
+                                        ## Turn Around
+                                        print("TURN AROUND")
+                                        AutoGo(const.MoveDirection.back, fullTurnDuration).start()
+                                else:
+                                    ## Turn Right
+                                    print("TURN Right")
+                                    AutoGo(const.MoveDirection.right, fullTurnDuration).start()
+                            else:
+                                ## Turn Left
+                                print("TURN Left")
+                                AutoGo(const.MoveDirection.left, fullTurnDuration).start()
+                        else:
+                            isInAllowedZone = True
+                            ## Go Straight
+                            print("Go Straight")
+                            AutoGo(const.MoveDirection.front, fullTurnDuration).start()
+
+                        for pos in pos_list:
+                            # if garage_map_mask[pos[0], pos[1]] == (0, 0, 0):
+                            cv2.line(map_mask, (circle_center_x, circle_center_y), pos,(255,0,0),5)
+                            cv2.circle(map_mask, pos, 1, (255, 0, 0), 1)
+                        
+                    else:
+                        # print("already in moving process")
+                        pass
+                        # InputTrigger.KeyPress("w")
+
+                    
+                    cv2.imshow("TrackingMaskMap", map_mask)
+                    # cv2.imshow("TrackingSourceMap", grey_src_map)
+
+
+                    ########## MINIMAP TRACK ENEMY COUNT #############
+                    hsv_minimap_frame = cv2.cvtColor(minimap_frame, cv2.COLOR_BGR2HSV)
                     lower_red = np.array([0, 180, 180])
                     upper_red = np.array([10, 255, 255])
-                    mask = cv2.inRange(hsv, lower_red, upper_red)
+                    mask = cv2.inRange(hsv_minimap_frame, lower_red, upper_red)
                     if cv2.countNonZero(mask) > 10:
                         executeOrder66()
 
-                    front_frame = np_frame[const.in_battle_front_view_height_start:const.in_battle_front_view_height_end,
-                                           const.in_battle_front_view_width_start:const.in_battle_front_view_width_end]
-                    prev_front_frame = prev_frame[const.in_battle_front_view_height_start:const.in_battle_front_view_height_end,
-                                                  const.in_battle_front_view_width_start:const.in_battle_front_view_width_end]
 
-                    comp = cv2.absdiff(front_frame, prev_front_frame)
-                    res = comp.astype(np.uint8)
-                    percentage = (np.count_nonzero(res) * 100) / res.size
-                    if percentage < 75:
-                        determineBackStir()
 
+                    ########## FRONT VIEW CHECK STUCK #############
+                    # front_frame = np_frame[const.in_battle_front_view_height_start:const.in_battle_front_view_height_end,
+                    #                        const.in_battle_front_view_width_start:const.in_battle_front_view_width_end]
+                    # prev_front_frame = prev_1_frame[const.in_battle_front_view_height_start:const.in_battle_front_view_height_end,
+                    #                               const.in_battle_front_view_width_start:const.in_battle_front_view_width_end]
+                    # comp = cv2.absdiff(front_frame, prev_front_frame)
+                    # res = comp.astype(np.uint8)
+                    # percentage = (np.count_nonzero(res) * 100) / res.size
+                    # if percentage < 75:
+                    #     determineBackStir()
+                    
+                    ########## HEALTH BAR CHECK HEALTH #############
                     # health_frame = frame[ const.in_battle_health_digit_height_start:const.in_battle_health_digit_height_end, const.in_battle_health_digit_width_start:const.in_battle_health_digit_width_end ]
                     # a = pytesseract.image_to_string(health_frame)
                     # try:
@@ -545,7 +745,96 @@ class setInterval:
         self.stopEvent.set()
 
 
+class AutoGo():
+    def __init__(self, direction: const.MoveDirection, turnAroundTime):
+        print("New turn event received")
+        self.direction = direction
+        self.turnAroundTime = turnAroundTime
+
+    def end(self):
+        global isAlreadyExecutingTurn
+        InputTrigger.keyRelease("w")
+        InputTrigger.keyRelease("a")
+        InputTrigger.keyRelease("s")
+        InputTrigger.keyRelease("d")
+        try:
+            if self.endTimer:
+                self.endTimer.cancel()
+        except ValueError:
+            pass
+        isAlreadyExecutingTurn = False
+
+    def releaseAllButton(self):
+        InputTrigger.keyRelease("w")
+        InputTrigger.keyRelease("a")
+        InputTrigger.keyRelease("s")
+        InputTrigger.keyRelease("d")
+
+    def start(self):
+        global isAlreadyExecutingTurn
+        # isAlreadyExecutingTurn = True
+
+        ## Step 0: release all button
+        self.releaseAllButton()
+        ## Step 1: Hold direction for time divided by turn around time
+        # InputTrigger.KeyPress("w", self.turnAroundTime).start()
+        # self.turn_button_time = self.turnAroundTime
+        # if self.direction == const.MoveDirection.backLeft:
+        #     turn_button_time = self.turnAroundTime / 4
+        #     InputTrigger.KeyPress("a", turn_button_time).start()
+        # elif self.direction == const.MoveDirection.left:
+        #     turn_button_time = 0.5
+        #     InputTrigger.KeyPress("a", self.turnAroundTime / 2).start()
+        # elif self.direction == const.MoveDirection.frontLeft:
+        #     turn_button_time = self.turnAroundTime / 4 * 3
+        #     InputTrigger.KeyPress("a", self.turnAroundTime / 4).start()
+        # elif self.direction == const.MoveDirection.front:
+        #     pass
+        # elif self.direction == const.MoveDirection.frontRight:
+        #     turn_button_time = self.turnAroundTime / 4
+        #     InputTrigger.KeyPress("a", self.turnAroundTime / 4).start()
+        # elif self.direction == const.MoveDirection.right:
+        #     turn_button_time = self.turnAroundTime / 2
+        #     InputTrigger.KeyPress("a", self.turnAroundTime / 2).start()
+        # elif self.direction == const.MoveDirection.backRight:
+        #     turn_button_time = self.turnAroundTime / 4 * 3
+        #     InputTrigger.KeyPress("a", self.turnAroundTime / 4 * 3).start()
+        # elif self.direction == const.MoveDirection.back:
+        #     turn_button_time = self.turnAroundTime
+        #     InputTrigger.KeyPress("a", self.turnAroundTime).start()
+
+        # self.endTimer = threading.Timer((self.turn_button_time + 0.1), self.end)
+        # self.endTimer.start()
+
+        InputTrigger.keyHold("w")
+        if self.direction == const.MoveDirection.backLeft:
+            InputTrigger.keyHold("a")
+        elif self.direction == const.MoveDirection.left:
+            InputTrigger.keyHold("a")
+        elif self.direction == const.MoveDirection.frontLeft:
+            InputTrigger.keyHold("a")
+        elif self.direction == const.MoveDirection.front:
+            pass
+        elif self.direction == const.MoveDirection.frontRight:
+            InputTrigger.keyHold("d")
+        elif self.direction == const.MoveDirection.right:
+            InputTrigger.keyHold("d")
+        elif self.direction == const.MoveDirection.backRight:
+            InputTrigger.keyHold("d")
+        elif self.direction == const.MoveDirection.back:
+            InputTrigger.keyHold("d")
+
+
+
+
+
+
+
+
+
 destructTimer = None
+
+
 
 
 def destructComplete():
@@ -575,7 +864,9 @@ def battleEnded():
     global calloutInterval
     global carJackInterval
     global total_back_stir_count
+    global detectedMap
 
+    detectedMap = None
     try:
         if calloutInterval:
             calloutInterval.cancel()
@@ -651,8 +942,8 @@ def determineBackStir():
     if isAlreadyBackStirring == False and total_back_stir_count < 6:
         total_back_stir_count += 1
     elif isAlreadyBackStirring == False and total_back_stir_count >= 6:
-        fullStuckTimer = threading.Timer(20, selfDesctruct)
-        fullStuckTimer.start()
+        # fullStuckTimer = threading.Timer(20, selfDesctruct)
+        # fullStuckTimer.start()
         return stopMoving()
 
     if isAlreadyBackStirring:
@@ -724,13 +1015,13 @@ def leftShortBackStir():
         global leftShortBackStirTimer1
         global leftShortBackStirTimer2
         leftShortBackStirTimer1.cancel()
-        InputTrigger.KeyPress("w", 2.55).start()
+        InputTrigger.KeyPress("w", 2.65).start()
         InputTrigger.KeyPress("a", 1.65).start()
 
         leftShortBackStirTimer2 = threading.Timer(2.75, turnFinalRight)
         leftShortBackStirTimer2.start()
 
-    InputTrigger.KeyPress("s", 1.4).start()
+    InputTrigger.KeyPress("s", 1.6).start()
 
     leftShortBackStirTimer1 = threading.Timer(1.7, turnForwardLeft)
     leftShortBackStirTimer1.start()
@@ -780,10 +1071,10 @@ def rightLongBackStir():
         InputTrigger.KeyPress("w", 3.5).start()
         InputTrigger.KeyPress("d", 1.75).start()
 
-        rightLongBackStirTimer2 = threading.Timer(3.8, turnFinalLeft)
+        rightLongBackStirTimer2 = threading.Timer(3.6, turnFinalLeft)
         rightLongBackStirTimer2.start()
 
-    InputTrigger.KeyPress("s", 2.2).start()
+    InputTrigger.KeyPress("s", 2.4).start()
 
     rightLongBackStirTimer1 = threading.Timer(2.5, turnForwardRight)
     rightLongBackStirTimer1.start()
@@ -815,12 +1106,12 @@ def full_reverse_back_stir():
         InputTrigger.keyHold("w")
         InputTrigger.KeyPress("a", 2.4).start()
 
-        fullreverseBackStirTimer2 = threading.Timer(5, finish)
+        fullreverseBackStirTimer2 = threading.Timer(3, finish)
         fullreverseBackStirTimer2.start()
 
     InputTrigger.KeyPress("s", 2.1).start()
 
-    fullreverseBackStirTimer1 = threading.Timer(3, turnAround)
+    fullreverseBackStirTimer1 = threading.Timer(2.4, turnAround)
     fullreverseBackStirTimer1.start()
 
 
@@ -875,9 +1166,9 @@ def delayBattleStart():
     except ValueError:
         pass
 
-    stirInterval = setInterval(6, stirringHorizontal)
+    # stirInterval = setInterval(6, stirringHorizontal)
     # calloutInterval = setInterval(40, calllOut)
-    carJackInterval = setInterval(10, carJack)
+    # carJackInterval = setInterval(10, carJack)
 
 
 def DoBattleNow():
@@ -889,6 +1180,6 @@ def DoBattleNow():
         pass
     else:
         isBattleAlreadyActive = True
-        battleStartDelayTimer = threading.Timer(18, delayBattleStart)
+        battleStartDelayTimer = threading.Timer(4, delayBattleStart)
         battleStartDelayTimer.start()
-        InputTrigger.keyHold("w")
+        # InputTrigger.keyHold("w")

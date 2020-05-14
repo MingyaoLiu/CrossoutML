@@ -7,6 +7,24 @@ import enum
 screenWidth = 1920
 screenHeight = 1080
 
+
+class MoveDirection(enum.Enum):
+    backLeft = 0
+    left = 1
+    frontLeft = 2
+    front = 3
+    frontRight = 4
+    right = 5
+    backRight = 6
+    back = 7
+    stop = 8
+
+class Quadrant(enum.Enum):
+    topRight = 0
+    topLeft = 1
+    botLeft = 2
+    botRight = 3
+
 class BattleMode(enum.IntEnum):
     scrap = 0
     wire = 1
@@ -128,12 +146,20 @@ get_resource_patrol_battle_label_trigger_pos_y = int(get_resource_patrol_battle_
 battle_type_title_label_width = 250
 battle_type_title_label_width_start = int(screenWidth / 12 + 10 - battle_type_title_label_width / 2)
 battle_type_title_label_width_end = int(screenWidth / 12 + 10 + battle_type_title_label_width / 2)
-battle_type_title_label_height = 60
+battle_type_title_label_height = 65
 battle_type_title_label_height_start = int(screenHeight / 13.5 - battle_type_title_label_height / 2)
 battle_type_title_label_height_end = int(screenHeight / 13.5 + battle_type_title_label_height / 2)
 battle_type_title_label_trigger_pos_x = int(battle_type_title_label_width_start + battle_type_title_label_width / 2)
 battle_type_title_label_trigger_pos_y = int(battle_type_title_label_height_start + battle_type_title_label_height / 2)
 
+battle_map_name_label_width = 400
+battle_map_name_label_width_start = int(screenWidth - 200 - battle_map_name_label_width / 2)
+battle_map_name_label_width_end = int(screenWidth - 200 + battle_map_name_label_width / 2)
+battle_map_name_label_height = 60
+battle_map_name_label_height_start = int(screenHeight / 13.5 - battle_map_name_label_height / 2)
+battle_map_name_label_height_end = int(screenHeight / 13.5 + battle_map_name_label_height / 2)
+battle_map_name_label_trigger_pos_x = int(battle_map_name_label_width_start + battle_map_name_label_width / 2)
+battle_map_name_label_trigger_pos_y = int(battle_map_name_label_height_start + battle_map_name_label_height / 2)
 
 battle_victory_defeat_giant_width = 550
 battle_victory_defeat_giant_width_start = int(screenWidth / 2 - battle_victory_defeat_giant_width / 2)
