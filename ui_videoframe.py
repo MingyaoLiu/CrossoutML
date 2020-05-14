@@ -3,7 +3,6 @@ import win32api
 import time
 import threading
 import random
-import operator
 
 import d3dshot
 
@@ -11,20 +10,22 @@ import cv2
 
 import pytesseract
 
-import InputTrigger
+import InputControl
 
-import protobuf_settings as ProtoSetting
 
 import numpy as np
 
 import Constants as const
+from Constants import ScreenStep, CropProperty, CropArea, Point
 
 import math
 
+from Utils import getCorrectPos
 
-def getCorrectPos(pos):
-    return (int(ProtoSetting.getGlobalSetting().settings.shiftX + pos[0]), int(ProtoSetting.getGlobalSetting().settings.shiftY + pos[1]))
 
+from ScreenClass import Screen
+
+from SettingsClass import getGlobalSetting
 
 lastFullyCompleteStep = 0
 isAlreadySelfDestruct = False
@@ -34,90 +35,47 @@ battleStartDelay = True
 battleStartDelayTimer = None
 
 
-
-
-
-class Point(tuple):
-    def __new__(self, x, y):
-        Point.x = property(operator.itemgetter(0))
-        Point.y = property(operator.itemgetter(1))
-        return tuple.__new__(Point, (x, y))
-
-
-class CropArea(tuple):
-    def __new__(self, x, y, xs, ys):
-        CropArea.x = property(operator.itemgetter(0))
-        CropArea.y = property(operator.itemgetter(1))
-        CropArea.xs = property(operator.itemgetter(2))
-        CropArea.ys = property(operator.itemgetter(3))
-        return tuple.__new__(CropArea, (x, y, xs, ys))
-
-
-class CropProperty(tuple):
-    def __new__(self, name: str, area: CropArea, requiredMatch: bool, clickPos: Point, willClick: bool, expectedStrs: [str],  clickWaitTime: int):
-        CropProperty.name = property(operator.itemgetter(0))
-        CropProperty.area = property(operator.itemgetter(1))
-        CropProperty.requiredMatch = property(operator.itemgetter(2))
-        CropProperty.clickPos = property(operator.itemgetter(3))
-        CropProperty.willClick = property(operator.itemgetter(4))
-        CropProperty.expectedStrs = property(operator.itemgetter(5))
-        CropProperty.clickWaitTime = property(operator.itemgetter(6))
-        return tuple.__new__(CropProperty, (name, area, requiredMatch, clickPos, willClick, expectedStrs, clickWaitTime))
-
-
-class Screen():
-
-    def __init__(self, screenStep: const.ScreenStep, crops: [CropProperty], allowedRetryCount: int):
-        self.screenStep = screenStep
-        self.crops = crops
-        self.allowedRetryCount = allowedRetryCount
-        self.retryCount = 0
-
-    def checkSingleSatisfy(self, frame, index) -> bool:
-        crop = self.crops[index]
-        crop_frame = frame[crop.area.y:crop.area.ys, crop.area.x:crop.area.xs]
-        low_txt = pytesseract.image_to_string(crop_frame, lang='eng').lower()
-        print(low_txt)
-        if crop.requiredMatch and (low_txt not in crop.expectedStrs):
-            return False
-        return True
-
-    def checkSatisfy(self, frame) -> bool:
-        for i in range(len(self.crops)):
-            if self.checkSingleSatisfy(frame, i):
-                pass
-            else:
-                return False
-        print("Step", self.screenStep.name, ">>>> SATISFIED")
-        return True
-
-    def executeSingleClick(self, index):
-        crop = self.crops[index]
-        if crop.willClick:
-            InputTrigger.mouseClick(getCorrectPos(crop.clickPos))
-            time.sleep(crop.clickWaitTime)
-
-    def executeClick(self):
-        for i in range(len(self.crops)):
-            self.executeSingleClick(i)
-
-    def addFailCount(self) -> bool:
-        if self.retryCount != 0 and self.retryCount % 100 == 0:
-            print("Retrying Step: ", self.screenStep.name, self.retryCount)
-        self.retryCount += 1
-        if self.retryCount >= self.allowedRetryCount:
-            print("Step", self.screenStep.name, ">>>> FAILED")
-            return False
-        return True
-
-    def resetRetryCount(self):
-        self.retryCount = 0
-
-
 isFirstTimeAtLogin = True
-detectedMap  = None
+detectedMap = None
 isAlreadyExecutingTurn = False
 isInAllowedZone = False
+turnCommandStack = []
+
+
+LoginScreen = Screen(ScreenStep.Login, const.login_crops, 10)
+
+WelcomeScreen = Screen(ScreenStep.WelcomeScreen, const.welcome_crops, 20)
+
+MasterJackUpgradeScreen = Screen(
+    ScreenStep.MasterJackUpgradeScreen, const.mainmenu_master_jack_crops, 10)
+
+ChallengeCompleteScreen = Screen(
+    ScreenStep.ChallengeCompleteScreen, const.mainmenu_challenge_crops, 10)
+
+MainMenuScreen = Screen(ScreenStep.MainMenu, const.mainmenu_crops, 30)
+
+select_mode_click_pos = [
+    getCorrectPos(Point(const.scrap_btn_trigger_pos_x,
+                        const.scrap_btn_trigger_pos_y)),
+    getCorrectPos(Point(const.wire_btn_trigger_pos_x,
+                        const.wire_btn_trigger_pos_y)),
+    getCorrectPos(Point(const.battery_btn_trigger_pos_x,
+                        const.battery_btn_trigger_pos_y)),
+    getCorrectPos(Point(const.raven_path_btn_trigger_pos_x,
+                        const.raven_path_btn_trigger_pos_y))
+]
+SelectModeScreen = Screen(ScreenStep.SelectMode, [], 30)
+
+ResourcePrepareBattleScreen = Screen(
+    ScreenStep.GetResourceMenu, const.resource_prepare_crops, 30)
+
+BattlePreparationScreen = Screen(
+    ScreenStep.BattlePrepareScreen, const.battle_preparation_crops, 1500)
+
+InBattleScreen = Screen(ScreenStep.InBattleNow, [], 30)
+
+FinishBattleScreen = Screen(
+    ScreenStep.FinishBattleScreen, const.finish_battle_crops, 3000)
 
 
 def bot():
@@ -129,270 +87,44 @@ def bot():
     global detectedMap
     global isAlreadyExecutingTurn
     global isInAllowedZone
+    global turnCommandStack
 
-    InputTrigger.mouseClick(getCorrectPos((400, 10)))
+    InputControl.mouseClick(getCorrectPos(Point(400, 10)))
     ######################
     ## SET CURRENT STEP ##
     ######################
     currentStep = const.ScreenStep.BattlePrepareScreen
 
-    garage_map_mask = cv2.imread("./assets/garage_map_1_mask_1.png", 0)
-
-
-
-
-    login_crops = [
-        CropProperty(
-            "Exit No Button",
-            CropArea(const.login_exit_no_width_start, const.login_exit_no_height_start,
-                     const.login_exit_no_width_end, const.login_exit_no_height_end),
-            True,
-            Point(const.login_exit_no_trigger_pos_x,
-                  const.login_exit_no_trigger_pos_y),
-            True,
-            ["no"],
-            1
-        ),
-        CropProperty(
-            "Escape Return Button",
-            CropArea(const.esc_return_button_width_start, const.esc_return_button_height_start,
-                     const.esc_return_button_width_end, const.esc_return_button_height_end),
-            True,
-            Point(const.esc_return_button_trigger_pos_x,
-                  const.esc_return_button_trigger_pos_y),
-            True,
-            ["return", "toate"],
-            1
-        ),
-
-        CropProperty(
-            "Login Button",
-            CropArea(const.login_label_width_start, const.login_label_height_start,
-                     const.login_label_width_end, const.login_label_height_end),
-            True,
-            Point(const.login_label_trigger_pos_x,
-                  const.login_label_trigger_pos_y),
-            True,
-            ["login", "log in", "log ln", "logln"],
-            10
-        )
-    ]
-    LoginScreen = Screen(const.ScreenStep.Login, login_crops, 10)
-
-    welcome_crops = [
-        CropProperty(
-            "Welcome Promo Close Button",
-            CropArea(const.welcome_promo_label_width_start, const.welcome_promo_label_height_start,
-                     const.welcome_promo_label_width_end, const.welcome_promo_label_height_end),
-            True,
-            Point(const.welcome_promo_label_trigger_pos_x,
-                  const.welcome_promo_label_trigger_pos_y),
-            True,
-            ["close", "c1ose", "ciose"],
-            2
-        )
-    ]
-    WelcomeScreen = Screen(const.ScreenStep.WelcomeScreen, welcome_crops, 20)
-
-    mainmenu_master_jack_crops = [
-        CropProperty(
-            "Mainmenu MasterJack Upgrade level Close",
-            CropArea(const.co_pilot_upgrade_close_width_start, const.co_pilot_upgrade_close_height_start,
-                     const.co_pilot_upgrade_close_width_end, const.co_pilot_upgrade_close_height_end),
-            True,
-            Point(const.co_pilot_upgrade_close_trigger_pos_x,
-                  const.co_pilot_upgrade_close_trigger_pos_x),
-            True,
-            ["close", "c1ose"],
-            2
-        )
-    ]
-    MasterJackUpgradeScreen = Screen(
-        const.ScreenStep.MasterJackUpgradeScreen, mainmenu_master_jack_crops, 10)
-
-    mainmenu_challenge_crops = [
-        CropProperty(
-            "Mainmenu Challenge Complete OK Button",
-            CropArea(const.mainmenu_challenge_complete_ok_width_start, const.mainmenu_challenge_complete_ok_height_start,
-                     const.mainmenu_challenge_complete_ok_width_end, const.mainmenu_challenge_complete_ok_height_end),
-            True,
-            Point(const.mainmenu_challenge_complete_ok_trigger_pos_x,
-                  const.mainmenu_challenge_complete_ok_trigger_pos_y),
-            True,
-            ["ok", "0k"],
-            2
-        )
-    ]
-    ChallengeCompleteScreen = Screen(
-        const.ScreenStep.ChallengeCompleteScreen, mainmenu_challenge_crops, 10)
-
-    mainmenu_crops = [
-        CropProperty(
-            "Main Menu Battle Button",
-            CropArea(const.mainmenu_battle_label_width_start, const.mainmenu_battle_label_height_start,
-                     const.mainmenu_battle_label_width_end, const.mainmenu_battle_label_height_end),
-            False,
-            Point(const.mainmenu_battle_label_trigger_pos_x,
-                  const.mainmenu_battle_label_trigger_pos_y),
-            False,
-            ["battle", "batt1e"],
-            1
-        ),
-        CropProperty(
-            "Main Menu Select Mode Button",
-            CropArea(const.mainmenu_select_mode_label_width_start, const.mainmenu_select_mode_label_height_start,
-                     const.mainmenu_select_mode_label_width_end, const.mainmenu_select_mode_label_height_end),
-            True,
-            Point(const.mainmenu_select_mode_label_trigger_pos_x,
-                  const.mainmenu_select_mode_label_trigger_pos_y),
-            True,
-            ["select mode", "selectmode", "se1ect mode"],
-            1
-        )
-    ]
-    MainMenuScreen = Screen(const.ScreenStep.MainMenu, mainmenu_crops, 30)
-
-    select_mode_click_pos = [
-        getCorrectPos((const.scrap_btn_trigger_pos_x,
-                       const.scrap_btn_trigger_pos_y)),
-        getCorrectPos((const.wire_btn_trigger_pos_x,
-                       const.wire_btn_trigger_pos_y)),
-        getCorrectPos((const.battery_btn_trigger_pos_x,
-                       const.battery_btn_trigger_pos_y)),
-        getCorrectPos((const.raven_path_btn_trigger_pos_x,
-                       const.raven_path_btn_trigger_pos_y))
-    ]
-    SelectModeScreen = Screen(const.ScreenStep.SelectMode, [], 30)
-
-    resource_prepare_crops = [
-        CropProperty(
-            "Scrap/Wire/Battery Prepare to Battle Button",
-            CropArea(const.get_resource_battle_label_width_start, const.get_resource_battle_label_height_start,
-                     const.get_resource_battle_label_width_end, const.get_resource_battle_label_height_end),
-            True,
-            Point(const.get_resource_battle_label_trigger_pos_x,
-                  const.get_resource_battle_label_trigger_pos_y),
-            True,
-            ["battle", "batt1e"],
-            1
-        ),
-        CropProperty(
-            "Patrol Mode Prepare to Battle Button",
-            CropArea(const.get_resource_battle_label_width_start, const.get_resource_patrol_battle_label_height_start,
-                     const.get_resource_battle_label_width_end, const.get_resource_patrol_battle_label_height_end),
-            False,
-            Point(const.get_resource_patrol_battle_label_trigger_pos_x,
-                  const.get_resource_patrol_battle_label_trigger_pos_y),
-            False,
-            ["battle", "batt1e"],
-            1
-        )
-    ]
-    ResourcePrepareBattleScreen = Screen(
-        const.ScreenStep.GetResourceMenu, resource_prepare_crops, 30)
-
-    battle_preparation_crops = [
-        CropProperty(
-            "Prepare to Battle Summary Screen Title",
-            CropArea(const.battle_type_title_label_width_start, const.battle_type_title_label_height_start,
-                     const.battle_type_title_label_width_end, const.battle_type_title_label_height_end),
-            True,
-            Point(const.mainmenu_challenge_complete_ok_trigger_pos_x,
-                  const.mainmenu_challenge_complete_ok_trigger_pos_y),
-            True,
-            ["assault", "encounter", "domination"],
-            1
-        ),
-        CropProperty(
-            "Prepare to Battle Summary Screen Map Name",
-            CropArea(const.battle_map_name_label_width_start, const.battle_map_name_label_height_start,
-                     const.battle_map_name_label_width_end, const.battle_map_name_label_height_end),
-            True,
-            Point(const.battle_map_name_label_trigger_pos_x,
-                  const.battle_map_name_label_trigger_pos_y),
-            True,
-            ["engineer garage", "naukograd", "sandy gulf", "sector ex", "rock city", "founders canyon", "factory", "bridge", "powerplant", "old town", "broken arrow", "fortress", "control-17' station", "control-17 station", "ship graveyard", "desert valley", "nameless tower"],
-            1
-        )
-    ]
-    BattlePreparationScreen = Screen(
-        const.ScreenStep.BattlePrepareScreen, battle_preparation_crops, 1500)
-
-    # in_battle_crops = [
-    #     CropProperty(
-    #         "Defeat / Victory Screen",
-    #         CropArea(const.battle_lose_survivor_part_width_start, const.battle_lose_survivor_part_height_start, const.battle_lose_survivor_part_width_end, const.battle_lose_survivor_part_height_end),
-    #         False,
-    #         Point(const.battle_lose_survivor_part_trigger_pos_x, const.battle_lose_survivor_part_trigger_pos_y),
-    #         False,
-    #         ["survivor's parts", "survivors parts", "survivorsparts"],
-    #         1
-    #     ),
-    #     CropProperty(
-    #         "Survivor's Kit",
-    #         CropArea(const.battle_lose_survivor_part_width_start, const.battle_lose_survivor_part_height_start, const.battle_lose_survivor_part_width_end, const.battle_lose_survivor_part_height_end),
-    #         False,
-    #         Point(const.battle_lose_survivor_part_trigger_pos_x, const.battle_lose_survivor_part_trigger_pos_y),
-    #         False,
-    #         ["survivor's parts", "survivors parts", "survivorsparts"],
-    #         1
-    #     )
-    # ]
-    InBattleScreen = Screen(const.ScreenStep.InBattleNow, [], 30)
-
-    finish_battle_crops = [
-        CropProperty(
-            "Finish Battle Close Button",
-            CropArea(const.finish_battle_close_label_width_start, const.finish_battle_close_label_height_start,
-                     const.finish_battle_close_label_width_end, const.finish_battle_close_label_height_end),
-            True,
-            Point(const.finish_battle_close_label_trigger_pos_x,
-                  const.finish_battle_close_label_trigger_pos_y),
-            True,
-            ["close", "c1ose"],
-            1
-        ),
-        CropProperty(
-            "Finish Battle BATTLE Button",
-            CropArea(const.finish_battle_battle_label_width_start, const.finish_battle_battle_label_height_start,
-                     const.finish_battle_battle_label_width_end, const.finish_battle_battle_label_height_end),
-            False,
-            Point(const.finish_battle_battle_label_trigger_pos_x,
-                  const.finish_battle_battle_label_trigger_pos_y),
-            False,
-            ["battle", "batt1e"],
-            1
-        )
-    ]
-
-    FinishBattleScreen = Screen(
-        const.ScreenStep.FinishBattleScreen, finish_battle_crops, 3000)
+    # garage_map_mask = cv2.imread("./assets/garage_map_1_mask_2.png", 0)
+    bridge_mask = cv2.imread(
+        "./assets/maps_in_game_crop_gray/bridgemask.png", 0)
+    # cv2.imshow('TrackingMaskMap',bridge_mask)
 
     d = d3dshot.create(capture_output='numpy')
     if (len(d.displays) > 1):
         d.display = d.displays[1]
-        ProtoSetting.getGlobalSetting().settings.shiftX = -2560
-        ProtoSetting.getGlobalSetting().saveSettings()
+        getGlobalSetting().settings.shiftX = -2560
+        getGlobalSetting().saveSettings()
     else:
         d.display = d.displays[0]
-        ProtoSetting.getGlobalSetting().settings.shiftX = 0
-        ProtoSetting.getGlobalSetting().saveSettings()
-    d.capture(target_fps=10, region=(
+        getGlobalSetting().settings.shiftX = 0
+        getGlobalSetting().saveSettings()
+    d.capture(target_fps=20, region=(
         0, 0, const.screenWidth, const.screenHeight))
 
     print(d.displays)
     time.sleep(1)
-    
 
     while True:
         np_frame = d.get_latest_frame()
         frame = cv2.cvtColor(np_frame, cv2.COLOR_BGR2RGB)
-        
 
-        # test_frame = frame[ const.battle_map_name_label_height_start:const.battle_map_name_label_height_end,const.battle_map_name_label_width_start:const.battle_map_name_label_width_end ]
-        # # cv2.imshow("TestCrop", test_frame)
-        # text = pytesseract.image_to_string(test_frame, lang='eng')
-        # print(text)
+        test_frame = frame[const.battle_map_name_label_height_start:const.battle_map_name_label_height_end,
+                           const.battle_map_name_label_width_start:const.battle_map_name_label_width_end]
+        # test_frame = frame[174:920, 587:1330]
+        cv2.imshow("TestCrop", test_frame)
+        text = pytesseract.image_to_string(test_frame, lang='eng')
+        print(text)
 
         if currentStep == const.ScreenStep.Login:
             screen = LoginScreen
@@ -466,7 +198,7 @@ def bot():
         elif currentStep == const.ScreenStep.SelectMode:
             clickPos = random.choice(select_mode_click_pos)
             # clickPos = select_mode_click_pos[3]
-            InputTrigger.mouseClick(clickPos)
+            InputControl.mouseClick(clickPos)
             time.sleep(1)
             currentStep += 1
 
@@ -485,11 +217,12 @@ def bot():
         elif currentStep == const.ScreenStep.BattlePrepareScreen:
             screen = BattlePreparationScreen
 
+            prev_frame = d.get_frame(5)
+
             if screen.retryCount % 100 == 0 and screen.retryCount != 0:
                 win32api.keybd_event(0x09, 0, 0, 0)
-                
 
-            if screen.checkSingleSatisfy(frame, 1):
+            if screen.checkSingleSatisfy(prev_frame, 1):
                 detectedMap = frame[174:920, 587:1330]
                 win32api.keybd_event(0x09, 0, win32con.KEYEVENTF_KEYUP, 0)
                 screen.resetRetryCount()
@@ -510,7 +243,7 @@ def bot():
         elif currentStep == const.ScreenStep.FinishBattleScreen:
             screen = FinishBattleScreen
             if screen.checkSatisfy(frame):
-                cv2.destroyWindow('TrackingSourceMap') 
+                cv2.destroyWindow('TrackingSourceMap')
                 battleEnded()
                 screen.resetRetryCount()
                 screen.executeClick()
@@ -518,29 +251,32 @@ def bot():
             elif screen.addFailCount():
                 if battleStartDelay == False:
 
-                    
-                    # prev_frame = d.get_frame(10)    
-                    prev_1_frame = d.get_frame(1)
+                    # prev_frame = d.get_frame(10)
+                    prev_1_frame = d.get_frame(10)
 
-
-                    # InputTrigger.KeyPress("t").start()
+                    # InputControl.KeyPress("t").start()
                     minimap_frame = frame[const.in_battle_mini_map_height_start:const.in_battle_mini_map_height_end,
-                                       const.in_battle_mini_map_width_start: const.in_battle_mini_map_width_end]
-                    
+                                          const.in_battle_mini_map_width_start: const.in_battle_mini_map_width_end]
+
                     ########## MINIMAP CHECK LOCATION #############
                     srcmap = detectedMap.copy()
                     grey_src_map = srcmap.copy()
                     grey_src_map = cv2.cvtColor(srcmap, cv2.COLOR_RGB2GRAY)
                     grey_minimap_frame = minimap_frame.copy()
                     scale_percent = 80  # percent of original size
-                    new_width = int(grey_minimap_frame.shape[1] * scale_percent / 100)
-                    new_height = int(grey_minimap_frame.shape[0] * scale_percent / 100)
+                    new_width = int(
+                        grey_minimap_frame.shape[1] * scale_percent / 100)
+                    new_height = int(
+                        grey_minimap_frame.shape[0] * scale_percent / 100)
                     dim = (new_width, new_height)
-                    grey_minimap_frame = cv2.resize(grey_minimap_frame, dim, interpolation=cv2.INTER_AREA)
-                    grey_minimap_frame = cv2.cvtColor(grey_minimap_frame, cv2.COLOR_RGB2GRAY)
+                    grey_minimap_frame = cv2.resize(
+                        grey_minimap_frame, dim, interpolation=cv2.INTER_AREA)
+                    grey_minimap_frame = cv2.cvtColor(
+                        grey_minimap_frame, cv2.COLOR_RGB2GRAY)
                     w, h = grey_minimap_frame.shape[::-1]
                     method = eval('cv2.TM_CCOEFF')
-                    res = cv2.matchTemplate(grey_src_map,grey_minimap_frame,method)
+                    res = cv2.matchTemplate(
+                        grey_src_map, grey_minimap_frame, method)
                     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
                     if method in [cv2.TM_SQDIFF, cv2.TM_SQDIFF_NORMED]:
                         top_left = min_loc
@@ -550,20 +286,25 @@ def bot():
                     # cv2.rectangle(grey_src_map, top_left, bottom_right, 255, 2)  ## Draw Template Rect on Src
                     circle_center_x = int(top_left[0] + w / 2)
                     circle_center_y = int(top_left[1] + h / 2)
-                    # cv2.circle(grey_src_map, (circle_center_x, circle_center_y), 2, (255, 0, 0), 2)
 
+                    map_mask = bridge_mask.copy()
+
+                    cv2.circle(map_mask, (circle_center_x,
+                                          circle_center_y), 2, (255, 255, 0), 2)
 
                     ########## TRACK MOVING DIRECTION #############
-                    
-                    map_mask = garage_map_mask.copy()
 
-
-                    prev_1_minimap_frame = prev_1_frame[const.in_battle_mini_map_height_start:const.in_battle_mini_map_height_end,const.in_battle_mini_map_width_start: const.in_battle_mini_map_width_end]
+                    prev_1_minimap_frame = prev_1_frame[const.in_battle_mini_map_height_start:const.in_battle_mini_map_height_end,
+                                                        const.in_battle_mini_map_width_start: const.in_battle_mini_map_width_end]
                     prev_grey_minimap_frame = prev_1_minimap_frame.copy()
-                    prev_grey_minimap_frame = cv2.cvtColor(prev_grey_minimap_frame, cv2.COLOR_BGR2GRAY)
-                    prev_grey_minimap_frame = cv2.resize(prev_grey_minimap_frame, dim, interpolation=cv2.INTER_AREA)
-                    res2 = cv2.matchTemplate(grey_src_map,prev_grey_minimap_frame,method)
-                    min_val2, max_val2, min_loc2, max_loc2 = cv2.minMaxLoc(res2)
+                    prev_grey_minimap_frame = cv2.cvtColor(
+                        prev_grey_minimap_frame, cv2.COLOR_BGR2GRAY)
+                    prev_grey_minimap_frame = cv2.resize(
+                        prev_grey_minimap_frame, dim, interpolation=cv2.INTER_AREA)
+                    res2 = cv2.matchTemplate(
+                        grey_src_map, prev_grey_minimap_frame, method)
+                    min_val2, max_val2, min_loc2, max_loc2 = cv2.minMaxLoc(
+                        res2)
                     if method in [cv2.TM_SQDIFF, cv2.TM_SQDIFF_NORMED]:
                         top_left2 = min_loc2
                     else:
@@ -573,34 +314,35 @@ def bot():
 
                     # cv2.circle(grey_src_map, (circle_center_x2, circle_center_y2), 3, (255, 0, 0), 3)
 
-
                     if isAlreadyExecutingTurn is False:
 
                         detect_angle_rad = math.radians(45)
-                        detect_distance = 30
-
+                        detect_distance = 10
 
                         center_rad = 0
-                        
+
                         if circle_center_x == circle_center_x2:
                             if circle_center_y > circle_center_y2:
                                 center_rad = -1 * math.pi / 2
                             else:
                                 center_rad = math.pi / 2
                         else:
-                            center_tan = abs((circle_center_y - circle_center_y2) / (circle_center_x - circle_center_x2))
+                            center_tan = abs(
+                                (circle_center_y - circle_center_y2) / (circle_center_x - circle_center_x2))
                             if circle_center_x > circle_center_x2:
 
-                                if circle_center_y > circle_center_y2: ## BotRight
-                                    center_rad = -1 * math.atan(center_tan) 
-                                else: ## TopRight
+                                if circle_center_y > circle_center_y2:  # BotRight
+                                    center_rad = -1 * math.atan(center_tan)
+                                else:  # TopRight
                                     center_rad = math.atan(center_tan)
 
                             else:
-                                if circle_center_y > circle_center_y2: ## BotLeft
-                                    center_rad = math.pi + math.atan(center_tan)
-                                else: ## TopLeft
-                                    center_rad = math.pi - math.atan(center_tan)
+                                if circle_center_y > circle_center_y2:  # BotLeft
+                                    center_rad = math.pi + \
+                                        math.atan(center_tan)
+                                else:  # TopLeft
+                                    center_rad = math.pi - \
+                                        math.atan(center_tan)
 
                         left_rad = center_rad + detect_angle_rad
                         right_rad = center_rad - detect_angle_rad
@@ -609,88 +351,147 @@ def bot():
 
                         pos_list = []
 
-                        print(left_rad, center_rad,right_rad)
+                        # print(left_rad, center_rad,right_rad)
 
                         for rad in rad_list:
                             if rad > 0 and rad <= math.pi / 2:
-                                pos_x = circle_center_x + detect_distance * abs(math.cos(rad))
-                                pos_y = circle_center_y - detect_distance * abs(math.sin(rad))
+                                pos_x = circle_center_x + \
+                                    detect_distance * abs(math.cos(rad))
+                                pos_y = circle_center_y - \
+                                    detect_distance * abs(math.sin(rad))
                                 pos_list.append((int(pos_x), int(pos_y)))
                             elif rad > math.pi / 2 and rad <= math.pi:
-                                pos_x = circle_center_x - detect_distance * abs(math.cos(rad))
-                                pos_y = circle_center_y - detect_distance * abs(math.sin(rad))
+                                pos_x = circle_center_x - \
+                                    detect_distance * abs(math.cos(rad))
+                                pos_y = circle_center_y - \
+                                    detect_distance * abs(math.sin(rad))
                                 pos_list.append((int(pos_x), int(pos_y)))
                             elif (rad > math.pi and rad <= math.pi / 2 * 3) or (rad <= -1 * math.pi / 2):
-                                pos_x = circle_center_x - detect_distance * abs(math.cos(rad))
-                                pos_y = circle_center_y + detect_distance * abs(math.sin(rad))
+                                pos_x = circle_center_x - \
+                                    detect_distance * abs(math.cos(rad))
+                                pos_y = circle_center_y + \
+                                    detect_distance * abs(math.sin(rad))
                                 pos_list.append((int(pos_x), int(pos_y)))
                             elif (rad > -1 * math.pi / 2 and rad <= 0) or (rad > math.pi / 2 * 3 and rad <= math.pi * 2):
-                                pos_x = circle_center_x + detect_distance * abs(math.cos(rad))
-                                pos_y = circle_center_y + detect_distance * abs(math.sin(rad))
+                                pos_x = circle_center_x + \
+                                    detect_distance * abs(math.cos(rad))
+                                pos_y = circle_center_y + \
+                                    detect_distance * abs(math.sin(rad))
                                 pos_list.append((int(pos_x), int(pos_y)))
                             else:
                                 print("Check Rad Failed")
 
                         left_pos = pos_list[0]
+                        left_too_close = False if map_mask[left_pos[1],
+                                                           left_pos[0]] == 0 else True
                         center_pos = pos_list[1]
+                        center_too_close = False if map_mask[center_pos[1],
+                                                             center_pos[0]] == 0 else True
                         right_pos = pos_list[2]
-                        
-                        print(map_mask[center_pos[0], center_pos[1]] == 0)
-                        print(map_mask[left_pos[0], left_pos[1]] == 0)
-                        print(map_mask[right_pos[0], right_pos[1]] == 0)
+                        right_too_close = False if map_mask[right_pos[1],
+                                                            right_pos[0]] == 0 else True
 
-                        fullTurnDuration = 1
-                        if map_mask[center_pos[0], center_pos[1]] != 0:
+                        straight_block_time = 0
+                        minor_turn_block_time = 0
+                        right_angle_block_time = 1.2
+                        extra_turn_block_time = 2
+                        full_turn_block_time = 2.6
 
-                            if map_mask[left_pos[0], left_pos[1]] != 0:
+                        direction = const.MoveDirection.front
+                        lastTurnCmd = const.MoveDirection.front
+                        if len(turnCommandStack) > 0:
+                            lastTurnCmd = turnCommandStack[0]
 
-                                if map_mask[right_pos[0], right_pos[1]] != 0:
+                        if center_too_close:
+                            if left_too_close:
+                                if right_too_close:  # 1 1 1
                                     if isInAllowedZone == False:
-                                        print("Go Straight")
-                                        AutoGo(const.MoveDirection.front, fullTurnDuration).start()
+                                        direction = const.MoveDirection.front
+                                        AutoGo(
+                                            direction, straight_block_time).start()
                                     else:
-                                        isInAllowedZone = False
-                                        ## Turn Around
-                                        print("TURN AROUND")
-                                        AutoGo(const.MoveDirection.back, fullTurnDuration).start()
-                                else:
-                                    ## Turn Right
-                                    print("TURN Right")
-                                    AutoGo(const.MoveDirection.right, fullTurnDuration).start()
+                                        if lastTurnCmd == const.MoveDirection.frontRight or lastTurnCmd == const.MoveDirection.right:
+                                            direction = const.MoveDirection.backRight
+                                            AutoGo(
+                                                direction, extra_turn_block_time).start()
+                                        elif lastTurnCmd == const.MoveDirection.frontLeft or lastTurnCmd == const.MoveDirection.left:
+                                            direction = const.MoveDirection.backLeft
+                                            AutoGo(
+                                                direction, extra_turn_block_time).start()
+                                        else:
+                                            direction = const.MoveDirection.back
+                                            AutoGo(
+                                                direction, full_turn_block_time).start()
+                                else:  # 1 1 0
+                                    direction = const.MoveDirection.right
+                                    AutoGo(
+                                        direction, right_angle_block_time).start()
                             else:
-                                ## Turn Left
-                                print("TURN Left")
-                                AutoGo(const.MoveDirection.left, fullTurnDuration).start()
+                                if right_too_close:  # 0 1 1
+                                    direction = const.MoveDirection.left
+                                    AutoGo(
+                                        direction, right_angle_block_time).start()
+                                else:  # 0 1 0
+                                    if lastTurnCmd == const.MoveDirection.frontRight or lastTurnCmd == const.MoveDirection.right:
+                                        direction = const.MoveDirection.right
+                                        AutoGo(
+                                            direction, right_angle_block_time).start()
+                                    elif lastTurnCmd == const.MoveDirection.frontLeft or lastTurnCmd == const.MoveDirection.left:
+                                        direction = const.MoveDirection.left
+                                        AutoGo(
+                                            direction, right_angle_block_time).start()
                         else:
                             isInAllowedZone = True
-                            ## Go Straight
-                            print("Go Straight")
-                            AutoGo(const.MoveDirection.front, fullTurnDuration).start()
+                            if left_too_close:
+                                if right_too_close:  # 1 0 1
+                                    direction = const.MoveDirection.front
+                                    AutoGo(
+                                        direction, straight_block_time).start()
+                                else:  # 1 0 0
+                                    direction = const.MoveDirection.frontRight
+                                    AutoGo(
+                                        direction, minor_turn_block_time).start()
+                            else:
+                                if right_too_close:  # 0 0 1
+                                    direction = const.MoveDirection.frontLeft
+                                    AutoGo(
+                                        direction, minor_turn_block_time).start()
+                                else:  # 0 0 0
+                                    if lastTurnCmd == const.MoveDirection.frontRight or lastTurnCmd == const.MoveDirection.right:
+                                        direction = const.MoveDirection.frontLeft
+                                        AutoGo(
+                                            direction, right_angle_block_time).start()
+                                    elif lastTurnCmd == const.MoveDirection.frontLeft or lastTurnCmd == const.MoveDirection.left:
+                                        direction = const.MoveDirection.frontRight
+                                        AutoGo(
+                                            direction, right_angle_block_time).start()
+                        print(direction)
+                        turnCommandStack.insert(0, direction)
+                        if len(turnCommandStack) >= 5:
+                            turnCommandStack.pop()
 
                         for pos in pos_list:
                             # if garage_map_mask[pos[0], pos[1]] == (0, 0, 0):
-                            cv2.line(map_mask, (circle_center_x, circle_center_y), pos,(255,0,0),5)
-                            cv2.circle(map_mask, pos, 1, (255, 0, 0), 1)
-                        
+                            cv2.line(map_mask, (circle_center_x,
+                                                circle_center_y), pos, (255, 0, 0), 1)
+                            # cv2.circle(map_mask, pos, 1, (255, 0, 0), 1)
+
                     else:
                         # print("already in moving process")
                         pass
-                        # InputTrigger.KeyPress("w")
+                        # InputControl.KeyPress("w")
 
-                    
                     cv2.imshow("TrackingMaskMap", map_mask)
-                    # cv2.imshow("TrackingSourceMap", grey_src_map)
-
+                    cv2.imshow("TrackingSourceMap", grey_src_map)
 
                     ########## MINIMAP TRACK ENEMY COUNT #############
-                    hsv_minimap_frame = cv2.cvtColor(minimap_frame, cv2.COLOR_BGR2HSV)
+                    hsv_minimap_frame = cv2.cvtColor(
+                        minimap_frame, cv2.COLOR_BGR2HSV)
                     lower_red = np.array([0, 180, 180])
                     upper_red = np.array([10, 255, 255])
                     mask = cv2.inRange(hsv_minimap_frame, lower_red, upper_red)
                     if cv2.countNonZero(mask) > 10:
                         executeOrder66()
-
-
 
                     ########## FRONT VIEW CHECK STUCK #############
                     # front_frame = np_frame[const.in_battle_front_view_height_start:const.in_battle_front_view_height_end,
@@ -702,7 +503,7 @@ def bot():
                     # percentage = (np.count_nonzero(res) * 100) / res.size
                     # if percentage < 75:
                     #     determineBackStir()
-                    
+
                     ########## HEALTH BAR CHECK HEALTH #############
                     # health_frame = frame[ const.in_battle_health_digit_height_start:const.in_battle_health_digit_height_end, const.in_battle_health_digit_width_start:const.in_battle_health_digit_width_end ]
                     # a = pytesseract.image_to_string(health_frame)
@@ -745,102 +546,13 @@ class setInterval:
         self.stopEvent.set()
 
 
-class AutoGo():
-    def __init__(self, direction: const.MoveDirection, turnAroundTime):
-        print("New turn event received")
-        self.direction = direction
-        self.turnAroundTime = turnAroundTime
-
-    def end(self):
-        global isAlreadyExecutingTurn
-        InputTrigger.keyRelease("w")
-        InputTrigger.keyRelease("a")
-        InputTrigger.keyRelease("s")
-        InputTrigger.keyRelease("d")
-        try:
-            if self.endTimer:
-                self.endTimer.cancel()
-        except ValueError:
-            pass
-        isAlreadyExecutingTurn = False
-
-    def releaseAllButton(self):
-        InputTrigger.keyRelease("w")
-        InputTrigger.keyRelease("a")
-        InputTrigger.keyRelease("s")
-        InputTrigger.keyRelease("d")
-
-    def start(self):
-        global isAlreadyExecutingTurn
-        # isAlreadyExecutingTurn = True
-
-        ## Step 0: release all button
-        self.releaseAllButton()
-        ## Step 1: Hold direction for time divided by turn around time
-        # InputTrigger.KeyPress("w", self.turnAroundTime).start()
-        # self.turn_button_time = self.turnAroundTime
-        # if self.direction == const.MoveDirection.backLeft:
-        #     turn_button_time = self.turnAroundTime / 4
-        #     InputTrigger.KeyPress("a", turn_button_time).start()
-        # elif self.direction == const.MoveDirection.left:
-        #     turn_button_time = 0.5
-        #     InputTrigger.KeyPress("a", self.turnAroundTime / 2).start()
-        # elif self.direction == const.MoveDirection.frontLeft:
-        #     turn_button_time = self.turnAroundTime / 4 * 3
-        #     InputTrigger.KeyPress("a", self.turnAroundTime / 4).start()
-        # elif self.direction == const.MoveDirection.front:
-        #     pass
-        # elif self.direction == const.MoveDirection.frontRight:
-        #     turn_button_time = self.turnAroundTime / 4
-        #     InputTrigger.KeyPress("a", self.turnAroundTime / 4).start()
-        # elif self.direction == const.MoveDirection.right:
-        #     turn_button_time = self.turnAroundTime / 2
-        #     InputTrigger.KeyPress("a", self.turnAroundTime / 2).start()
-        # elif self.direction == const.MoveDirection.backRight:
-        #     turn_button_time = self.turnAroundTime / 4 * 3
-        #     InputTrigger.KeyPress("a", self.turnAroundTime / 4 * 3).start()
-        # elif self.direction == const.MoveDirection.back:
-        #     turn_button_time = self.turnAroundTime
-        #     InputTrigger.KeyPress("a", self.turnAroundTime).start()
-
-        # self.endTimer = threading.Timer((self.turn_button_time + 0.1), self.end)
-        # self.endTimer.start()
-
-        InputTrigger.keyHold("w")
-        if self.direction == const.MoveDirection.backLeft:
-            InputTrigger.keyHold("a")
-        elif self.direction == const.MoveDirection.left:
-            InputTrigger.keyHold("a")
-        elif self.direction == const.MoveDirection.frontLeft:
-            InputTrigger.keyHold("a")
-        elif self.direction == const.MoveDirection.front:
-            pass
-        elif self.direction == const.MoveDirection.frontRight:
-            InputTrigger.keyHold("d")
-        elif self.direction == const.MoveDirection.right:
-            InputTrigger.keyHold("d")
-        elif self.direction == const.MoveDirection.backRight:
-            InputTrigger.keyHold("d")
-        elif self.direction == const.MoveDirection.back:
-            InputTrigger.keyHold("d")
-
-
-
-
-
-
-
-
-
 destructTimer = None
-
-
 
 
 def destructComplete():
     global destructTimer
     global isAlreadySelfDestruct
-    InputTrigger.keyRelease("m")
+    InputControl.keyRelease("m")
     destructTimer.cancel()
 
 
@@ -849,7 +561,7 @@ def selfDesctruct():
     global isAlreadySelfDestruct
     if isAlreadySelfDestruct == False:
         isAlreadySelfDestruct = True
-        InputTrigger.keyHold("m")
+        kbDown("m")
         destructTimer = threading.Timer(5.0, destructComplete)
         destructTimer.start()
 
@@ -888,21 +600,21 @@ def battleEnded():
     isBattleAlreadyActive = False
     isAlreadySelfDestruct = False
     isAlreadyBackStirring = False
-    InputTrigger.keyRelease("w")
-    InputTrigger.keyRelease("a")
-    InputTrigger.keyRelease("s")
-    InputTrigger.keyRelease("d")
-    InputTrigger.keyRelease("m")
+    InputControl.keyRelease("w")
+    InputControl.keyRelease("a")
+    InputControl.keyRelease("s")
+    InputControl.keyRelease("d")
+    InputControl.keyRelease("m")
 
 
 def calllOut():
     calloutLst = ["b", "c", "x", "z"]
     callout = random.choice(list(calloutLst))
-    InputTrigger.KeyPress(callout).start()
+    InputControl.KeyPress(callout).start()
 
 
 def carJack():
-    InputTrigger.KeyPress("r").start()
+    InputControl.KeyPress("r").start()
 
 
 total_back_stir_count = 0
@@ -927,10 +639,10 @@ def setBackByOneRightLongBackStirCount():
 
 
 def stopMoving():
-    InputTrigger.keyRelease("w")
-    InputTrigger.keyRelease("a")
-    InputTrigger.keyRelease("s")
-    InputTrigger.keyRelease("d")
+    InputControl.keyRelease("w")
+    InputControl.keyRelease("a")
+    InputControl.keyRelease("s")
+    InputControl.keyRelease("d")
 
 
 def determineBackStir():
@@ -986,7 +698,7 @@ def leftShortBackStir():
 
     isAlreadyBackStirring = True
 
-    InputTrigger.keyRelease("w")
+    InputControl.keyRelease("w")
 
     global leftShortBackStirTimer1
     global leftShortBackStirTimer2
@@ -1005,8 +717,8 @@ def leftShortBackStir():
         global leftShortBackStirTimer2
         global leftShortBackStirTimer3
         leftShortBackStirTimer2.cancel()
-        InputTrigger.keyHold("w")
-        InputTrigger.KeyPress("d", 0.73).start()
+        kbDown("w")
+        InputControl.KeyPress("d", 0.73).start()
 
         leftShortBackStirTimer3 = threading.Timer(1, finish)
         leftShortBackStirTimer3.start()
@@ -1015,13 +727,13 @@ def leftShortBackStir():
         global leftShortBackStirTimer1
         global leftShortBackStirTimer2
         leftShortBackStirTimer1.cancel()
-        InputTrigger.KeyPress("w", 2.65).start()
-        InputTrigger.KeyPress("a", 1.65).start()
+        InputControl.KeyPress("w", 2.65).start()
+        InputControl.KeyPress("a", 1.65).start()
 
         leftShortBackStirTimer2 = threading.Timer(2.75, turnFinalRight)
         leftShortBackStirTimer2.start()
 
-    InputTrigger.KeyPress("s", 1.6).start()
+    InputControl.KeyPress("s", 1.6).start()
 
     leftShortBackStirTimer1 = threading.Timer(1.7, turnForwardLeft)
     leftShortBackStirTimer1.start()
@@ -1036,7 +748,7 @@ def rightLongBackStir():
     global isAlreadyBackStirring
 
     isAlreadyBackStirring = True
-    InputTrigger.keyRelease("w")
+    InputControl.keyRelease("w")
 
     global rightLongBackStirTimer1
     global rightLongBackStirTimer2
@@ -1057,8 +769,8 @@ def rightLongBackStir():
         global rightLongBackStirTimer3
 
         rightLongBackStirTimer2.cancel()
-        InputTrigger.keyHold("w")
-        InputTrigger.KeyPress("a", 0.72).start()
+        kbDown("w")
+        InputControl.KeyPress("a", 0.72).start()
 
         rightLongBackStirTimer3 = threading.Timer(1, finish)
         rightLongBackStirTimer3.start()
@@ -1068,13 +780,13 @@ def rightLongBackStir():
         global rightLongBackStirTimer2
 
         rightLongBackStirTimer1.cancel()
-        InputTrigger.KeyPress("w", 3.5).start()
-        InputTrigger.KeyPress("d", 1.75).start()
+        InputControl.KeyPress("w", 3.5).start()
+        InputControl.KeyPress("d", 1.75).start()
 
         rightLongBackStirTimer2 = threading.Timer(3.6, turnFinalLeft)
         rightLongBackStirTimer2.start()
 
-    InputTrigger.KeyPress("s", 2.4).start()
+    InputControl.KeyPress("s", 2.4).start()
 
     rightLongBackStirTimer1 = threading.Timer(2.5, turnForwardRight)
     rightLongBackStirTimer1.start()
@@ -1088,7 +800,7 @@ def full_reverse_back_stir():
     global isAlreadyBackStirring
 
     isAlreadyBackStirring = True
-    InputTrigger.keyRelease("w")
+    InputControl.keyRelease("w")
 
     global fullreverseBackStirTimer1
     global fullreverseBackStirTimer2
@@ -1103,13 +815,13 @@ def full_reverse_back_stir():
         global fullreverseBackStirTimer1
         global fullreverseBackStirTimer2
         fullreverseBackStirTimer1.cancel()
-        InputTrigger.keyHold("w")
-        InputTrigger.KeyPress("a", 2.4).start()
+        kbDown("w")
+        InputControl.KeyPress("a", 2.4).start()
 
         fullreverseBackStirTimer2 = threading.Timer(3, finish)
         fullreverseBackStirTimer2.start()
 
-    InputTrigger.KeyPress("s", 2.1).start()
+    InputControl.KeyPress("s", 2.1).start()
 
     fullreverseBackStirTimer1 = threading.Timer(2.4, turnAround)
     fullreverseBackStirTimer1.start()
@@ -1141,16 +853,16 @@ def stirringHorizontal():
     else:
 
         if lastStir == "a":
-            InputTrigger.KeyPress("d", 0.3).start()
+            InputControl.KeyPress("d", 0.3).start()
             lastStir = "d"
         else:
-            InputTrigger.KeyPress("a", 0.3).start()
+            InputControl.KeyPress("a", 0.3).start()
             lastStir = "a"
 
 
 def executeOrder66():
     # print("<< In Battle >> Attack")
-    InputTrigger.KeyPress("1").start()
+    InputControl.KeyPress("1").start()
 
 
 def delayBattleStart():
@@ -1180,6 +892,6 @@ def DoBattleNow():
         pass
     else:
         isBattleAlreadyActive = True
-        battleStartDelayTimer = threading.Timer(4, delayBattleStart)
+        battleStartDelayTimer = threading.Timer(1, delayBattleStart)
         battleStartDelayTimer.start()
-        # InputTrigger.keyHold("w")
+        kbDown("s")

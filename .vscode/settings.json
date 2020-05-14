@@ -1,0 +1,8 @@
+{
+    "editor.formatOnPaste": true,
+    "editor.formatOnSave": true,
+    "python.pythonPath": "C:\\ProgramData\\Anaconda3\\python.exe",
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.python"
+    }
+}

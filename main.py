@@ -7,7 +7,6 @@ from PyQt5.QtWidgets import QApplication, QDesktopWidget, QWidget
 from ui_mainwindow import UI_MainWindow
 
 
-
 # import torch
 # import cv2
 
@@ -15,10 +14,9 @@ from ui_mainwindow import UI_MainWindow
 # print(cv2.getBuildInformation())
 
 
-# import InputTrigger
-# InputTrigger.KeyPress("w", "12").start()
-# InputTrigger.KeyPress("s", "2").start()
-
+# import InputControl
+# InputControl.KeyPress("w", "12").start()
+# InputControl.KeyPress("s", "2").start()
 
 
 # import operator
@@ -38,4 +36,3 @@ if __name__ == "__main__":
     window.show()
 
     app.exec_()
-
