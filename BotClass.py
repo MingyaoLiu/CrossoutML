@@ -1,13 +1,31 @@
-
+import cv2
+import d3dshot
 import Constants as const
 from Constants import ScreenStep, Point
 from ScreenClass import Screen
 from Utils import getCorrectPos
+from InputControl import kbDown, kbUp, KBPress, mouseClick
+from MovementClass import MoveManagement
+from InBattleChecks import BattleManagement
+import time
+from SettingsClass import getGlobalSetting
+import random
+import threading
 
 
 class BotProgram():
 
     def __init__(self):
+
+        self.prev_frame_dist = 10
+
+        self.d = d3dshot.create(capture_output='numpy')
+
+        self.currentStep = ScreenStep.BattlePrepareScreen
+
+        self.battleMgm = BattleManagement()
+
+        self.inBattleDelayTimer = None
 
         self.LoginScreen = Screen(ScreenStep.Login, const.login_crops, 10)
         self.WelcomeScreen = Screen(ScreenStep.WelcomeScreen,
@@ -45,8 +63,195 @@ class BotProgram():
         self.FinishBattleScreen = Screen(
             ScreenStep.FinishBattleScreen, const.finish_battle_crops, 3000)
 
+    def __advanceNextStep(self):
+        if self.currentStep == ScreenStep.debug:
+            pass
+        elif self.currentStep == ScreenStep.FinishBattleScreen:
+            self.currentStep = ScreenStep.Login
+        else:
+            self.currentStep += 1
+
+    def __processFrame(self):
+        if self.currentStep == ScreenStep.Login:
+            screen = self.LoginScreen
+            if screen.retryCount == 0:
+                screen.addFailCount()
+                kbDown("esc")
+                kbUp("esc")
+                time.sleep(0.5)
+                kbDown("esc")
+                kbUp("esc")
+                time.sleep(0.5)
+            elif screen.checkSingleSatisfy(self.frame, 0)[0]:
+                screen.executeSingleClick(0)
+            elif screen.checkSingleSatisfy(self.frame, 1)[0]:
+                screen.executeSingleClick(1)
+            elif screen.checkSingleSatisfy(self.frame, 2)[0]:
+                screen.resetRetryCount()
+                screen.executeSingleClick(2)
+                self.__advanceNextStep()
+            elif screen.addFailCount():
+                pass
+            else:
+                screen.resetRetryCount()
+                self.__advanceNextStep()
+
+        elif self.currentStep == ScreenStep.WelcomeScreen:
+            screen = self.WelcomeScreen
+            if screen.checkSatisfy(self.frame):
+                screen.resetRetryCount()
+                screen.executeClick()
+                self.__advanceNextStep()
+            elif screen.addFailCount():
+                pass
+            else:
+                screen.resetRetryCount()
+                self.__advanceNextStep()
+        elif self.currentStep == ScreenStep.MasterJackUpgradeScreen:
+            screen = self.MasterJackUpgradeScreen
+            if screen.checkSatisfy(self.frame):
+                screen.resetRetryCount()
+                screen.executeClick()
+            elif screen.addFailCount():
+                pass
+            else:
+                screen.resetRetryCount()
+                self.__advanceNextStep()
+        elif self.currentStep == ScreenStep.ChallengeCompleteScreen:
+            screen = self.ChallengeCompleteScreen
+            if screen.checkSatisfy(self.frame):
+                screen.resetRetryCount()
+                screen.executeClick()
+            elif screen.addFailCount():
+                pass
+            else:
+                screen.resetRetryCount()
+                self.__advanceNextStep()
+
+        elif self.currentStep == ScreenStep.MainMenu:
+            screen = self.MainMenuScreen
+            if screen.checkSatisfy(self.frame):
+                screen.resetRetryCount()
+                screen.executeClick()
+                self.__advanceNextStep()
+            elif screen.addFailCount():
+                pass
+            else:
+                screen.resetRetryCount()
+                self.__advanceNextStep()
+
+        elif self.currentStep == ScreenStep.SelectMode:
+            clickPos = random.choice(self.select_mode_click_pos)
+            # clickPos = select_mode_click_pos[3]
+            mouseClick(clickPos)
+            time.sleep(1)
+            self.__advanceNextStep()
+
+        elif self.currentStep == ScreenStep.GetResourceMenu:
+            screen = self.ResourcePrepareBattleScreen
+            if screen.checkSatisfy(self.frame):
+                screen.resetRetryCount()
+                screen.executeClick()
+                self.__advanceNextStep()
+            elif screen.addFailCount():
+                pass
+            else:
+                screen.resetRetryCount()
+                self.__advanceNextStep()
+
+        elif self.currentStep == ScreenStep.BattlePrepareScreen:
+            screen = self.BattlePreparationScreen
+
+            prev_frame = self.d.get_frame(5)
+
+            if screen.retryCount % 100 == 0 and screen.retryCount != 0:
+                kbDown("tab")
+
+            satisfaction_check = screen.checkSingleSatisfy(prev_frame, 1)
+
+            if satisfaction_check[0]:
+
+                detectedMap = self.frame[174:920, 587:1330]
+                mapMask = cv2.imread(
+                    const.map_mask_file_path[satisfaction_check[1]], 0)
+                self.battleMgm.loadMapMask(detectedMap, mapMask)
+                kbUp("tab")
+                screen.resetRetryCount()
+                self.__advanceNextStep()
+            elif screen.addFailCount():
+                pass
+            else:
+                screen.resetRetryCount()
+                self.__advanceNextStep()
+
+        elif self.currentStep == ScreenStep.InBattleNow:
+            self.__advanceNextStep()
+            self.battleMgm.delayStart()
+
+        elif self.currentStep == ScreenStep.DeathWaiting:
+
+            self.battleMgm.loadFrame(
+                self.frame)
+            if self.inBattleDelayTimer is None:
+                self.inBattleDelayTimer = threading.Timer(
+                    180, self.__advanceNextStep)
+                self.inBattleDelayTimer.start()
+            else:
+                pass
+
+        elif self.currentStep == ScreenStep.FinishBattleScreen:
+            screen = self.FinishBattleScreen
+            if screen.checkSatisfy(self.frame):
+                self.battleMgm.stop()
+                screen.resetRetryCount()
+                screen.executeClick()
+                self.__advanceNextStep()
+            elif screen.addFailCount():
+                self.battleMgm.loadFrame(
+                    self.frame)
+            else:
+                self.battleMgm.stop()
+                screen.resetRetryCount()
+                self.__advanceNextStep()
+
+        else:
+            # print("CURRENT STEP:", currentStep)
+            pass
+
     def stop(self):
         print("STOP BOT")
+        self.d.stop()
 
     def start(self):
         print("START BOT")
+        mouseClick(getCorrectPos(Point(400, 10)))
+
+        self.d.capture(target_fps=20, region=(
+            0, 0, const.screenWidth, const.screenHeight))
+
+        if (len(self.d.displays) > 1):
+            self.d.display = self.d.displays[1]
+            getGlobalSetting().settings.shiftX = -2560
+            getGlobalSetting().saveSettings()
+        else:
+            self.d.display = self.d.displays[0]
+            getGlobalSetting().settings.shiftX = 0
+            getGlobalSetting().saveSettings()
+
+        time.sleep(1)
+
+        while True:
+            np_frame = self.d.get_latest_frame()
+            self.frame = cv2.cvtColor(np_frame, cv2.COLOR_BGR2RGB)
+            self.__processFrame()
+
+            # test_frame = frame[const.battle_map_name_label_height_start:const.battle_map_name_label_height_end,
+            #                    const.battle_map_name_label_width_start:const.battle_map_name_label_width_end]
+            # # test_frame = frame[174:920, 587:1330]
+            # cv2.imshow("TestCrop", test_frame)
+            # text = pytesseract.image_to_string(test_frame, lang='eng')
+            # print(text)
+
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                self.stop()
+                break

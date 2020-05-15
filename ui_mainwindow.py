@@ -1,11 +1,8 @@
 import sys
+import BotSequence
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5 import uic
 from PyQt5.QtCore import QTimer
-from BotSequence import runDetection
-
-import sys
-
 from ui_settingwindow import UI_SettingWindow
 
 
@@ -20,7 +17,7 @@ class UI_MainWindow(QtWidgets.QMainWindow):
         self.quitBtn.clicked.connect(self.closeApp)
 
     def startApp(self):
-        runDetection()
+        BotSequence.startBot()
 
     def goToSettingWindow(self):
         self.window = QtWidgets.QMainWindow()
