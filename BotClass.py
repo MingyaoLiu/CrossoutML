@@ -21,7 +21,7 @@ class BotProgram():
 
         self.d = d3dshot.create(capture_output='numpy')
 
-        self.currentStep = ScreenStep.BattlePrepareScreen
+        self.currentStep = ScreenStep.Login
 
         self.battleMgm = BattleManagement()
 

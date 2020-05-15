@@ -13,11 +13,19 @@ class BattleManagement():
 
     def __init__(self):
 
-        self.debug_window_name = "DebugWindow"
-        cv2.namedWindow(self.debug_window_name, cv2.WINDOW_NORMAL)
-        cv2.resizeWindow(self.debug_window_name, 1280, 720)
-        self.detect_angle_rad = math.radians(45)
-        self.detect_distance = 10
+        self.stuckDetermineCount = 20
+        self.stuckTimerCount = 0
+
+        self.delayTime = 15
+
+        self.frameDetectionInterval = 0.2
+
+        self.base_detect_front_degree = 60
+        self.detect_front_degree = self.base_detect_front_degree
+
+        self.detect_angle_rad = math.radians(self.detect_front_degree)
+        self.base_detect_distance = 10
+        self.detect_distance = self.base_detect_distance
 
         self.battleIsInDelay = True
         self.acceptNewFrame = True
@@ -27,12 +35,23 @@ class BattleManagement():
 
         self.tentacle_pos_lst = None
         self.tooCloseTuple = None
+        self.current_pos = None
+        self.prev_pos = None
+
+        self.debug_window_name = "DebugWindow"
+        cv2.namedWindow(self.debug_window_name, cv2.WINDOW_NORMAL)
+        cv2.resizeWindow(self.debug_window_name, 1280, 720)
 
     def start(self):
         self.isBattleAlreadyActive = True
         self.battleIsInDelay = False
+
+    def moveForwardBeforeStart(self):
+        KBPress("b").start()
         kbUp("s")
         kbDown("w")
+        moveForwardBeforeStartTimer = threading.Timer(2, self.start())
+        moveForwardBeforeStartTimer.start()
 
     def delayStart(self):
         if self.isBattleAlreadyActive:
@@ -40,45 +59,61 @@ class BattleManagement():
         else:
             self.isBattleAlreadyActive = True
             kbDown("s")
-            battleIsInDelayTimer = threading.Timer(15, self.start)
+            battleIsInDelayTimer = threading.Timer(
+                self.delayTime - 2, self.moveForwardBeforeStart)
             battleIsInDelayTimer.start()
 
     def stop(self):
         print("stop")
 
     def __calcFrame(self):
+
+        if self.prev_pos is None:
+            self.current_pos = self.__getMiniMapReadLoc()
+            self.prev_pos = self.current_pos
+            return
+
         if self.__isEnemyNear():
             KBPress("1").start()
 
-        self.__calculateTentacle()
-        self.__determineTooClose()
-
-        if self.tooCloseTuple is None:
+        self.prev_pos = self.current_pos
+        self.current_pos = self.__getMiniMapReadLoc()
+        # self.pixelAdvanced = math.sqrt((self.current_pos.x - self.prev_pos.x) * (self.current_pos.x - self.prev_pos.x) + (
+        #     self.current_pos.y - self.prev_pos.y) * (self.current_pos.y - self.prev_pos.y)) if self.prev_pos is not None else 0
+        # print(self.pixelAdvanced)
+        if abs(self.current_pos.x - self.prev_pos.x) + abs(self.current_pos.y - self.prev_pos.y) <= 1 and self.tentacle_pos_lst is not None and self.tooCloseTuple is not None:
+            # print("Position Too Close ", self.pixelAdvanced," Using Previous tentacle points")
+            self.stuckTimerCount += 1
             pass
         else:
-            self.moveMgm.loadTooClose(self.tooCloseTuple)
+            self.stuckTimerCount = 0
+            self.tentacle_pos_lst = self.__calculateTentacle()
+            self.tooCloseTuple = self.__calculateTooClose()
 
-            cv2.circle(self.debugMask, self.current_pos, 1, (255, 0, 0), 1)
-            debug_test_mask = self.debugMask.copy()
-            for pos in self.tentacle_pos_lst:
-                cv2.line(debug_test_mask,
-                         self.current_pos, pos, (255, 255, 0), 1)
-
-            cv2.imshow(self.debug_window_name, debug_test_mask)
+        if self.stuckTimerCount >= self.stuckDetermineCount:
+            self.moveMgm.forceToBack()
+        self.moveMgm.loadTooClose(self.tooCloseTuple)
+        cv2.circle(self.debugMask, (int(self.current_pos.x),
+                                    int(self.current_pos.y)), 1, (0, 0, 255), 1)
+        debug_test_mask = self.debugMask.copy()
+        for pos in self.tentacle_pos_lst:
+            cv2.line(debug_test_mask,
+                     (int(self.current_pos.x),
+                      int(self.current_pos.y)), (int(pos.x), int(pos.y)), (255, 0, 0), 1)
+        print(self.tooCloseTuple)
+        cv2.imshow(self.debug_window_name, debug_test_mask)
 
     def __acceptNewFrame(self):
         self.acceptNewFrame = True
 
     def loadFrame(self, frame):
         if (self.isBattleAlreadyActive is False) or self.battleIsInDelay or (self.acceptNewFrame is False):
-            print("Frame is Wasted")
-            print("battle start", self.isBattleAlreadyActive)
-            print("battle is in delay", self.battleIsInDelay)
-            print("processing frame", self.acceptNewFrame)
+            # print("Frame is Wasted")
             pass
         else:
             self.acceptNewFrame = False
-            acceptNewFrameTimer = threading.Timer(0.05, self.__acceptNewFrame)
+            acceptNewFrameTimer = threading.Timer(
+                self.frameDetectionInterval, self.__acceptNewFrame)
             acceptNewFrameTimer.start()
 
             self.minimap_frame = frame[const.in_battle_mini_map_height_start:const.in_battle_mini_map_height_end,
@@ -91,10 +126,9 @@ class BattleManagement():
         self.debugMask = self.mask.copy()
         self.debugMask = cv2.cvtColor(self.debugMask, cv2.COLOR_GRAY2RGB)
 
-    def __getMiniMapReadLoc(self, minimap_frame) -> Point:
-        grey_minimap_frame = minimap_frame.copy()
+    def __getMiniMapReadLoc(self) -> Point:
         grey_minimap_frame = cv2.cvtColor(
-            grey_minimap_frame, cv2.COLOR_RGB2GRAY)
+            self.minimap_frame, cv2.COLOR_RGB2GRAY)
         scale_percent = 80
         new_width = int(grey_minimap_frame.shape[1] * scale_percent / 100)
         new_height = int(grey_minimap_frame.shape[0] * scale_percent / 100)
@@ -102,41 +136,34 @@ class BattleManagement():
             grey_minimap_frame, (new_width, new_height), interpolation=cv2.INTER_AREA)
         method = eval('cv2.TM_CCOEFF')
         res = cv2.matchTemplate(self.grey_src_map, grey_minimap_frame, method)
-        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+        _, _, min_loc, max_loc = cv2.minMaxLoc(res)
         if method in [cv2.TM_SQDIFF, cv2.TM_SQDIFF_NORMED]:
             top_left = min_loc
         else:
             top_left = max_loc
-        circle_center_x = int(top_left[0] + new_width / 2)
-        circle_center_y = int(top_left[1] + new_height / 2)
+        circle_center_x = top_left[0] + new_width / 2
+        circle_center_y = top_left[1] + new_height / 2
         return Point(circle_center_x, circle_center_y)
 
-    def __determineTooClose(self):
-        if self.tentacle_pos_lst is None:
-            return
-        else:
-            left_pos = self.tentacle_pos_lst[0]
-            left_too_close = False if self.mask[left_pos[1],
-                                                left_pos[0]] == 0 else True
-            center_pos = self.tentacle_pos_lst[1]
-            center_too_close = False if self.mask[center_pos[1],
-                                                  center_pos[0]] == 0 else True
-            right_pos = self.tentacle_pos_lst[2]
-            right_too_close = False if self.mask[right_pos[1],
-                                                 right_pos[0]] == 0 else True
-            self.tooCloseTuple = (
-                left_too_close, center_too_close, right_too_close)
+    def __calculateTooClose(self) -> (bool, bool, bool):
+        left_pos = self.tentacle_pos_lst[0]
+        left_too_close = False if self.mask[int(left_pos[1]),
+                                            int(left_pos[0])] == 0 else True
+        center_pos = self.tentacle_pos_lst[1]
+        center_too_close = False if self.mask[int(center_pos[1]),
+                                              int(center_pos[0])] == 0 else True
+        right_pos = self.tentacle_pos_lst[2]
+        right_too_close = False if self.mask[int(right_pos[1]),
+                                             int(right_pos[0])] == 0 else True
+        return (left_too_close, center_too_close, right_too_close)
 
-    def __calculateTentacle(self):
-        self.prev_pos = self.current_pos
-        self.current_pos = self.__getMiniMapReadLoc()
+    def __calculateTentacle(self) -> [Point]:
 
-        self.pixelAdvanced = abs(self.current_pos.x - self.prev_pos.x) + \
-            abs(self.current_pos.y - self.prev_pos.y)
+        # self.detect_distance = self.base_detect_distance if self.pixelAdvanced < 1 else self.base_detect_distance * \
+        #     self.pixelAdvanced / 1.5
 
-        if self.pixelAdvanced <= 2:
-            print("Position Too Close", self.pixelAdvanced)
-            return
+        # self.detect_front_degree = self.base_detect_front_degree if self.pixelAdvanced < 1 else self.base_detect_front_degree
+        # self.detect_angle_rad = math.radians(self.detect_front_degree)
 
         center_rad = 0
         if self.current_pos.x == self.prev_pos.x:
@@ -165,7 +192,7 @@ class BattleManagement():
         left_rad = center_rad + self.detect_angle_rad
         right_rad = center_rad - self.detect_angle_rad
         rad_list = [left_rad, center_rad, right_rad]
-        self.tentacle_pos_lst = []
+        pos_lst = []
 
         for rad in rad_list:
             if rad > 0 and rad <= math.pi / 2:
@@ -173,27 +200,28 @@ class BattleManagement():
                     self.detect_distance * abs(math.cos(rad))
                 pos_y = self.current_pos.y - \
                     self.detect_distance * abs(math.sin(rad))
-                self.tentacle_pos_lst.append(Point(int(pos_x), int(pos_y)))
+                pos_lst.append(Point(pos_x, pos_y))
             elif rad > math.pi / 2 and rad <= math.pi:
                 pos_x = self.current_pos.x - \
                     self.detect_distance * abs(math.cos(rad))
                 pos_y = self.current_pos.y - \
                     self.detect_distance * abs(math.sin(rad))
-                self.tentacle_pos_lst.append(Point(int(pos_x), int(pos_y)))
+                pos_lst.append(Point(pos_x, pos_y))
             elif (rad > math.pi and rad <= math.pi / 2 * 3) or (rad <= -1 * math.pi / 2):
                 pos_x = self.current_pos.x - \
                     self.detect_distance * abs(math.cos(rad))
                 pos_y = self.current_pos.y + \
                     self.detect_distance * abs(math.sin(rad))
-                self.tentacle_pos_lst.append(Point(int(pos_x), int(pos_y)))
+                pos_lst.append(Point(pos_x, pos_y))
             elif (rad > -1 * math.pi / 2 and rad <= 0) or (rad > math.pi / 2 * 3 and rad <= math.pi * 2):
                 pos_x = self.current_pos.x + \
                     self.detect_distance * abs(math.cos(rad))
                 pos_y = self.current_pos.y + \
                     self.detect_distance * abs(math.sin(rad))
-                self.tentacle_pos_lst.append(Point(int(pos_x), int(pos_y)))
+                pos_lst.append(Point(pos_x, pos_y))
             else:
-                print("Check Rad Failed")
+                raise Exception("Check Rad Failed")
+        return pos_lst
 
     def __isEnemyNear(self) -> bool:
         hsv_minimap_frame = cv2.cvtColor(self.minimap_frame, cv2.COLOR_BGR2HSV)

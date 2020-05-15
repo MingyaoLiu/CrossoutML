@@ -26,3 +26,7 @@ class setInterval:
 
     def cancel(self):
         self.stopEvent.set()
+
+
+def atLeastTwoTrue(a: bool, b: bool, c: bool):
+    return a if a and (b or c) else (b and c)
