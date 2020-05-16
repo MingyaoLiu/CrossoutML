@@ -6,7 +6,7 @@ from ScreenClass import Screen
 from Utils import getCorrectPos
 from InputControl import kbDown, kbUp, KBPress, mouseClick
 from MovementClass import MoveManagement
-from InBattleChecks import BattleManagement
+from BattleClass import BattleManagement
 import time
 from SettingsClass import getGlobalSetting
 import random
@@ -19,7 +19,7 @@ class BotProgram():
 
         self.killBotNow = False
 
-        self.prev_frame_dist = 10
+        # self.prev_frame_dist = 10
 
         self.d = d3dshot.create(capture_output='numpy')
 
