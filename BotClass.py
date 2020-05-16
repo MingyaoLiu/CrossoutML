@@ -225,13 +225,12 @@ class BotProgram():
         self.killBotNow = True
         self.d.stop()
         self.battleMgm.stop()
-        cv2.destroyAllWindows()
 
     def start(self):
         print("START BOT")
         mouseClick(getCorrectPos(Point(400, 10)))
-
-        self.d.capture(target_fps=20, region=(
+        target_fps = getGlobalSetting().settings.targetDisplayFPS or 20
+        self.d.capture(target_fps=target_fps, region=(
             0, 0, const.screenWidth, const.screenHeight))
 
         time.sleep(1)

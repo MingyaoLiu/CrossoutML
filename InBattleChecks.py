@@ -67,6 +67,8 @@ class BattleManagement():
 
     def stop(self):
         print("stop")
+        if getGlobalSetting().settings.showDebugWindow:
+            cv2.destroyWindow(self.debug_window_name)
 
     def __calcFrame(self):
 

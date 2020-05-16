@@ -110,6 +110,11 @@
                <height>16777215</height>
               </size>
              </property>
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+              </font>
+             </property>
              <property name="text">
               <string notr="true"/>
              </property>
@@ -175,6 +180,11 @@
                <height>16777215</height>
               </size>
              </property>
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+              </font>
+             </property>
              <property name="placeholderText">
               <string>default 0</string>
              </property>
@@ -236,6 +246,11 @@
                <width>120</width>
                <height>16777215</height>
               </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+              </font>
              </property>
              <property name="placeholderText">
               <string>default 0</string>
@@ -301,6 +316,11 @@
                <width>120</width>
                <height>16777215</height>
               </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+              </font>
              </property>
              <property name="placeholderText">
               <string>default 0</string>
@@ -394,6 +414,11 @@
                <height>16777215</height>
               </size>
              </property>
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+              </font>
+             </property>
              <property name="placeholderText">
               <string>default 10</string>
              </property>
@@ -450,6 +475,11 @@
                <height>16777215</height>
               </size>
              </property>
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+              </font>
+             </property>
              <property name="placeholderText">
               <string>Degree. default 45</string>
              </property>
@@ -505,6 +535,11 @@
                <width>120</width>
                <height>16777215</height>
               </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+              </font>
              </property>
              <property name="placeholderText">
               <string>default 0 = unlimited</string>
@@ -585,6 +620,11 @@
                <width>120</width>
                <height>16777215</height>
               </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+              </font>
              </property>
              <property name="placeholderText">
               <string>default 20</string>

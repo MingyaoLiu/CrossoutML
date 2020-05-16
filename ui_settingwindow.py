@@ -24,13 +24,14 @@ class UI_SettingWindow(QtWidgets.QMainWindow):
         self.displayIndex.setText(str(setting.displayIndex))
         self.shiftX.setText(str(setting.shiftX))
         self.shiftY.setText(str(setting.shiftY))
-        self.targetFPSInput.setText(str(setting.targetDisplayFPS))
+        self.targetFPSInput.setText(str(setting.targetDisplayFPS or 20))
         
-        self.detectDistance.setText(str(setting.frontDetectDistance))
-        self.detectRadius.setText(str(setting.frontDetectDegree))
+        self.detectDistance.setText(str(setting.frontDetectDistance or 10))
+        self.detectRadius.setText(str(setting.frontDetectDegree or 45))
         self.detectFPS.setText(str(setting.detectionFPS))
         self.showDebugCheckbox.setChecked(setting.showDebugWindow)
-        self.checkStuckFrameCount.setText(str(setting.checkStuckFrameCount))
+        self.checkStuckFrameCount.setText(
+            str(setting.checkStuckFrameCount or 20))
         
         
     def saveSettings(self):
@@ -38,12 +39,13 @@ class UI_SettingWindow(QtWidgets.QMainWindow):
         setting.displayIndex = int(self.displayIndex.text())
         setting.shiftX = int(self.shiftX.text())
         setting.shiftY = int(self.shiftY.text())
-        setting.targetDisplayFPS = int(self.targetFPSInput.text())
-        setting.frontDetectDistance = int(self.targetFPSInput.text())
-        setting.frontDetectDegree = int(self.detectRadius.text())
+        setting.targetDisplayFPS = int(self.targetFPSInput.text()) or 20
+        setting.frontDetectDistance = int(self.detectDistance.text()) or 10
+        setting.frontDetectDegree = int(self.detectRadius.text()) or 45
         setting.detectionFPS = int(self.detectFPS.text())
         setting.showDebugWindow = self.showDebugCheckbox.isChecked()
-        setting.checkStuckFrameCount = int(self.checkStuckFrameCount.text())
+        setting.checkStuckFrameCount = int(
+            self.checkStuckFrameCount.text()) or 20
         getGlobalSetting().saveSettings()
         self.close()
         
