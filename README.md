@@ -17,4 +17,4 @@ Grinder
 
 
 ## Init Protobuf database
-.\protoc.exe -I="C:\Users\gaming\Documents\GitHub\Jetson-Nano-Projects\opencv_crossout" --python_out="C:\Users\gaming\Documents\GitHub\Jetson-Nano-Projects\opencv_crossout" C:\Users\gaming\Documents\GitHub\Jetson-Nano-Projects\opencv_crossout\crossml.proto
+.\protoc.exe -I="C:\Users\gaming\Documents\GitHub\CrossoutML" --python_out="C:\Users\gaming\Documents\GitHub\CrossoutML" C:\Users\gaming\Documents\GitHub\CrossoutML\crossml.proto
