@@ -32,11 +32,7 @@ from SettingsClass import getGlobalSetting
 
 
 def checkSettings():
-    settings = getGlobalSetting().settings
-    # if settings.checkStuckFrameCount is None:
-    #     print("Is NONE")
-    # else:
-    #     print("Exist", settings.checkStuckFrameCount)
+    return getGlobalSetting()
 
 
 if __name__ == "__main__":

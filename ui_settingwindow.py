@@ -45,6 +45,7 @@ class UI_SettingWindow(QtWidgets.QMainWindow):
         setting.showDebugWindow = self.showDebugCheckbox.isChecked()
         setting.checkStuckFrameCount = int(self.checkStuckFrameCount.text())
         getGlobalSetting().saveSettings()
+        self.close()
         
         
         

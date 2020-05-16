@@ -1,24 +1,22 @@
 
 import crossml_pb2
+from os import path
 
 
 class Settings(object):
 
     def __init__(self):
         self.settings = crossml_pb2.CrossoutMLSetting()
+        self.getSettingsFile()
 
-        with open('settings.bin', 'rb') as f:
-            self.settings.ParseFromString(f.read())
-            f.close()
-
-    def writeSettings(self, new_setting):
-
-        settingsFile = open("settings.bin", "wb")
-
-        self.settings = new_setting
-        settingsFile.write(self.settings.SerializeToString())
-        settingsFile.close()
-        return 1
+    def getSettingsFile(self):
+        if path.exists('settings.bin'):
+            with open('settings.bin', 'rb') as f:
+                self.settings.ParseFromString(f.read())
+                f.close()
+        else:
+            self.settings = crossml_pb2.CrossoutMLSetting()
+            self.saveSettings()
 
     def getSettings(self):
         return self.settings

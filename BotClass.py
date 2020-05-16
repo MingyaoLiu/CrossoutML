@@ -234,15 +234,6 @@ class BotProgram():
         self.d.capture(target_fps=20, region=(
             0, 0, const.screenWidth, const.screenHeight))
 
-        if (len(self.d.displays) > 1):
-            self.d.display = self.d.displays[1]
-            getGlobalSetting().settings.shiftX = -2560
-            getGlobalSetting().saveSettings()
-        else:
-            self.d.display = self.d.displays[0]
-            getGlobalSetting().settings.shiftX = 0
-            getGlobalSetting().saveSettings()
-
         time.sleep(1)
 
         while self.killBotNow is False:
