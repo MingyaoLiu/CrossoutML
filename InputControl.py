@@ -28,7 +28,6 @@ def char2key(c):
         return vk_key
     else:
         raise Exception("Not in VK list and Not A Single Char")
-        return vk_key_dict["esc"]
 
 
 class KBPress:
