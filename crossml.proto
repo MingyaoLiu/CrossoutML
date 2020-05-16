@@ -5,4 +5,12 @@ message CrossoutMLSetting {
     bool fullAuto = 2;
     int32 shiftX = 3;
     int32 shiftY = 4;
+    int32 carMaxSpeed = 5;
+    int32 frontDetectDistance = 6;
+    int32 frontDetectDegree = 7;
+    int32 targetDisplayFPS = 8;
+    int32 detectionFPS = 9;
+    bool showDebugWindow = 10;
+    int32 checkStuckFrameCount = 20;
+
 }

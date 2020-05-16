@@ -27,7 +27,7 @@ def char2key(c):
         vk_key = result & 0xFF
         return vk_key
     else:
-        print("Not in VK list and Not A Single Char")
+        raise Exception("Not in VK list and Not A Single Char")
         return vk_key_dict["esc"]
 
 

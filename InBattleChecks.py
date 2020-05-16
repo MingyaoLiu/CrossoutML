@@ -7,25 +7,14 @@ from InputControl import KBPress, kbUp, kbDown
 from Constants import CropProperty, Point
 import threading
 import random
+from SeettingsClass import getGlobalSetting
 
 
 class BattleManagement():
 
     def __init__(self):
 
-        self.stuckDetermineCount = 20
-        self.stuckTimerCount = 0
-
         self.delayTime = 15
-
-        self.frameDetectionInterval = 0.2
-
-        self.base_detect_front_degree = 60
-        self.detect_front_degree = self.base_detect_front_degree
-
-        self.detect_angle_rad = math.radians(self.detect_front_degree)
-        self.base_detect_distance = 10
-        self.detect_distance = self.base_detect_distance
 
         self.battleIsInDelay = True
         self.acceptNewFrame = True
@@ -38,9 +27,22 @@ class BattleManagement():
         self.current_pos = None
         self.prev_pos = None
 
-        self.debug_window_name = "DebugWindow"
-        cv2.namedWindow(self.debug_window_name, cv2.WINDOW_NORMAL)
-        cv2.resizeWindow(self.debug_window_name, 1280, 720)
+        self.currentStuckTimerCount = 0
+        self.stuckDetermineCount = getGlobalSetting().settings.checkStuckFrameCount or 20
+
+        self.detect_front_degree = getGlobalSetting().settings.frontDetectDistance or 45
+
+        self.detect_angle_rad = math.radians(self.detect_front_degree)
+
+        self.detect_distance = getGlobalSetting().settings.frontDetectDistance or 10
+
+        self.frameDetectionInterval = 0 if getGlobalSetting(
+        ).settings.detectionFPS == 0 else 1000 / getGlobalSetting().settings.detectionFPS
+
+        if getGlobalSetting().settings.showDebugWindow:
+            self.debug_window_name = "DebugWindow"
+            cv2.namedWindow(self.debug_window_name, cv2.WINDOW_NORMAL)
+            cv2.resizeWindow(self.debug_window_name, 1280, 720)
 
     def start(self):
         self.isBattleAlreadyActive = True
@@ -83,38 +85,41 @@ class BattleManagement():
         # print(self.pixelAdvanced)
         if abs(self.current_pos.x - self.prev_pos.x) + abs(self.current_pos.y - self.prev_pos.y) <= 1 and self.tentacle_pos_lst is not None and self.tooCloseTuple is not None:
             # print("Position Too Close ", self.pixelAdvanced," Using Previous tentacle points")
-            self.stuckTimerCount += 1
+            self.currentStuckTimerCount += 1
             pass
         else:
-            self.stuckTimerCount = 0
+            self.currentStuckTimerCount = 0
             self.tentacle_pos_lst = self.__calculateTentacle()
             self.tooCloseTuple = self.__calculateTooClose()
 
-        if self.stuckTimerCount >= self.stuckDetermineCount:
+        if self.currentStuckTimerCount >= self.stuckDetermineCount:
             self.moveMgm.forceToBack()
+            self.__carJack()
         self.moveMgm.loadTooClose(self.tooCloseTuple)
-        cv2.circle(self.debugMask, (int(self.current_pos.x),
-                                    int(self.current_pos.y)), 1, (0, 0, 255), 1)
-        debug_test_mask = self.debugMask.copy()
-        for pos in self.tentacle_pos_lst:
-            cv2.line(debug_test_mask,
-                     (int(self.current_pos.x),
-                      int(self.current_pos.y)), (int(pos.x), int(pos.y)), (255, 0, 0), 1)
-        print(self.tooCloseTuple)
-        cv2.imshow(self.debug_window_name, debug_test_mask)
+        if getGlobalSetting().settings.showDebugWindow:
+            cv2.circle(self.debugMask, (int(self.current_pos.x),
+                                        int(self.current_pos.y)), 1, (0, 0, 255), 1)
+            debug_test_mask = self.debugMask.copy()
+            for pos in self.tentacle_pos_lst:
+                cv2.line(debug_test_mask,
+                         (int(self.current_pos.x),
+                          int(self.current_pos.y)), (int(pos.x), int(pos.y)), (255, 0, 0), 1)
+            cv2.imshow(self.debug_window_name, debug_test_mask)
 
     def __acceptNewFrame(self):
-        self.acceptNewFrame = True
+        if self.frameDetectionInterval:
+            self.acceptNewFrame = True
 
     def loadFrame(self, frame):
         if (self.isBattleAlreadyActive is False) or self.battleIsInDelay or (self.acceptNewFrame is False):
             # print("Frame is Wasted")
             pass
         else:
-            self.acceptNewFrame = False
-            acceptNewFrameTimer = threading.Timer(
-                self.frameDetectionInterval, self.__acceptNewFrame)
-            acceptNewFrameTimer.start()
+            if self.frameDetectionInterval:
+                self.acceptNewFrame = False
+                acceptNewFrameTimer = threading.Timer(
+                    self.frameDetectionInterval, self.__acceptNewFrame)
+                acceptNewFrameTimer.start()
 
             self.minimap_frame = frame[const.in_battle_mini_map_height_start:const.in_battle_mini_map_height_end,
                                        const.in_battle_mini_map_width_start: const.in_battle_mini_map_width_end]
@@ -158,12 +163,6 @@ class BattleManagement():
         return (left_too_close, center_too_close, right_too_close)
 
     def __calculateTentacle(self) -> [Point]:
-
-        # self.detect_distance = self.base_detect_distance if self.pixelAdvanced < 1 else self.base_detect_distance * \
-        #     self.pixelAdvanced / 1.5
-
-        # self.detect_front_degree = self.base_detect_front_degree if self.pixelAdvanced < 1 else self.base_detect_front_degree
-        # self.detect_angle_rad = math.radians(self.detect_front_degree)
 
         center_rad = 0
         if self.current_pos.x == self.prev_pos.x:
@@ -232,12 +231,12 @@ class BattleManagement():
             return True
         return False
 
-    def calllOut(self):
+    def __calllOut(self):
         calloutLst = ["b", "c", "x", "z"]
         callout = random.choice(list(calloutLst))
         KBPress(callout).start()
 
-    def carJack(self):
+    def __carJack(self):
         KBPress("r").start()
 
     ########## MINIMAP TRACK ENEMY COUNT #############
