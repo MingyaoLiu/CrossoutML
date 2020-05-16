@@ -28,8 +28,20 @@ from ui_mainwindow import UI_MainWindow
 # a = Point(1, 3)
 # print(a.x)
 
+from SettingsClass import getGlobalSetting
+
+
+def checkSettings():
+    settings = getGlobalSetting().settings
+    # if settings.checkStuckFrameCount is None:
+    #     print("Is NONE")
+    # else:
+    #     print("Exist", settings.checkStuckFrameCount)
+
 
 if __name__ == "__main__":
+
+    checkSettings()
 
     app = QtWidgets.QApplication(sys.argv)
     window = UI_MainWindow()

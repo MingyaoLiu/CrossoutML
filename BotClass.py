@@ -17,6 +17,8 @@ class BotProgram():
 
     def __init__(self):
 
+        self.killBotNow = False
+
         self.prev_frame_dist = 10
 
         self.d = d3dshot.create(capture_output='numpy')
@@ -220,7 +222,10 @@ class BotProgram():
 
     def stop(self):
         print("STOP BOT")
+        self.killBotNow = True
         self.d.stop()
+        self.battleMgm.stop()
+        cv2.destroyAllWindows()
 
     def start(self):
         print("START BOT")
@@ -240,7 +245,7 @@ class BotProgram():
 
         time.sleep(1)
 
-        while True:
+        while self.killBotNow is False:
             np_frame = self.d.get_latest_frame()
             self.frame = cv2.cvtColor(np_frame, cv2.COLOR_BGR2RGB)
             self.__processFrame()
