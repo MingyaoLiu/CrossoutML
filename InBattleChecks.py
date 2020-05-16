@@ -7,7 +7,7 @@ from InputControl import KBPress, kbUp, kbDown
 from Constants import CropProperty, Point
 import threading
 import random
-from SeettingsClass import getGlobalSetting
+from SettingsClass import getGlobalSetting
 
 
 class BattleManagement():
