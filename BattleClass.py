@@ -21,7 +21,7 @@ class BattleManagement():
         self.battleFrameStack = []
         self.currentBattleFrame = None
 
-        self.delayTime = 15
+        self.delayTime = 17
 
         self.battleIsInDelay = True
         self.acceptNewFrame = True
@@ -51,10 +51,11 @@ class BattleManagement():
         self.battleIsInDelay = False
 
     def moveForwardBeforeStart(self):
+        KBPress("spacebar", 1).start()
         KBPress("b").start()
         kbUp("s")
         kbDown("w")
-        moveForwardBeforeStartTimer = threading.Timer(2, self.start())
+        moveForwardBeforeStartTimer = threading.Timer(5, self.start())
         moveForwardBeforeStartTimer.start()
 
     def delayStart(self):
@@ -64,7 +65,7 @@ class BattleManagement():
             self.isBattleAlreadyActive = True
             kbDown("s")
             battleIsInDelayTimer = threading.Timer(
-                self.delayTime - 2, self.moveForwardBeforeStart)
+                self.delayTime - 5, self.moveForwardBeforeStart)
             battleIsInDelayTimer.start()
 
     def stop(self):
@@ -74,6 +75,11 @@ class BattleManagement():
 
         if self.grey_src_map is None or minimap_frame is None:
             raise Exception("No Src Map or minimap Loaded")
+
+        if self.currentStuckTimerCount > self.stuckDetermineCount:
+            kbDown("w")
+            KBPress("r")
+            self.currentStuckTimerCount = 0
 
         # Check if enemy is near, fire if near
         if self.__isEnemyNear(minimap_frame):
@@ -156,6 +162,7 @@ class BattleManagement():
 
         if pixel_distance == 0:
             # print("completely ignore this frame as it didn't move at all.")
+            self.currentStuckTimerCount += 1
             return None
         elif pixel_distance < 3:
             # new_bf_pos_data = PointData(

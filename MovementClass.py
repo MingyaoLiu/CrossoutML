@@ -26,10 +26,10 @@ class MoveManagement():
             if bf.speed > 70:
                 kbUp("w")
                 kbDown("spacebar")
-            elif bf.speed > 50:
+            elif bf.speed > 40:
                 kbUp("spacebar")
                 kbUp("w")
-            elif bf.speed < 30:
+            elif bf.speed < 20:
                 kbUp("spacebar")
                 kbDown("w")
             else:

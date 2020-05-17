@@ -23,7 +23,7 @@ class BotProgram():
 
         self.d = d3dshot.create(capture_output='numpy')
 
-        self.currentStep = ScreenStep.Login
+        self.currentStep = ScreenStep.BattlePrepareScreen
 
         self.battleMgm = BattleManagement()
 
@@ -243,8 +243,9 @@ class BotProgram():
             self.__processFrame()
 
             # test_frame = frame[const.battle_map_name_label_height_start:const.battle_map_name_label_height_end,
-            #                    const.battle_map_name_label_width_start:const.battle_map_name_label_width_end]
-            # # test_frame = frame[174:920, 587:1330]
+            #    const.battle_map_name_label_width_start:const.battle_map_name_label_width_end]
+            # ff = cv2.cvtColor(np_frame, cv2.COLOR_BGR2GRAY)
+            # test_frame = ff[174:920, 587:1330]
             # cv2.imshow("TestCrop", test_frame)
             # text = pytesseract.image_to_string(test_frame, lang='eng')
             # print(text)
