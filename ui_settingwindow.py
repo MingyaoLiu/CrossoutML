@@ -25,8 +25,9 @@ class UI_SettingWindow(QtWidgets.QMainWindow):
         self.shiftX.setText(str(setting.shiftX))
         self.shiftY.setText(str(setting.shiftY))
         self.targetFPSInput.setText(str(setting.targetDisplayFPS or 20))
-        
-        self.detectDistance.setText(str(setting.frontDetectDistance or 10))
+        self.centerDetectDistance.setText(
+            str(setting.centerDetectDistance or 3 * (setting.lrDetectDistance or 10)))
+        self.lrDetectDistance.setText(str(setting.lrDetectDistance or 10))
         self.detectRadius.setText(str(setting.frontDetectDegree or 45))
         self.detectFPS.setText(str(setting.detectionFPS))
         self.showDebugCheckbox.setChecked(setting.showDebugWindow)
@@ -40,7 +41,9 @@ class UI_SettingWindow(QtWidgets.QMainWindow):
         setting.shiftX = int(self.shiftX.text())
         setting.shiftY = int(self.shiftY.text())
         setting.targetDisplayFPS = int(self.targetFPSInput.text()) or 20
-        setting.frontDetectDistance = int(self.detectDistance.text()) or 10
+        setting.centerDetectDistance = int(
+            self.centerDetectDistance.text()) or 3 * (setting.lrDetectDistance or 10)
+        setting.lrDetectDistance = int(self.lrDetectDistance.text()) or 10
         setting.frontDetectDegree = int(self.detectRadius.text()) or 45
         setting.detectionFPS = int(self.detectFPS.text())
         setting.showDebugWindow = self.showDebugCheckbox.isChecked()

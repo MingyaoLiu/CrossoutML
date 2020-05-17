@@ -23,7 +23,7 @@ class BotProgram():
 
         self.d = d3dshot.create(capture_output='numpy')
 
-        self.currentStep = ScreenStep.Login
+        self.currentStep = ScreenStep.BattlePrepareScreen
 
         self.battleMgm = BattleManagement()
 
@@ -172,7 +172,7 @@ class BotProgram():
             satisfaction_check = screen.checkSingleSatisfy(prev_frame, 1)
 
             if satisfaction_check[0]:
-
+                print("aaa")
                 detectedMap = self.frame[174:920, 587:1330]
                 mapMask = cv2.imread(
                     const.map_mask_file_path[satisfaction_check[1]], 0)
@@ -230,6 +230,8 @@ class BotProgram():
         print("START BOT")
         mouseClick(getCorrectPos(Point(400, 10)))
         target_fps = getGlobalSetting().settings.targetDisplayFPS or 20
+        self.d.display = self.d.displays[getGlobalSetting(
+        ).settings.displayIndex]
         self.d.capture(target_fps=target_fps, region=(
             0, 0, const.screenWidth, const.screenHeight))
 
@@ -246,7 +248,3 @@ class BotProgram():
             # cv2.imshow("TestCrop", test_frame)
             # text = pytesseract.image_to_string(test_frame, lang='eng')
             # print(text)
-
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                self.stop()
-                break

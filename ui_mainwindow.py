@@ -5,6 +5,7 @@ from PyQt5.QtCore import QTimer
 from ui_settingwindow import UI_SettingWindow
 import threading
 from BotBackgroundThread import BotBackgroundThread
+from DebugClass import getDebugger
 
 
 class UI_MainWindow(QtWidgets.QMainWindow):
@@ -22,6 +23,8 @@ class UI_MainWindow(QtWidgets.QMainWindow):
         self.settingBtn.clicked.connect(self.goToSettingWindow)
         self.quitBtn.clicked.connect(self.closeApp)
 
+        self.debugger = getDebugger()
+
     def __enableClick(self):
         self.isAllowedClick = True
 
@@ -33,6 +36,7 @@ class UI_MainWindow(QtWidgets.QMainWindow):
 
     def stopApp(self):
         if self.isAllowedClick and self.botWorker is not None:
+            self.debugger.closeDebugWindow()
             self.__disableClick()
             # self.botWorker.stopBot()
             # self.botWorker.quit()
@@ -41,6 +45,7 @@ class UI_MainWindow(QtWidgets.QMainWindow):
 
     def startApp(self):
         if self.isAllowedClick and self.botWorker is None:
+            self.debugger.createDebugWindow()
             self.__disableClick()
             self.botWorker = BotBackgroundThread()
             self.botWorker.start()
@@ -54,6 +59,7 @@ class UI_MainWindow(QtWidgets.QMainWindow):
             self.ui.show()
 
     def closeApp(self):
+        self.debugger.closeDebugWindow()
         self.close()
         QtWidgets.QApplication.quit()
         return sys.exit(0)

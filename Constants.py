@@ -82,6 +82,31 @@ class CropProperty(tuple):
         return tuple.__new__(CropProperty, (name, area, requiredMatch, clickPos, willClick, expectedStrs, clickWaitTime))
 
 
+class PointData(tuple):
+    def __new__(self, pos: Point, isOutside: bool):
+        PointData.pos = property(operator.itemgetter(0))
+        PointData.isOutside = property(operator.itemgetter(1))
+        return tuple.__new__(PointData, (pos, isOutside))
+
+
+class CenterData(tuple):
+    def __new__(self, close: PointData, mid: PointData, far: PointData):
+        CenterData.close = property(operator.itemgetter(0))
+        CenterData.mid = property(operator.itemgetter(1))
+        CenterData.far = property(operator.itemgetter(2))
+        return tuple.__new__(CenterData, (close, mid, far))
+
+
+class BattleFrame(tuple):
+    def __new__(self, clockTime: float, pos: Point, center: CenterData, left: PointData, right: PointData):
+        BattleFrame.clockTime = property(operator.itemgetter(0))
+        BattleFrame.pos = property(operator.itemgetter(1))
+        BattleFrame.center = property(operator.itemgetter(2))
+        BattleFrame.left = property(operator.itemgetter(3))
+        BattleFrame.right = property(operator.itemgetter(4))
+        return tuple.__new__(BattleFrame, (clockTime, pos, center, left, right))
+
+
 #######################################################
 ##                      Dicts                        ##
 #######################################################

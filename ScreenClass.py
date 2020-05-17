@@ -3,6 +3,8 @@ import InputControl
 import pytesseract
 from Constants import ScreenStep, CropProperty, CropArea
 from Utils import getCorrectPos
+from SettingsClass import getGlobalSetting
+from DebugClass import getDebugger
 
 
 class Screen():
@@ -16,6 +18,8 @@ class Screen():
     def checkSingleSatisfy(self, frame, index) -> (bool, str):
         crop = self.crops[index]
         crop_frame = frame[crop.area.y:crop.area.ys, crop.area.x:crop.area.xs]
+        getDebugger().debugDisplay(crop_frame)
+
         low_txt = pytesseract.image_to_string(crop_frame, lang='eng').lower()
         if crop.requiredMatch and (low_txt not in crop.expectedStrs):
             return (False, low_txt)
