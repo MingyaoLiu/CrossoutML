@@ -26,8 +26,6 @@ class Debug():
     def debugDisplay(self, frame):
         if self.startedDebugger:
             cv2.imshow(self.debug_window_name, frame)
-            if cv2.waitKey(0) & 0xFF == ord('q'):
-                self.closeDebugWindow()
 
 
 global_debugger = None

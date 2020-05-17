@@ -1,4 +1,4 @@
-from Constants import MoveDirection
+from Constants import MoveDirection, BattleFrame, Point, PointData
 import threading
 from InputControl import KBPress, kbDown, kbUp, MouseMove
 from Utils import atLeastTwoTrue
@@ -18,6 +18,55 @@ class MoveManagement():
     def forceToBack(self):
         self.forcingBack = True
         self.sendMoveCmd(MoveDirection.back, 5)
+
+    def loadNewBF(self, bf: BattleFrame):
+        print(bf.speed)
+
+        if bf.center.far.isOutside or bf.center.mid.isOutside or bf.center.low.isOutside or bf.left.isOutside or bf.right.isOutside:
+            if bf.speed > 70:
+                kbUp("w")
+                kbDown("spacebar")
+            elif bf.speed > 50:
+                kbUp("spacebar")
+                kbUp("w")
+            elif bf.speed < 30:
+                kbUp("spacebar")
+                kbDown("w")
+            else:
+                kbUp("spacebar")
+                kbDown("w")
+            if bf.left.isOutside and bf.right.isOutside:
+                if bf.center.low.isOutside:
+                    print("It's Fked")
+                    kbUp("d")
+                    kbDown("a")
+                else:
+                    print("Waiting for anything to change")
+                    kbUp("a")
+                    kbUp("d")
+            elif bf.right.isOutside:
+                kbUp("d")
+                if bf.center.low.isOutside:
+                    kbDown("a")
+                else:
+                    kbUp("a")
+            elif bf.left.isOutside:
+                kbUp("a")
+                if bf.center.low.isOutside:
+                    kbDown("d")
+                else:
+                    kbUp("d")
+            else:
+                kbUp("a")
+                kbUp("d")
+
+        else:
+            kbUp("spacebar")
+            kbUp("a")
+            kbUp("d")
+
+            kbDown("w")
+            print("Nothing is detected, go straight forward")
 
     def loadTooClose(self, tooCloseTuple):
         if (self.forcingBack is False) and self.isAlreadyTurning and len(self.tooCloseStack):

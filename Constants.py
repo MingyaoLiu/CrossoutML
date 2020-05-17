@@ -90,21 +90,24 @@ class PointData(tuple):
 
 
 class CenterData(tuple):
-    def __new__(self, close: PointData, mid: PointData, far: PointData):
-        CenterData.close = property(operator.itemgetter(0))
+    def __new__(self, low: PointData, mid: PointData, far: PointData):
+        CenterData.low = property(operator.itemgetter(0))
         CenterData.mid = property(operator.itemgetter(1))
         CenterData.far = property(operator.itemgetter(2))
-        return tuple.__new__(CenterData, (close, mid, far))
+        return tuple.__new__(CenterData, (low, mid, far))
 
 
 class BattleFrame(tuple):
-    def __new__(self, clockTime: float, pos: Point, center: CenterData, left: PointData, right: PointData):
-        BattleFrame.clockTime = property(operator.itemgetter(0))
-        BattleFrame.pos = property(operator.itemgetter(1))
-        BattleFrame.center = property(operator.itemgetter(2))
-        BattleFrame.left = property(operator.itemgetter(3))
-        BattleFrame.right = property(operator.itemgetter(4))
-        return tuple.__new__(BattleFrame, (clockTime, pos, center, left, right))
+    def __new__(self, record: bool, time: float, speed: float, posData: PointData, centerRad: float, center: CenterData, left: PointData, right: PointData):
+        BattleFrame.record = property(operator.itemgetter(0))
+        BattleFrame.time = property(operator.itemgetter(1))
+        BattleFrame.speed = property(operator.itemgetter(2))
+        BattleFrame.posData = property(operator.itemgetter(3))
+        BattleFrame.centerRad = property(operator.itemgetter(4))
+        BattleFrame.center = property(operator.itemgetter(5))
+        BattleFrame.left = property(operator.itemgetter(6))
+        BattleFrame.right = property(operator.itemgetter(7))
+        return tuple.__new__(BattleFrame, (record, time, speed, posData, centerRad, center, left, right))
 
 
 #######################################################

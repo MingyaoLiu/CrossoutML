@@ -16,6 +16,8 @@ class BattleManagement():
 
     def __init__(self):
 
+        self.low_speed_top_limit = 50
+
         self.battleFrameStack = []
         self.currentBattleFrame = None
 
@@ -26,10 +28,6 @@ class BattleManagement():
         self.isBattleAlreadyActive = False
 
         self.moveMgm = MoveManagement()
-
-        self.tentacle_pos_lst = None
-        self.tooCloseTuple = None
-        self.current_pos = None
 
         self.currentStuckTimerCount = 0
         self.stuckDetermineCount = getGlobalSetting().settings.checkStuckFrameCount or 20
@@ -81,25 +79,36 @@ class BattleManagement():
         if self.__isEnemyNear(minimap_frame):
             KBPress("1").start()
 
-        proc_time = time.process_time_ns()
+        # generate current battle frame
+        proc_time = time.perf_counter()
         currentBattleFrame = self.__calcBattleFrame(
             proc_time, self.grey_src_map, minimap_frame)
 
         # add check stuck !
 
-        if getGlobalSetting().settings.showDebugWindow:
-            cv2.circle(self.debugMask, (int(currentBattleFrame.pos.x),
-                                        int(currentBattleFrame.pos.y)), 1, (0, 0, 255), 1)
+        if currentBattleFrame and currentBattleFrame.record:
+            self.battleFrameStack.insert(0, currentBattleFrame)
+            if len(self.battleFrameStack) >= 11:
+                self.battleFrameStack.pop()
+
+        if currentBattleFrame and currentBattleFrame.center and currentBattleFrame.left and currentBattleFrame.right:
+            self.moveMgm.loadNewBF(currentBattleFrame)
+
+        if getGlobalSetting().settings.showDebugWindow and currentBattleFrame:
+            if currentBattleFrame.posData.pos:
+                cv2.circle(self.debugMask, (int(currentBattleFrame.posData.pos.x),
+                                            int(currentBattleFrame.posData.pos.y)), 1, (0, 0, 255), 2)
             debug_test_mask = self.debugMask.copy()
-            cv2.line(debug_test_mask,
-                     (int(currentBattleFrame.pos.x),
-                      int(currentBattleFrame.pos.y)), (int(currentBattleFrame.center.low.x), int(currentBattleFrame.center.low.y)), (255, 0, 0), 1)
-            cv2.line(debug_test_mask,
-                     (int(currentBattleFrame.pos.x),
-                      int(currentBattleFrame.pos.y)), (int(currentBattleFrame.center.mid.x), int(currentBattleFrame.center.mid.y)), (255, 0, 0), 1)
-            cv2.line(debug_test_mask,
-                     (int(currentBattleFrame.pos.x),
-                      int(currentBattleFrame.pos.y)), (int(currentBattleFrame.center.far.x), int(currentBattleFrame.center.far.y)), (255, 0, 0), 1)
+            if currentBattleFrame.posData.pos and currentBattleFrame.center and currentBattleFrame.left and currentBattleFrame.right:
+                cv2.line(debug_test_mask,
+                         (int(currentBattleFrame.posData.pos.x),
+                          int(currentBattleFrame.posData.pos.y)), (int(currentBattleFrame.center.far.pos.x), int(currentBattleFrame.center.far.pos.y)), (255, 0, 0), 1)
+                cv2.line(debug_test_mask,
+                         (int(currentBattleFrame.posData.pos.x),
+                          int(currentBattleFrame.posData.pos.y)), (int(currentBattleFrame.left.pos.x), int(currentBattleFrame.left.pos.y)), (255, 0, 0), 1)
+                cv2.line(debug_test_mask,
+                         (int(currentBattleFrame.posData.pos.x),
+                          int(currentBattleFrame.posData.pos.y)), (int(currentBattleFrame.right.pos.x), int(currentBattleFrame.right.pos.y)), (255, 0, 0), 1)
             getDebugger().debugDisplay(debug_test_mask)
 
     def __acceptNewFrame(self):
@@ -127,35 +136,55 @@ class BattleManagement():
         self.debugMask = self.mask.copy()
         self.debugMask = cv2.cvtColor(self.debugMask, cv2.COLOR_GRAY2RGB)
 
+    def __calcDistance(self, pos1: Point, pos2: Point) -> float:
+        if (pos1 == pos2):
+            return 0
+        return math.sqrt((pos1.x - pos2.x) * (pos1.x - pos2.x) + (pos1.y - pos2.y) * (pos1.y - pos2.y))
+
     def __calcBattleFrame(self, time, src_map, minimap_frame) -> BattleFrame:
         current_pos = self.__getMiniMapReadLoc(src_map,
                                                minimap_frame)
 
-        if len(self.battleFrameStack) == 0:
-            print("No previous Battle Frame Yet, can't determine posisiton")
+        if len(self.battleFrameStack) < 10:
+            print("No previous 10- Battle Frame Yet, can't determine posisiton")
             print("Append empty battle frame")
-            return None
+            pos_data = PointData(current_pos, self.__calcTooClose(current_pos))
+            return BattleFrame(True, time, 0, pos_data, None, None, None, None)
 
         prev_bf = self.battleFrameStack[0]
-        pixelAdvanced = self.__calcPixelAdvanced(
-            current_pos, prev_bf.position)
-        if pixelAdvanced == 0:
-            print("completely ignore this frame as it didn't move at all.")
-        elif pixelAdvanced < 2:
-            if len(self.battleFrameStack) == 1:
-                print("No 2 frame before data, calculate new tentacle.")
-            else:
-                print("estimate data based on 2 frame before position")
+        pixel_distance = self.__calcDistance(prev_bf.posData.pos, current_pos)
 
-        center_rad = self.__calcRad(self.battleFrameStack[0].pos, current_pos)
+        if pixel_distance == 0:
+            # print("completely ignore this frame as it didn't move at all.")
+            return None
+        elif pixel_distance < 3:
+            # new_bf_pos_data = PointData(
+            #     current_pos, self.__calcTooClose(current_pos))
+
+            # new_bf = BattleFrame(False, time, 0, new_bf_pos_data,
+            #                      prev_bf.centerRad, prev_bf.center, prev_bf.left, prev_bf.right)
+            # return new_bf
+            return None
+        center_rad = self.__calcRad(prev_bf.posData.pos, current_pos)
         left_rad = center_rad + self.detect_angle_rad
         right_rad = center_rad - self.detect_angle_rad
+        # if len(self.battleFrameStack) == 1:
+        #     print("No 2 frame before data, calculate new tentacle.")
+        # else:
+        #     print("estimate data based on 2 frame before position")
+        # center_rad = ((self.battleFrameStack[0].centerRad or 0) + (self.battleFrameStack[1].centerRad or 0) +
+        #               (self.battleFrameStack[2].centerRad or 0) + (self.battleFrameStack[3].centerRad or 0) + self.__calcRad(prev_bf.pos, current_pos)) / 5
 
-        center_low_dist = self.__calcEndPoint(
+        # left_rad = center_rad + self.detect_angle_rad
+        # right_rad = center_rad - self.detect_angle_rad
+
+        pos_data = PointData(current_pos, self.__calcTooClose(current_pos))
+
+        center_low_dist_pos = self.__calcEndPoint(
             current_pos, center_rad, self.center_low_distance)
-        center_mid_dist = self.__calcEndPoint(
+        center_mid_dist_pos = self.__calcEndPoint(
             current_pos, center_rad, self.center_mid_distance)
-        center_far_dist = self.__calcEndPoint(
+        center_far_dist_pos = self.__calcEndPoint(
             current_pos, center_rad, self.center_far_distance)
         left_low_dist = self.__calcEndPoint(
             current_pos, left_rad, self.lr_detect_distance)
@@ -163,11 +192,13 @@ class BattleManagement():
             current_pos, right_rad, self.lr_detect_distance)
 
         center_low_pd = PointData(
-            center_low_dist, self.__calcTooClose(center_low_dist))
+            center_low_dist_pos, self.__calcTooClose(center_low_dist_pos))
         center_mid_pd = PointData(
-            center_mid_dist, self.__calcTooClose(center_mid_dist))
+            center_mid_dist_pos, self.__calcTooClose(center_mid_dist_pos))
         center_far_pd = PointData(
-            center_far_dist, self.__calcTooClose(center_far_dist))
+            center_far_dist_pos, self.__calcTooClose(center_far_dist_pos))
+
+        speed = pixel_distance / (time - prev_bf.time) * 5
 
         center_data = CenterData(center_low_pd, center_mid_pd, center_far_pd)
 
@@ -176,7 +207,7 @@ class BattleManagement():
         right_low_pd = PointData(
             right_low_dist, self.__calcTooClose(right_low_dist))
 
-        return BattleFrame(time, current_pos, center_data, left_low_pd, right_low_pd)
+        return BattleFrame(True, time, speed, pos_data, center_rad, center_data, left_low_pd, right_low_pd)
 
     def __getMiniMapReadLoc(self, src_map, minimap_frame) -> Point:
         grey_minimap_frame = cv2.cvtColor(minimap_frame, cv2.COLOR_RGB2GRAY)
@@ -225,27 +256,27 @@ class BattleManagement():
 
     def __calcEndPoint(self, start_pos: Point, rad: float, distance: float) -> Point:
         if rad > 0 and rad <= math.pi / 2:
-            pos_x = self.current_pos.x + \
+            pos_x = start_pos.x + \
                 distance * abs(math.cos(rad))
-            pos_y = self.current_pos.y - \
+            pos_y = start_pos.y - \
                 distance * abs(math.sin(rad))
             return Point(pos_x, pos_y)
         elif rad > math.pi / 2 and rad <= math.pi:
-            pos_x = self.current_pos.x - \
+            pos_x = start_pos.x - \
                 distance * abs(math.cos(rad))
-            pos_y = self.current_pos.y - \
+            pos_y = start_pos.y - \
                 distance * abs(math.sin(rad))
             return Point(pos_x, pos_y)
         elif (rad > math.pi and rad <= math.pi / 2 * 3) or (rad <= -1 * math.pi / 2):
-            pos_x = self.current_pos.x - \
+            pos_x = start_pos.x - \
                 distance * abs(math.cos(rad))
-            pos_y = self.current_pos.y + \
+            pos_y = start_pos.y + \
                 distance * abs(math.sin(rad))
             return Point(pos_x, pos_y)
         elif (rad > -1 * math.pi / 2 and rad <= 0) or (rad > math.pi / 2 * 3 and rad <= math.pi * 2):
-            pos_x = self.current_pos.x + \
+            pos_x = start_pos.x + \
                 distance * abs(math.cos(rad))
-            pos_y = self.current_pos.y + \
+            pos_y = start_pos.y + \
                 distance * abs(math.sin(rad))
             return Point(pos_x, pos_y)
         else:
