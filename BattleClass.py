@@ -16,6 +16,8 @@ class BattleManagement():
 
     def __init__(self):
 
+        self.anakinKilling = False
+
         self.low_speed_top_limit = 50
 
         self.battleFrameStack = []
@@ -67,6 +69,18 @@ class BattleManagement():
     def stop(self):
         print("stop")
 
+    def __anakinRest(self):
+        self.anakinKilling = False
+
+    def __executeOrder66(self):
+        if self.anakinKilling:
+            pass
+        else:
+            self.anakinKilling = True
+            KBPress("1").start()
+            killTimer = threading.Timer(5, self.__anakinRest)
+            killTimer.start()
+
     def __calcFrame(self, minimap_frame):
 
         if self.grey_src_map is None or minimap_frame is None:
@@ -87,7 +101,7 @@ class BattleManagement():
 
         # Check if enemy is near, fire if near
         if self.__isEnemyNear(minimap_frame):
-            KBPress("1").start()
+            self.__executeOrder66()
 
         # generate current battle frame
         proc_time = time.perf_counter()
