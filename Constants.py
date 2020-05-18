@@ -143,6 +143,8 @@ map_mask_file_path = {
 screenWidth = 1920
 screenHeight = 1080
 
+topTitleBarHeight = 30
+
 
 scrap_btn_width = 40
 scrap_btn_height = 40
