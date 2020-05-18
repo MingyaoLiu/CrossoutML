@@ -15,12 +15,30 @@ class MoveManagement():
         self.move_block_timer = None
         self.forcingBack = False
 
+    def forceBackComplate(self):
+        self.forcingBack = False
+
     def forceToBack(self):
+        if self.forcingBack:
+            return
         self.forcingBack = True
-        self.sendMoveCmd(MoveDirection.back, 5)
+        kbUp("w")
+        kbUp("a")
+        kbUp("s")
+        kbUp("d")
+        kbUp("spacebar")
+        # self.sendMoveCmd(MoveDirection.back, 5)
+        # KBPress("spacebar", 1).start()
+        KBPress("s", 3).start()
+        KBPress("d", 1).start()
+        forceBackTimer = threading.Timer(6, self.forceBackComplate)
+        forceBackTimer.start()
 
     def loadNewBF(self, bf: BattleFrame):
         print(bf.speed)
+
+        if self.forcingBack:
+            return
 
         if bf.center.far.isOutside or bf.center.mid.isOutside or bf.center.low.isOutside or bf.left.isOutside or bf.right.isOutside:
             if bf.speed > 70:

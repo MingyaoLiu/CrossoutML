@@ -98,16 +98,17 @@ class CenterData(tuple):
 
 
 class BattleFrame(tuple):
-    def __new__(self, record: bool, time: float, speed: float, posData: PointData, centerRad: float, center: CenterData, left: PointData, right: PointData):
+    def __new__(self, record: bool, time: float, distance: float, speed: float, posData: PointData, centerRad: float, center: CenterData, left: PointData, right: PointData):
         BattleFrame.record = property(operator.itemgetter(0))
         BattleFrame.time = property(operator.itemgetter(1))
-        BattleFrame.speed = property(operator.itemgetter(2))
-        BattleFrame.posData = property(operator.itemgetter(3))
-        BattleFrame.centerRad = property(operator.itemgetter(4))
-        BattleFrame.center = property(operator.itemgetter(5))
-        BattleFrame.left = property(operator.itemgetter(6))
-        BattleFrame.right = property(operator.itemgetter(7))
-        return tuple.__new__(BattleFrame, (record, time, speed, posData, centerRad, center, left, right))
+        BattleFrame.distance = property(operator.itemgetter(2))
+        BattleFrame.speed = property(operator.itemgetter(3))
+        BattleFrame.posData = property(operator.itemgetter(4))
+        BattleFrame.centerRad = property(operator.itemgetter(5))
+        BattleFrame.center = property(operator.itemgetter(6))
+        BattleFrame.left = property(operator.itemgetter(7))
+        BattleFrame.right = property(operator.itemgetter(8))
+        return tuple.__new__(BattleFrame, (record, time, distance, speed, posData, centerRad, center, left, right))
 
 
 #######################################################

@@ -23,7 +23,6 @@ class BattleManagement():
 
         self.delayTime = 17
 
-        self.battleIsInDelay = True
         self.acceptNewFrame = True
         self.isBattleAlreadyActive = False
 
@@ -36,10 +35,10 @@ class BattleManagement():
 
         self.detect_angle_rad = math.radians(self.detect_front_degree)
 
-        self.center_far_distance = getGlobalSetting().settings.centerDetectDistance or 30
+        self.center_far_distance = getGlobalSetting().settings.centerFarDetectDistance or 30
         self.lr_detect_distance = getGlobalSetting().settings.lrDetectDistance or 10
 
-        self.center_low_distance = self.lr_detect_distance
+        self.center_low_distance = getGlobalSetting().settings.centerLowDetectDistance
         self.center_mid_distance = self.center_low_distance + (
             self.center_far_distance - self.center_low_distance) / 2
 
@@ -48,24 +47,21 @@ class BattleManagement():
 
     def start(self):
         self.isBattleAlreadyActive = True
-        self.battleIsInDelay = False
 
     def moveForwardBeforeStart(self):
-        KBPress("spacebar", 1).start()
         KBPress("b").start()
         kbUp("s")
         kbDown("w")
-        moveForwardBeforeStartTimer = threading.Timer(5, self.start())
+        moveForwardBeforeStartTimer = threading.Timer(2, self.start)
         moveForwardBeforeStartTimer.start()
 
     def delayStart(self):
         if self.isBattleAlreadyActive:
             pass
         else:
-            self.isBattleAlreadyActive = True
             kbDown("s")
             battleIsInDelayTimer = threading.Timer(
-                self.delayTime - 5, self.moveForwardBeforeStart)
+                self.delayTime - 2, self.moveForwardBeforeStart)
             battleIsInDelayTimer.start()
 
     def stop(self):
@@ -77,9 +73,17 @@ class BattleManagement():
             raise Exception("No Src Map or minimap Loaded")
 
         if self.currentStuckTimerCount > self.stuckDetermineCount:
-            kbDown("w")
-            KBPress("r")
-            self.currentStuckTimerCount = 0
+            if self.currentStuckTimerCount > 2 * self.stuckDetermineCount:
+                print("STUCK MOFO")
+                self.moveMgm.forceToBack()
+                self.currentStuckTimerCount = 0
+                KBPress("r")
+            else:
+                print("PRE STUCK MOFO")
+                if self.moveMgm.forceToBack():
+                    pass
+                else:
+                    kbDown("w")
 
         # Check if enemy is near, fire if near
         if self.__isEnemyNear(minimap_frame):
@@ -122,9 +126,9 @@ class BattleManagement():
             self.acceptNewFrame = True
 
     def loadFrame(self, frame):
-        if (self.isBattleAlreadyActive is False) or self.battleIsInDelay or (self.acceptNewFrame is False):
+        if self.isBattleAlreadyActive is False or self.acceptNewFrame is False:
             # print("Frame is Wasted")
-            pass
+            return
         else:
             if self.frameDetectionInterval:
                 self.acceptNewFrame = False
@@ -151,39 +155,42 @@ class BattleManagement():
         current_pos = self.__getMiniMapReadLoc(src_map,
                                                minimap_frame)
 
+        if len(self.battleFrameStack) == 0:
+            pos_data = PointData(current_pos, self.__calcTooClose(current_pos))
+            return BattleFrame(True, time, 0, 0, pos_data, None, None, None, None)
         if len(self.battleFrameStack) < 10:
             print("No previous 10- Battle Frame Yet, can't determine posisiton")
             print("Append empty battle frame")
+            prev_bf = self.battleFrameStack[0]
             pos_data = PointData(current_pos, self.__calcTooClose(current_pos))
-            return BattleFrame(True, time, 0, pos_data, None, None, None, None)
+            pixel_distance = self.__calcDistance(
+                prev_bf.posData.pos, current_pos)
+            return BattleFrame(True, time, pixel_distance, 0, pos_data, None, None, None, None)
 
         prev_bf = self.battleFrameStack[0]
         pixel_distance = self.__calcDistance(prev_bf.posData.pos, current_pos)
+        center_rad = self.__calcRad(prev_bf.posData.pos, current_pos)
 
         if pixel_distance == 0:
             # print("completely ignore this frame as it didn't move at all.")
             self.currentStuckTimerCount += 1
             return None
-        elif pixel_distance < 3:
-            # new_bf_pos_data = PointData(
-            #     current_pos, self.__calcTooClose(current_pos))
-
-            # new_bf = BattleFrame(False, time, 0, new_bf_pos_data,
-            #                      prev_bf.centerRad, prev_bf.center, prev_bf.left, prev_bf.right)
-            # return new_bf
-            return None
-        center_rad = self.__calcRad(prev_bf.posData.pos, current_pos)
+        elif pixel_distance < 4:
+            self.currentStuckTimerCount = 0
+            i = 0
+            while i < len(self.battleFrameStack):
+                total_distance = self.__calcDistance(
+                    self.battleFrameStack[i].posData.pos, current_pos)
+                if total_distance > 8:
+                    center_rad = self.__calcRad(
+                        self.battleFrameStack[i].posData.pos, current_pos)
+                    break
+                i += 1
+            if total_distance <= 8:
+                return None
+        self.currentStuckTimerCount = 0
         left_rad = center_rad + self.detect_angle_rad
         right_rad = center_rad - self.detect_angle_rad
-        # if len(self.battleFrameStack) == 1:
-        #     print("No 2 frame before data, calculate new tentacle.")
-        # else:
-        #     print("estimate data based on 2 frame before position")
-        # center_rad = ((self.battleFrameStack[0].centerRad or 0) + (self.battleFrameStack[1].centerRad or 0) +
-        #               (self.battleFrameStack[2].centerRad or 0) + (self.battleFrameStack[3].centerRad or 0) + self.__calcRad(prev_bf.pos, current_pos)) / 5
-
-        # left_rad = center_rad + self.detect_angle_rad
-        # right_rad = center_rad - self.detect_angle_rad
 
         pos_data = PointData(current_pos, self.__calcTooClose(current_pos))
 
@@ -214,7 +221,7 @@ class BattleManagement():
         right_low_pd = PointData(
             right_low_dist, self.__calcTooClose(right_low_dist))
 
-        return BattleFrame(True, time, speed, pos_data, center_rad, center_data, left_low_pd, right_low_pd)
+        return BattleFrame(True, time, pixel_distance, speed, pos_data, center_rad, center_data, left_low_pd, right_low_pd)
 
     def __getMiniMapReadLoc(self, src_map, minimap_frame) -> Point:
         grey_minimap_frame = cv2.cvtColor(minimap_frame, cv2.COLOR_RGB2GRAY)
