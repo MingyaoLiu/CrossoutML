@@ -119,20 +119,22 @@ map_mask_file_path = {
     "engineer garage": "./assets/maps_masks/garage_map_1_mask.png",
     "naukograd": "./assets/maps_masks/naukugrad_mask.png",
     "sandy gulf": "./assets/maps_masks/sandy_gulf_mask.png",
-    "sector ex": "./assets/maps_masks/default_test.png",
-    "rock city": "./assets/maps_masks/default_test.png",
+    "sector ex": "./assets/maps_masks/sector_ex_mask.png",
+    "rock city": "./assets/maps_masks/rock_city_mask.png",
     "founders canyon": "./assets/maps_masks/founders_canyon_mask.png",
     "factory": "./assets/maps_masks/factory_mask.png",
     "bridge": "./assets/maps_masks/bridge_mask_2.png",
     "powerplant": "./assets/maps_masks/powerplant_mask.png",
     "old town": "./assets/maps_masks/default_test.png",
     "broken arrow": "./assets/maps_masks/broken_arrow_mask.png",
-    "fortress": "./assets/maps_masks/default_test.png",
+    "fortress": "./assets/maps_masks/fortress_mask.png",
     "“control-17” station": "./assets/maps_masks/control-17_station_mask.png",
     "ship graveyard": "./assets/maps_masks/ship_graveyard_mask.png",
     "desert valley": "./assets/maps_masks/desert_valley_mask.png",
-    "nameless tower": "./assets/maps_masks/default_test.png",
+    "nameless tower": "./assets/maps_masks/nameless tower_mask.png",
     "chemical plant": "./assets/maps_masks/chemical_plant_mask.png",
+    "crater": "./assets/maps_masks/crater_mask.png",
+
 }
 
 
