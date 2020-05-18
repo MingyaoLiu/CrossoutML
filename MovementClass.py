@@ -19,6 +19,7 @@ class MoveManagement():
         self.forcingBack = False
 
     def forceToBack(self):
+        print("force back")
         if self.forcingBack:
             return
         self.forcingBack = True
