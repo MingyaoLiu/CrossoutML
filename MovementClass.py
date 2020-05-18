@@ -36,13 +36,12 @@ class MoveManagement():
                 kbUp("spacebar")
                 kbDown("w")
             if bf.left.isOutside and bf.right.isOutside:
+                kbUp("a")
                 if bf.center.low.isOutside:
                     print("It's Fked")
-                    kbUp("d")
-                    kbDown("a")
+                    kbDown("d")
                 else:
                     print("Waiting for anything to change")
-                    kbUp("a")
                     kbUp("d")
             elif bf.right.isOutside:
                 kbUp("d")
