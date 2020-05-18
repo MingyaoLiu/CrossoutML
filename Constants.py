@@ -126,7 +126,7 @@ map_mask_file_path = {
     "bridge": "./assets/maps_masks/bridge_mask_2.png",
     "powerplant": "./assets/maps_masks/powerplant_mask.png",
     "old town": "./assets/maps_masks/default_test.png",
-    "broken arrow": "./assets/maps_masks/default_test.png",
+    "broken arrow": "./assets/maps_masks/broken_arrow_mask.png",
     "fortress": "./assets/maps_masks/default_test.png",
     "“control-17” station": "./assets/maps_masks/control-17_station_mask.png",
     "ship graveyard": "./assets/maps_masks/ship_graveyard_mask.png",

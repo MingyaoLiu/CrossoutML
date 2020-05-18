@@ -17,8 +17,10 @@ class Screen():
 
     def checkSingleSatisfy(self, frame, index) -> (bool, str):
         crop = self.crops[index]
-        heightShift = 0 if getGlobalSetting().settings.isFullScreen else topTitleBarHeight
-        crop_frame = frame[crop.area.y + heightShift:crop.area.ys + heightShift, crop.area.x:crop.area.xs]
+        heightShift = topTitleBarHeight if getGlobalSetting(
+        ).settings.isFullScreen else 0
+        crop_frame = frame[crop.area.y - heightShift:crop.area.ys -
+                           heightShift, crop.area.x:crop.area.xs]
         getDebugger().debugDisplay(crop_frame)
 
         low_txt = pytesseract.image_to_string(crop_frame, lang='eng').lower()
