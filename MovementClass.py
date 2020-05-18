@@ -42,6 +42,7 @@ class MoveManagement():
             return
 
         if bf.center.far.isOutside or bf.center.mid.isOutside or bf.center.low.isOutside or bf.left.isOutside or bf.right.isOutside:
+            # Determine Forward Speed
             if bf.speed > 70:
                 kbUp("w")
                 kbDown("spacebar")
@@ -54,14 +55,18 @@ class MoveManagement():
             else:
                 kbUp("spacebar")
                 kbDown("w")
+            # Determine Turn
             if bf.left.isOutside and bf.right.isOutside:
                 kbUp("a")
-                if bf.center.low.isOutside:
+                kbUp("d")
+                if bf.posData.isOutside:
                     print("It's Fked")
-                    kbDown("d")
+                    self.forceToBack()
+                elif bf.center.low.isOutside:
+                    print("It's Fked")
+                    self.forceToBack()
                 else:
                     print("Waiting for anything to change")
-                    kbUp("d")
             elif bf.right.isOutside:
                 kbUp("d")
                 if bf.center.low.isOutside:

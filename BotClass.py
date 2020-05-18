@@ -196,7 +196,7 @@ class BotProgram():
                 self.frame)
             if self.inBattleDelayTimer is None:
                 self.inBattleDelayTimer = threading.Timer(
-                    120, self.__advanceNextStep)
+                    180, self.__finishInBattle)
                 self.inBattleDelayTimer.start()
             else:
                 pass
@@ -219,6 +219,10 @@ class BotProgram():
         else:
             # print("CURRENT STEP:", currentStep)
             pass
+
+    def __finishInBattle(self):
+        self.inBattleDelayTimer = None
+        self.__advanceNextStep()
 
     def stop(self):
         print("STOP BOT")

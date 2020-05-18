@@ -16,7 +16,7 @@ class BattleManagement():
 
     def __init__(self):
 
-        self.anakinKilling = False
+        self.anakinIsKilling = False
 
         self.low_speed_top_limit = 50
 
@@ -70,15 +70,15 @@ class BattleManagement():
         print("stop")
 
     def __anakinRest(self):
-        self.anakinKilling = False
+        self.anakinIsKilling = False
 
     def __executeOrder66(self):
-        if self.anakinKilling:
+        if self.anakinIsKilling:
             pass
         else:
-            self.anakinKilling = True
+            self.anakinIsKilling = True
             KBPress("1").start()
-            killTimer = threading.Timer(5, self.__anakinRest)
+            killTimer = threading.Timer(2, self.__anakinRest)
             killTimer.start()
 
     def __calcFrame(self, minimap_frame):
@@ -140,10 +140,12 @@ class BattleManagement():
             self.acceptNewFrame = True
 
     def loadFrame(self, frame):
+        print("load frame")
         if self.isBattleAlreadyActive is False or self.acceptNewFrame is False:
-            # print("Frame is Wasted")
+            print("Frame is Wasted")
             return
         else:
+            print("Good Frame")
             if self.frameDetectionInterval:
                 self.acceptNewFrame = False
                 acceptNewFrameTimer = threading.Timer(
@@ -189,18 +191,18 @@ class BattleManagement():
             # print("completely ignore this frame as it didn't move at all.")
             self.currentStuckTimerCount += 1
             return None
-        elif pixel_distance < 4:
+        elif pixel_distance < 2:
             self.currentStuckTimerCount = 0
             i = 0
             while i < len(self.battleFrameStack):
                 total_distance = self.__calcDistance(
                     self.battleFrameStack[i].posData.pos, current_pos)
-                if total_distance > 8:
+                if total_distance > 4:
                     center_rad = self.__calcRad(
                         self.battleFrameStack[i].posData.pos, current_pos)
                     break
                 i += 1
-            if total_distance <= 8:
+            if total_distance <= 4:
                 return None
         self.currentStuckTimerCount = 0
         left_rad = center_rad + self.detect_angle_rad
