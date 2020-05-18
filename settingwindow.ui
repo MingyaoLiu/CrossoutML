@@ -56,6 +56,72 @@
           <number>5</number>
          </property>
          <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_16">
+           <property name="sizeConstraint">
+            <enum>QLayout::SetMaximumSize</enum>
+           </property>
+           <item>
+            <widget class="QLabel" name="label_15">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>30</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>12</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Start Screen:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="startScreenDropDown">
+             <item>
+              <property name="text">
+               <string notr="true">Login</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string notr="true">Main Menu</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string notr="true">Battle Prepare</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string notr="true">Finish Battle</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>DEBUG</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
           <layout class="QHBoxLayout" name="horizontalLayout_9">
            <property name="sizeConstraint">
             <enum>QLayout::SetMaximumSize</enum>
@@ -484,19 +550,6 @@
            </property>
            <property name="text">
             <string>Full Screen 1080p Mode</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_12">
-           <property name="font">
-            <font>
-             <family>Calibri Light</family>
-             <pointsize>10</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Recommand top left corner 1080p windowed mode</string>
            </property>
           </widget>
          </item>

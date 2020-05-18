@@ -7,7 +7,7 @@ import time
 
 
 def getCorrectPos(pos: Point) -> Point:
-    return Point(int(getGlobalSetting().settings.shiftX + pos.x), int(getGlobalSetting().settings.shiftY + pos.y))
+    return Point(int(getGlobalSetting().settings.mouseShiftX + pos.x), int(getGlobalSetting().settings.mouseShiftY + pos.y))
 
 
 class setInterval:

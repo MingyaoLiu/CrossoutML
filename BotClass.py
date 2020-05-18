@@ -23,7 +23,7 @@ class BotProgram():
 
         self.d = d3dshot.create(capture_output='numpy')
 
-        self.currentStep = ScreenStep.BattlePrepareScreen
+        self.currentStep = ScreenStep(getGlobalSetting().settings.startScreen)
 
         self.battleMgm = BattleManagement()
 
@@ -232,8 +232,10 @@ class BotProgram():
         target_fps = getGlobalSetting().settings.targetDisplayFPS or 20
         self.d.display = self.d.displays[getGlobalSetting(
         ).settings.displayIndex]
+        displayShiftX = getGlobalSetting().settings.displayShiftX
+        displayShiftY = getGlobalSetting().settings.displayShiftY
         self.d.capture(target_fps=target_fps, region=(
-            0, 0, const.screenWidth, const.screenHeight))
+            0 + displayShiftX, 0 + displayShiftY, const.screenWidth, const.screenHeight))
 
         time.sleep(1)
 
