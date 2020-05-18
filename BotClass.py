@@ -240,7 +240,7 @@ class BotProgram():
         while self.killBotNow is False:
             np_frame = self.d.get_latest_frame()
             self.frame = cv2.cvtColor(np_frame, cv2.COLOR_BGR2RGB)
-            self.__processFrame()
+            # self.__processFrame()
 
             # test_frame = frame[const.battle_map_name_label_height_start:const.battle_map_name_label_height_end,
             #    const.battle_map_name_label_width_start:const.battle_map_name_label_width_end]
