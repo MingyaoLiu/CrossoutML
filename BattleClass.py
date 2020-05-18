@@ -80,7 +80,7 @@ class BattleManagement():
                 KBPress("r")
             else:
                 print("PRE STUCK MOFO")
-                if self.moveMgm.forceToBack():
+                if self.moveMgm.forcingBack:
                     pass
                 else:
                     kbDown("w")

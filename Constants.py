@@ -132,6 +132,7 @@ map_mask_file_path = {
     "ship graveyard": "./assets/maps_masks/ship_graveyard_mask.png",
     "desert valley": "./assets/maps_masks/desert_valley_mask.png",
     "nameless tower": "./assets/maps_masks/default_test.png",
+    "chemical plant": "./assets/maps_masks/chemical_plant_mask.png",
 }
 
 
