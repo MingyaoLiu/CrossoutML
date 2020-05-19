@@ -3,16 +3,19 @@ syntax = "proto3";
 message CrossoutMLSetting {
     int32 displayIndex = 1;
     bool fullAuto = 2;
-    int32 shiftX = 3;
-    int32 shiftY = 4;
-    int32 carMaxSpeed = 5;
-    int32 centerFarDetectDistance = 6;
-    int32 centerLowDetectDistance = 7;
-    int32 lrDetectDistance = 8;
-    int32 frontDetectDegree = 9;
-    int32 targetDisplayFPS = 10;
-    int32 detectionFPS = 11;
-    bool showDebugWindow = 12;
-    int32 checkStuckFrameCount = 13;
+    int32 displayShiftX = 3;
+    int32 displayShiftY = 4;
+    int32 mouseShiftX = 5;
+    int32 mouseShiftY = 6;
+    int32 carMaxSpeed = 7;
+    int32 centerFarDetectDistance = 8;
+    int32 centerLowDetectDistance = 9;
+    int32 lrDetectDistance = 10;
+    int32 frontDetectDegree = 11;
+    int32 targetDisplayFPS = 12;
+    int32 detectionFPS = 13;
+    bool showDebugWindow = 14;
+    int32 checkStuckFrameCount = 15;
+    bool isFullScreen = 16
 
 }
