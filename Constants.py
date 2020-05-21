@@ -123,7 +123,7 @@ map_mask_file_path = {
     "rock city": "./assets/maps_masks/rock_city_mask.png",
     "founders canyon": "./assets/maps_masks/founders_canyon_mask.png",
     "factory": "./assets/maps_masks/factory_mask.png",
-    "bridge": "./assets/maps_masks/bridge_mask_2.png",
+    "bridge": "./assets/maps_masks/bridge_mask.png",
     "powerplant": "./assets/maps_masks/powerplant_mask.png",
     "old town": "./assets/maps_masks/default_test.png",
     "broken arrow": "./assets/maps_masks/broken_arrow_mask.png",
