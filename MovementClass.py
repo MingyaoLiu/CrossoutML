@@ -15,8 +15,16 @@ class MoveManagement():
         self.move_block_timer = None
         self.forcingBack = False
 
+
+
+
     def forceBackComplate(self):
         self.forcingBack = False
+
+    def forceBackStage2(self):
+        kbDown("w")
+        forceBack2Timer = threading.Timer(1, self.forceBackComplate)
+        forceBack2Timer.start()
 
     def forceToBack(self):
         print("force back")
@@ -30,16 +38,27 @@ class MoveManagement():
         kbUp("spacebar")
         # self.sendMoveCmd(MoveDirection.back, 5)
         # KBPress("spacebar", 1).start()
-        KBPress("s", 3).start()
-        KBPress("d", 1).start()
-        forceBackTimer = threading.Timer(6, self.forceBackComplate)
-        forceBackTimer.start()
+        kbDown("s")
+        KBPress("d", 1.5).start()
+        forceBack1Timer = threading.Timer(4, self.forceBackStage2)
+        forceBack1Timer.start()
 
     def loadNewBF(self, bf: BattleFrame):
         print(bf.speed)
 
         if self.forcingBack:
             return
+
+        if bf.posData.isOutside:
+            if self.isInAllowedZone is False:
+                kbDown("w")
+                pass
+            else:
+                print("It's Fked")
+                self.forceToBack()
+        else:
+            self.isInAllowedZone = True
+        
 
         if bf.center.far.isOutside or bf.center.mid.isOutside or bf.center.low.isOutside or bf.left.isOutside or bf.right.isOutside:
             # Determine Forward Speed
@@ -59,14 +78,14 @@ class MoveManagement():
             if bf.left.isOutside and bf.right.isOutside:
                 kbUp("a")
                 kbUp("d")
+                print("LEFT RIGHT ALL OUT")
                 if bf.posData.isOutside:
-                    print("It's Fked")
-                    self.forceToBack()
-                elif bf.center.low.isOutside:
-                    print("It's Fked")
+                    print("CAR IS OUTSIDE")
                     self.forceToBack()
                 else:
-                    print("Waiting for anything to change")
+                    print("CAR IS NOT OUTSIDE")
+                    kbUp("d")
+                    kbDown("a")
             elif bf.right.isOutside:
                 kbUp("d")
                 if bf.center.low.isOutside:
@@ -91,27 +110,6 @@ class MoveManagement():
             kbDown("w")
             print("Nothing is detected, go straight forward")
 
-    def loadTooClose(self, tooCloseTuple):
-        if (self.forcingBack is False) and self.isAlreadyTurning and len(self.tooCloseStack):
-
-            if (tooCloseTuple[0] != self.tooCloseStack[0][0] or tooCloseTuple[2] != self.tooCloseStack[0][2]):
-
-                if self.move_block_timer:
-                    self.move_block_timer.cancel()
-                self.tooCloseTuple = tooCloseTuple
-                self.calculateTurn()
-            else:
-                pass
-        elif self.forcingBack:
-            pass
-        else:
-            self.tooCloseStack.insert(0, tooCloseTuple)
-            if len(self.tooCloseStack) >= 5:
-                self.tooCloseStack.pop()
-            self.isAlreadyTurning = True
-            self.tooCloseTuple = tooCloseTuple
-            self.calculateTurn()
-
     def __finishedMove(self):
         self.isAlreadyTurning = False
         self.move_block_timer = None
@@ -125,58 +123,6 @@ class MoveManagement():
         Move(direction).start()
         self.move_block_timer = threading.Timer(duration, self.__finishedMove)
         self.move_block_timer.start()
-
-    def calculateTurn(self):
-
-        left_too_close = self.tooCloseTuple[0]
-        center_too_close = self.tooCloseTuple[1]
-        right_too_close = self.tooCloseTuple[2]
-
-        lastTurnCmd = MoveDirection.front
-        if len(self.turnCommandStack) > 0:
-            lastTurnCmd = self.turnCommandStack[0]
-
-        if center_too_close:
-            if left_too_close:
-                if right_too_close:  # 1 1 1
-                    if self.isInAllowedZone == False:
-                        self.sendMoveCmd(MoveDirection.front, 0.1)
-                    else:
-                        self.sendMoveCmd(MoveDirection.left, 1)
-                        # if lastTurnCmd == MoveDirection.frontRight or lastTurnCmd == MoveDirection.right:
-                        #     self.sendMoveCmd(MoveDirection.backRight, 4)
-                        # elif lastTurnCmd == MoveDirection.frontLeft or lastTurnCmd == MoveDirection.left:
-                        #     self.sendMoveCmd(MoveDirection.backLeft, 4)
-                        # else:
-                        #     self.sendMoveCmd(MoveDirection.back, 5)
-                else:  # 1 1 0
-                    self.sendMoveCmd(MoveDirection.right, 3)
-            else:
-                if right_too_close:  # 0 1 1
-                    self.sendMoveCmd(MoveDirection.left, 3)
-                else:  # 0 1 0
-                    if lastTurnCmd == MoveDirection.frontRight or lastTurnCmd == MoveDirection.right:
-                        self.sendMoveCmd(MoveDirection.frontRight, 0.35)
-                    elif lastTurnCmd == MoveDirection.frontLeft or lastTurnCmd == MoveDirection.left:
-                        self.sendMoveCmd(MoveDirection.frontLeft, 0.35)
-                    else:
-                        self.sendMoveCmd(MoveDirection.back, 5)
-        else:
-            self.isInAllowedZone = True
-            if left_too_close:
-                if right_too_close:  # 1 0 1
-                    self.sendMoveCmd(MoveDirection.front, 0.1)
-                else:  # 1 0 0
-                    self.sendMoveCmd(MoveDirection.frontRight, 0.35)
-            else:
-                if right_too_close:  # 0 0 1
-                    self.sendMoveCmd(MoveDirection.frontLeft, 0.35)
-                else:  # 0 0 0
-                    self.sendMoveCmd(MoveDirection.front, 0.1)
-                    # if lastTurnCmd == MoveDirection.frontRight or lastTurnCmd == MoveDirection.right:
-                    #     self.sendMoveCmd(MoveDirection.frontLeft, 0.5)
-                    # elif lastTurnCmd == MoveDirection.frontLeft or lastTurnCmd == MoveDirection.left:
-                    #     self.sendMoveCmd(MoveDirection.frontRight, 0.5)
 
 
 class Move():

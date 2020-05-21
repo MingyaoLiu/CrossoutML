@@ -108,8 +108,6 @@ class BattleManagement():
         currentBattleFrame = self.__calcBattleFrame(
             proc_time, self.grey_src_map, minimap_frame)
 
-        # add check stuck !
-
         if currentBattleFrame and currentBattleFrame.record:
             self.battleFrameStack.insert(0, currentBattleFrame)
             if len(self.battleFrameStack) >= 11:
@@ -140,12 +138,12 @@ class BattleManagement():
             self.acceptNewFrame = True
 
     def loadFrame(self, frame):
-        print("load frame")
+        # print("load frame")
         if self.isBattleAlreadyActive is False or self.acceptNewFrame is False:
             print("Frame is Wasted")
             return
         else:
-            print("Good Frame")
+            # print("Good Frame")
             if self.frameDetectionInterval:
                 self.acceptNewFrame = False
                 acceptNewFrameTimer = threading.Timer(
@@ -174,7 +172,7 @@ class BattleManagement():
         if len(self.battleFrameStack) == 0:
             pos_data = PointData(current_pos, self.__calcTooClose(current_pos))
             return BattleFrame(True, time, 0, 0, pos_data, None, None, None, None)
-        if len(self.battleFrameStack) < 10:
+        elif len(self.battleFrameStack) < 10:
             print("No previous 10- Battle Frame Yet, can't determine posisiton")
             print("Append empty battle frame")
             prev_bf = self.battleFrameStack[0]
@@ -186,6 +184,7 @@ class BattleManagement():
         prev_bf = self.battleFrameStack[0]
         pixel_distance = self.__calcDistance(prev_bf.posData.pos, current_pos)
         center_rad = self.__calcRad(prev_bf.posData.pos, current_pos)
+        speed = pixel_distance / (time - prev_bf.time) * 5
 
         if pixel_distance == 0:
             # print("completely ignore this frame as it didn't move at all.")
@@ -200,6 +199,7 @@ class BattleManagement():
                 if total_distance > 4:
                     center_rad = self.__calcRad(
                         self.battleFrameStack[i].posData.pos, current_pos)
+                    speed = pixel_distance / (time - self.battleFrameStack[i].time) * 5
                     break
                 i += 1
             if total_distance <= 4:
@@ -228,7 +228,6 @@ class BattleManagement():
         center_far_pd = PointData(
             center_far_dist_pos, self.__calcTooClose(center_far_dist_pos))
 
-        speed = pixel_distance / (time - prev_bf.time) * 5
 
         center_data = CenterData(center_low_pd, center_mid_pd, center_far_pd)
 
