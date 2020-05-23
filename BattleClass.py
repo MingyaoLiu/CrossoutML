@@ -16,6 +16,8 @@ class BattleManagement():
 
     def __init__(self):
 
+        self.speedMultiplier = 4.25
+
         self.anakinIsKilling = False
 
         self.low_speed_top_limit = 50
@@ -23,7 +25,7 @@ class BattleManagement():
         self.battleFrameStack = []
         self.currentBattleFrame = None
 
-        self.delayTime = 17
+        self.delayTime = 4
 
         self.acceptNewFrame = True
         self.isBattleAlreadyActive = False
@@ -89,14 +91,15 @@ class BattleManagement():
         if self.currentStuckTimerCount > self.stuckDetermineCount:
             if self.currentStuckTimerCount > 2 * self.stuckDetermineCount:
                 print("STUCK MOFO")
+                KBPress("r")
                 self.moveMgm.forceToBack()
                 self.currentStuckTimerCount = 0
-                KBPress("r")
             else:
                 print("PRE STUCK MOFO")
                 if self.moveMgm.forcingBack:
                     pass
                 else:
+                    kbUp("spacebar")
                     kbDown("w")
 
         # Check if enemy is near, fire if near
@@ -184,7 +187,7 @@ class BattleManagement():
         prev_bf = self.battleFrameStack[0]
         pixel_distance = self.__calcDistance(prev_bf.posData.pos, current_pos)
         center_rad = self.__calcRad(prev_bf.posData.pos, current_pos)
-        speed = pixel_distance / (time - prev_bf.time) * 5
+        speed = pixel_distance / (time - prev_bf.time) * self.speedMultiplier
 
         if pixel_distance == 0:
             # print("completely ignore this frame as it didn't move at all.")
@@ -196,13 +199,14 @@ class BattleManagement():
             while i < len(self.battleFrameStack):
                 total_distance = self.__calcDistance(
                     self.battleFrameStack[i].posData.pos, current_pos)
-                if total_distance > 4:
+                if total_distance > 6:
                     center_rad = self.__calcRad(
                         self.battleFrameStack[i].posData.pos, current_pos)
-                    speed = pixel_distance / (time - self.battleFrameStack[i].time) * 5
+
+                    speed = total_distance / (time - self.battleFrameStack[i].time) * self.speedMultiplier
                     break
                 i += 1
-            if total_distance <= 4:
+            if total_distance <= 6:
                 return None
         self.currentStuckTimerCount = 0
         left_rad = center_rad + self.detect_angle_rad
