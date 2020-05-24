@@ -20,7 +20,7 @@ class MoveManagement():
 
         self.globalDelayFrameCount = 5
 
-        self.globalConfirmTurnDoneFrameCount = 5
+        self.globalConfirmTurnDoneFrameCount = 30
         self.currentConfirmFrameCount = 0
 
 
@@ -46,7 +46,7 @@ class MoveManagement():
         # self.sendMoveCmd(MoveDirection.back, 5)
         # KBPress("spacebar", 1).start()
         kbDown("s")
-        KBPress("d", 1.5).start()
+        KBPress("d", 1.75).start()
         forceBack1Timer = threading.Timer(4, self.forceBackStage2)
         forceBack1Timer.start()
 
