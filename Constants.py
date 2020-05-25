@@ -90,11 +90,14 @@ class PointData(tuple):
 
 
 class CenterData(tuple):
-    def __new__(self, low: PointData, mid: PointData, far: PointData):
+    def __new__(self, low: PointData, mid: PointData, far: PointData, low_rev: PointData, mid_rev: PointData, far_rev: PointData):
         CenterData.low = property(operator.itemgetter(0))
         CenterData.mid = property(operator.itemgetter(1))
         CenterData.far = property(operator.itemgetter(2))
-        return tuple.__new__(CenterData, (low, mid, far))
+        CenterData.low_rev = property(operator.itemgetter(3))
+        CenterData.mid_rev = property(operator.itemgetter(4))
+        CenterData.far_rev = property(operator.itemgetter(5))
+        return tuple.__new__(CenterData, (low, mid, far, low_rev, mid_rev, far_rev))
 
 
 class BattleFrame(tuple):
@@ -442,18 +445,35 @@ in_battle_health_digit_trigger_pos_y = int(
 
 in_battle_mini_map_width = 150
 in_battle_mini_map_width_start = int(
-    screenWidth - 210 - in_battle_mini_map_width / 2)
+    screenWidth - 209 - in_battle_mini_map_width / 2)
 in_battle_mini_map_width_end = int(
-    screenWidth - 210 + in_battle_mini_map_width / 2)
+    screenWidth - 209 + in_battle_mini_map_width / 2)
 in_battle_mini_map_height = 150
 in_battle_mini_map_height_start = int(
-    screenHeight - 180 - in_battle_mini_map_height / 2)
+    screenHeight - 176 - in_battle_mini_map_height / 2)
 in_battle_mini_map_height_end = int(
-    screenHeight - 180 + in_battle_mini_map_height / 2)
+    screenHeight - 176 + in_battle_mini_map_height / 2)
 in_battle_mini_map_trigger_pos_x = int(
     in_battle_mini_map_width_start + in_battle_mini_map_width / 2)
 in_battle_mini_map_trigger_pos_y = int(
     in_battle_mini_map_height_start + in_battle_mini_map_height / 2)
+
+
+in_battle_mini_map_arrow_width = 30
+in_battle_mini_map_arrow_width_start = int(
+    screenWidth - 209 - in_battle_mini_map_arrow_width / 2)
+in_battle_mini_map_arrow_width_end = int(
+    screenWidth - 209 + in_battle_mini_map_arrow_width / 2)
+in_battle_mini_map_arrow_height = 30
+in_battle_mini_map_arrow_height_start = int(
+    screenHeight - 176 - in_battle_mini_map_arrow_height / 2)
+in_battle_mini_map_arrow_height_end = int(
+    screenHeight - 176 + in_battle_mini_map_arrow_height / 2)
+in_battle_mini_map_arrow_trigger_pos_x = int(
+    in_battle_mini_map_arrow_width_start + in_battle_mini_map_arrow_width / 2)
+in_battle_mini_map_arrow_trigger_pos_y = int(
+    in_battle_mini_map_arrow_height_start + in_battle_mini_map_arrow_height / 2)
+
 
 
 co_pilot_upgrade_close_width = 54

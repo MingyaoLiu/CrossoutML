@@ -90,12 +90,12 @@ class BattleManagement():
 
         if self.currentStuckTimerCount > self.stuckDetermineCount:
             if self.currentStuckTimerCount > 2 * self.stuckDetermineCount:
-                print("STUCK MOFO")
+                # print("STUCK MOFO")
                 KBPress("r")
-                self.moveMgm.forceToBack()
+                # self.moveMgm.forceToBack()
                 self.currentStuckTimerCount = 0
             else:
-                print("PRE STUCK MOFO")
+                # print("PRE STUCK MOFO")
                 if self.moveMgm.forcingBack:
                     pass
                 else:
@@ -124,16 +124,19 @@ class BattleManagement():
                 cv2.circle(self.debugMask, (int(currentBattleFrame.posData.pos.x),
                                             int(currentBattleFrame.posData.pos.y)), 1, (0, 0, 255), 2)
             debug_test_mask = self.debugMask.copy()
+
+            if currentBattleFrame.center:
+                cv2.line(debug_test_mask,
+                         (int(currentBattleFrame.center.far_rev.pos.x),
+                          int(currentBattleFrame.center.far_rev.pos.y)), (int(currentBattleFrame.center.far.pos.x), int(currentBattleFrame.center.far.pos.y)), (255, 0, 0), 2)
             if currentBattleFrame.posData.pos and currentBattleFrame.center and currentBattleFrame.left and currentBattleFrame.right:
-                cv2.line(debug_test_mask,
-                         (int(currentBattleFrame.posData.pos.x),
-                          int(currentBattleFrame.posData.pos.y)), (int(currentBattleFrame.center.far.pos.x), int(currentBattleFrame.center.far.pos.y)), (255, 0, 0), 1)
-                cv2.line(debug_test_mask,
-                         (int(currentBattleFrame.posData.pos.x),
-                          int(currentBattleFrame.posData.pos.y)), (int(currentBattleFrame.left.pos.x), int(currentBattleFrame.left.pos.y)), (255, 0, 0), 1)
-                cv2.line(debug_test_mask,
-                         (int(currentBattleFrame.posData.pos.x),
-                          int(currentBattleFrame.posData.pos.y)), (int(currentBattleFrame.right.pos.x), int(currentBattleFrame.right.pos.y)), (255, 0, 0), 1)
+                pass
+                # cv2.line(debug_test_mask,
+                #          (int(currentBattleFrame.posData.pos.x),
+                #           int(currentBattleFrame.posData.pos.y)), (int(currentBattleFrame.left.pos.x), int(currentBattleFrame.left.pos.y)), (255, 0, 0), 1)
+                # cv2.line(debug_test_mask,
+                #          (int(currentBattleFrame.posData.pos.x),
+                #           int(currentBattleFrame.posData.pos.y)), (int(currentBattleFrame.right.pos.x), int(currentBattleFrame.right.pos.y)), (255, 0, 0), 1)
             getDebugger().debugDisplay(debug_test_mask)
 
     def __acceptNewFrame(self):
@@ -143,7 +146,7 @@ class BattleManagement():
     def loadFrame(self, frame):
         # print("load frame")
         if self.isBattleAlreadyActive is False or self.acceptNewFrame is False:
-            print("Frame is Wasted")
+            # print("Frame is Wasted")
             return
         else:
             # print("Good Frame")
@@ -171,44 +174,66 @@ class BattleManagement():
     def __calcBattleFrame(self, time, src_map, minimap_frame) -> BattleFrame:
         current_pos = self.__getMiniMapReadLoc(src_map,
                                                minimap_frame)
+        minimap_frame_height,minimap_frame_width = minimap_frame.shape[:2]
+        arrow_frame_width = 30
+        arrow_frame_height = 30
+        arrow_frame_height_start = int((minimap_frame_height - arrow_frame_height) / 2)
+        arrow_frame_width_start = int((minimap_frame_width - arrow_frame_width) / 2)
+        minimap_arrow_frame = minimap_frame[arrow_frame_height_start:arrow_frame_height_start + arrow_frame_height, arrow_frame_width_start: arrow_frame_width_start + arrow_frame_width] 
 
         if len(self.battleFrameStack) == 0:
             pos_data = PointData(current_pos, self.__calcTooClose(current_pos))
             return BattleFrame(True, time, 0, 0, pos_data, None, None, None, None)
-        elif len(self.battleFrameStack) < 10:
-            print("No previous 10- Battle Frame Yet, can't determine posisiton")
-            print("Append empty battle frame")
+        elif len(self.battleFrameStack) < 10: 
             prev_bf = self.battleFrameStack[0]
             pos_data = PointData(current_pos, self.__calcTooClose(current_pos))
             pixel_distance = self.__calcDistance(
                 prev_bf.posData.pos, current_pos)
             return BattleFrame(True, time, pixel_distance, 0, pos_data, None, None, None, None)
 
-        prev_bf = self.battleFrameStack[0]
+
+
+        prev_bf = self.battleFrameStack[5]
         pixel_distance = self.__calcDistance(prev_bf.posData.pos, current_pos)
-        center_rad = self.__calcRad(prev_bf.posData.pos, current_pos)
+
+        # if pixel_distance < 4:
+        #     print("PIXEL", pixel_distance)
+        #     if pixel_distance == 0:
+        #         self.currentStuckTimerCount += 1
+        #         return None
+        #     else:
+        #         i = 0
+        #         while i < len(self.battleFrameStack):
+        #             total_distance = self.__calcDistance(
+        #                 self.battleFrameStack[i].posData.pos, current_pos)
+        #             if total_distance > 4:
+        #                 prev_bf = self.battleFrameStack[i]
+        #                 break
+        #             i += 1
+        #         if total_distance < 4:
+        #             return None
+
+
+        print(self.__calcRadWithContour(minimap_arrow_frame))
+
+
+        # self.currentStuckTimerCount = 0
+
+        # if self.battleFrameStack[0].centerRad:
+            
+
+        center_rad = self.__calcRad(prev_bf.posData.pos, current_pos, minimap_arrow_frame)
+
+        # if center_rad:
+        #     pass
+        # else:
+        if center_rad is None:
+            return None
+            
+
         speed = pixel_distance / (time - prev_bf.time) * self.speedMultiplier
 
-        if pixel_distance == 0:
-            # print("completely ignore this frame as it didn't move at all.")
-            self.currentStuckTimerCount += 1
-            return None
-        elif pixel_distance < 2:
-            self.currentStuckTimerCount = 0
-            i = 0
-            while i < len(self.battleFrameStack):
-                total_distance = self.__calcDistance(
-                    self.battleFrameStack[i].posData.pos, current_pos)
-                if total_distance > 6:
-                    center_rad = self.__calcRad(
-                        self.battleFrameStack[i].posData.pos, current_pos)
 
-                    speed = total_distance / (time - self.battleFrameStack[i].time) * self.speedMultiplier
-                    break
-                i += 1
-            if total_distance <= 6:
-                return None
-        self.currentStuckTimerCount = 0
         left_rad = center_rad + self.detect_angle_rad
         right_rad = center_rad - self.detect_angle_rad
 
@@ -233,7 +258,22 @@ class BattleManagement():
             center_far_dist_pos, self.__calcTooClose(center_far_dist_pos))
 
 
-        center_data = CenterData(center_low_pd, center_mid_pd, center_far_pd)
+
+        center_low_dist_rev_pos = self.__calcEndPoint(
+            current_pos, math.pi + center_rad, self.center_low_distance)
+        center_mid_dist_rev_pos = self.__calcEndPoint(
+            current_pos, math.pi + center_rad, self.center_mid_distance)
+        center_far_dist_rev_pos = self.__calcEndPoint(
+            current_pos, math.pi + center_rad, self.center_far_distance)
+    
+        center_low_rev_pd = PointData(
+            center_low_dist_rev_pos, self.__calcTooClose(center_low_dist_rev_pos))
+        center_mid_rev_pd = PointData(
+            center_mid_dist_rev_pos, self.__calcTooClose(center_mid_dist_rev_pos))
+        center_far_rev_pd = PointData(
+            center_far_dist_rev_pos, self.__calcTooClose(center_far_dist_rev_pos))
+
+        center_data = CenterData(center_low_pd, center_mid_pd, center_far_pd, center_low_rev_pd, center_mid_rev_pd, center_far_rev_pd)
 
         left_low_pd = PointData(
             left_low_dist, self.__calcTooClose(left_low_dist))
@@ -244,6 +284,7 @@ class BattleManagement():
 
     def __getMiniMapReadLoc(self, src_map, minimap_frame) -> Point:
         grey_minimap_frame = cv2.cvtColor(minimap_frame, cv2.COLOR_RGB2GRAY)
+        
         scale_percent = 80
         new_width = int(grey_minimap_frame.shape[1] * scale_percent / 100)
         new_height = int(grey_minimap_frame.shape[0] * scale_percent / 100)
@@ -267,27 +308,68 @@ class BattleManagement():
     def __calcPixelAdvanced(self, pos1, pos2) -> int:
         return abs(pos1.x - pos2.x) + abs(pos1.y - pos2.y)
 
-    def __calcRad(self, start_pos: Point, end_pos: Point) -> float:
-        if end_pos.x == start_pos.x:
-            if end_pos.y > start_pos.y:
-                return -1 * math.pi / 2
-            else:
-                return math.pi / 2
+
+    def __calcRadWithContour(self, minimap_arrow_frame) -> float:
+        img = cv2.cvtColor(minimap_arrow_frame, cv2.COLOR_BGR2GRAY)
+        ret, thresh = cv2.threshold(img, 195, 255, cv2.THRESH_BINARY)
+        contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL , cv2.CHAIN_APPROX_NONE )
+        if len(contours) >= 1:
+            cnt = contours[0]
+            [vx,vy,x,y] = cv2.fitLine(cnt, cv2.DIST_L2,0,0.01,0.01)
+            # print(math.atan(vy,vx))
+            return -1 * math.atan(vy / vx)
         else:
-            center_tan = abs((end_pos.y - start_pos.y) /
-                             (end_pos.x - start_pos.x))
-            if end_pos.x > start_pos.x:
-                if end_pos.y > start_pos.y:                 # BotRight
-                    return -1 * math.atan(center_tan)
-                else:                                       # TopRight
-                    return math.atan(center_tan)
-            else:
-                if end_pos.y > start_pos.y:                 # BotLeft
-                    return math.pi + math.atan(center_tan)
-                else:                                       # TopLeft
-                    return math.pi - math.atan(center_tan)
+            print("CONTOUR IS 0")
+        return None
+
+    def __calcRad(self, start_pos: Point, end_pos: Point, minimap_arrow_frame) -> float:
+
+        contour_rad = self.__calcRadWithContour(minimap_arrow_frame)
+        if contour_rad:
+            # if end_pos.x > start_pos.x:
+            #     if end_pos.y > start_pos.y:                 # BotRight
+            #         return -1 * abs(contour_rad) 
+            #     else:                                       # TopRight
+            #         return abs(contour_rad) 
+            # else:
+            #     if end_pos.y > start_pos.y:                 # BotLeft
+            #         return math.pi + abs(contour_rad) 
+            #     else:                                       # TopLeft
+            #         return math.pi - abs(contour_rad) 
+            print(contour_rad)
+            return contour_rad
+        else:
+            return None
+
+
+        # if end_pos.x == start_pos.x:
+        #     if end_pos.y > start_pos.y:
+        #         return -1 * contour_rad if contour_rad else -1 * math.pi / 2
+        #     else:
+        #         return contour_rad if contour_rad else math.pi / 2
+        # else:
+        #     center_tan = abs((end_pos.y - start_pos.y) /
+        #                      (end_pos.x - start_pos.x))
+        #     center_rad = math.atan(center_tan)
+
+        #     print(center_rad, contour_rad)
+            
+
+        #     if end_pos.x > start_pos.x:
+        #         if end_pos.y > start_pos.y:                 # BotRight
+                    
+        #             return -1 * contour_rad if contour_rad else -1 * center_rad
+        #         else:                                       # TopRight
+        #             return contour_rad if contour_rad else center_rad
+        #     else:
+        #         if end_pos.y > start_pos.y:                 # BotLeft
+        #             return math.pi + contour_rad if contour_rad else math.pi + center_rad
+        #         else:                                       # TopLeft
+        #             return math.pi - contour_rad if contour_rad else math.pi - center_rad
 
     def __calcEndPoint(self, start_pos: Point, rad: float, distance: float) -> Point:
+
+        
         if rad > 0 and rad <= math.pi / 2:
             pos_x = start_pos.x + \
                 distance * abs(math.cos(rad))
@@ -306,13 +388,14 @@ class BattleManagement():
             pos_y = start_pos.y + \
                 distance * abs(math.sin(rad))
             return Point(pos_x, pos_y)
-        elif (rad > -1 * math.pi / 2 and rad <= 0) or (rad > math.pi / 2 * 3 and rad <= math.pi * 2):
+        elif (rad >= -1 * math.pi / 2 and rad <= 0) or (rad > math.pi / 2 * 3 and rad <= math.pi * 2):
             pos_x = start_pos.x + \
                 distance * abs(math.cos(rad))
             pos_y = start_pos.y + \
                 distance * abs(math.sin(rad))
             return Point(pos_x, pos_y)
         else:
+            print(rad)
             raise Exception("Check Rad Failed")
 
     def __isEnemyNear(self, minimap_frame) -> bool:

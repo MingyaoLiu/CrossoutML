@@ -51,31 +51,21 @@ class MoveManagement():
         forceBack1Timer.start()
 
     def loadNewBF(self, bf: BattleFrame):
-        print(bf.speed)
+        # print(bf.speed)
 
         if self.forcingBack:
             return
-
-        if bf.posData.isOutside:
-            if self.isInAllowedZone is False:
-                kbDown("w")
-                pass
-            else:
-                print("It's Fked")
-                self.forceToBack()
-        else:
-            self.isInAllowedZone = True
         
 
         if bf.center.far.isOutside or bf.center.mid.isOutside or bf.center.low.isOutside or bf.left.isOutside or bf.right.isOutside:
             # Determine Forward Speed
-            if bf.speed > 70:
+            if bf.speed > 80:
                 kbUp("w")
                 kbDown("spacebar")
             elif bf.speed > 30:
                 kbUp("spacebar")
                 kbUp("w")
-            elif bf.speed < 15:
+            elif bf.speed < 10:
                 kbUp("spacebar")
                 kbDown("w")
             else:
@@ -83,73 +73,33 @@ class MoveManagement():
                 kbDown("w")
             # Determine Turn
 
-            if self.initTooCloseDirection == "LEFT":
-                print("Init Turning is LEFT")
-                kbUp("a")
-                if bf.left.isOutside:
-                    if bf.center.low.isOutside:
-                        kbDown("d")
-                        self.currentConfirmFrameCount = 0
-                    else:
-                        kbUp("d")
-                        if self.currentConfirmFrameCount > self.globalConfirmTurnDoneFrameCount:
-                            self.initTooCloseDirection = None
-                            self.currentConfirmFrameCount = 0
-                        else:
-                            self.currentConfirmFrameCount += 1
-                else:
-                    print("LEFT is completely inside zone, turning is too far.")
-                    kbUp("d")
-                    self.initTooCloseDirection = None
-                    self.currentConfirmFrameCount = 0
 
-            elif self.initTooCloseDirection == "RIGHT":
-                print("Init Turning is RIGHT")
-                kbUp("d")
-                if bf.right.isOutside:
-                    if bf.center.low.isOutside:
-                        kbDown("a")
-                        self.currentConfirmFrameCount = 0
-                    else:
-                        kbUp("a")
-                        if self.currentConfirmFrameCount > self.globalConfirmTurnDoneFrameCount:
-                            self.initTooCloseDirection = None
-                            self.currentConfirmFrameCount = 0
-                        else:
-                            self.currentConfirmFrameCount += 1
-                else:
-                    print("LEFT is completely inside zone, turning is too far.")
-                    kbUp("a")
-                    self.initTooCloseDirection = None
-                    self.currentConfirmFrameCount = 0
-                
-            else:
-                print("No Init Turning Direction, Could be turning not yet set, or not turning, or left and right enter turning at the same time.")
-                kbUp("a")
-                kbUp("d")
+            # print("No Init Turning Direction, Could be turning not yet set, or not turning, or left and right enter turning at the same time.")
+            # kbUp("a")
+            # kbUp("d")
 
-                if bf.left.isOutside and bf.right.isOutside:
-                    if bf.posData.isOutside:
-                        print("CAR IS OUTSIDE")
-                        self.forceToBack()
-                    else:
-                        print("Both Tentacle Outside, No Init")
+            # if bf.left.isOutside and bf.right.isOutside:
+            #     if bf.posData.isOutside:
+            #         print("CAR IS OUTSIDE")
+            #         self.forceToBack()
+            #     else:
+            #         print("Both Tentacle Outside, No Init")
 
-                elif bf.right.isOutside:
-                    if bf.center.mid.isOutside or bf.center.low.isOutside:
-                        self.initTooCloseDirection = "RIGHT"
-                        kbDown("a")
-                    else:
-                        print("RIGHT but still have distance to go.")
+            # elif bf.right.isOutside:
+            #     if bf.center.low.isOutside:
+            #         self.initTooCloseDirection = "RIGHT"
+            #         kbDown("a")
+            #     else:
+            #         print("RIGHT but still have distance to go.")
 
-                elif bf.left.isOutside:
-                    if bf.center.mid.isOutside or bf.center.low.isOutside:
-                        self.initTooCloseDirection = "LEFT"
-                        kbDown("d")
-                    else:
-                        print("LEFT but still have distance to go.")
-                else:
-                    pass
+            # elif bf.left.isOutside:
+            #     if bf.center.low.isOutside:
+            #         self.initTooCloseDirection = "LEFT"
+            #         kbDown("d")
+            #     else:
+            #         print("LEFT but still have distance to go.")
+            # else:
+            #     pass
 
         else:
             kbUp("spacebar")
@@ -157,7 +107,7 @@ class MoveManagement():
             kbUp("d")
 
             kbDown("w")
-            print("Nothing is detected, go straight forward")
+            # print("Nothing is detected, go straight forward")
 
     def __finishedMove(self):
         self.isAlreadyTurning = False
