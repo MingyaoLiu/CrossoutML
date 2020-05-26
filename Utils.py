@@ -4,6 +4,7 @@ from Constants import Point
 from SettingsClass import getGlobalSetting
 import threading
 import time
+import cv2
 
 
 def getCorrectPos(pos: Point) -> Point:
@@ -30,3 +31,15 @@ class setInterval:
 
 def atLeastTwoTrue(a: bool, b: bool, c: bool):
     return a if a and (b or c) else (b and c)
+
+def imgRotate(image, angle, center = None, scale = 1.0):
+    (h, w) = image.shape[:2]
+
+    if center is None:
+        center = (w / 2, h / 2)
+
+    # Perform the rotation
+    M = cv2.getRotationMatrix2D(center, angle, scale)
+    rotated = cv2.warpAffine(image, M, (w, h))
+
+    return rotated

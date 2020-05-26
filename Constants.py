@@ -90,14 +90,11 @@ class PointData(tuple):
 
 
 class CenterData(tuple):
-    def __new__(self, low: PointData, mid: PointData, far: PointData, low_rev: PointData, mid_rev: PointData, far_rev: PointData):
+    def __new__(self, low: PointData, mid: PointData, far: PointData):
         CenterData.low = property(operator.itemgetter(0))
         CenterData.mid = property(operator.itemgetter(1))
         CenterData.far = property(operator.itemgetter(2))
-        CenterData.low_rev = property(operator.itemgetter(3))
-        CenterData.mid_rev = property(operator.itemgetter(4))
-        CenterData.far_rev = property(operator.itemgetter(5))
-        return tuple.__new__(CenterData, (low, mid, far, low_rev, mid_rev, far_rev))
+        return tuple.__new__(CenterData, (low, mid, far))
 
 
 class BattleFrame(tuple):
@@ -112,7 +109,6 @@ class BattleFrame(tuple):
         BattleFrame.left = property(operator.itemgetter(7))
         BattleFrame.right = property(operator.itemgetter(8))
         return tuple.__new__(BattleFrame, (record, time, distance, speed, posData, centerRad, center, left, right))
-
 
 #######################################################
 ##                      Dicts                        ##

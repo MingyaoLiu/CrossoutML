@@ -10,13 +10,13 @@ import random
 from SettingsClass import getGlobalSetting
 import time
 from DebugClass import getDebugger
-
+from Utils import imgRotate
 
 class BattleManagement():
 
     def __init__(self):
 
-        self.speedMultiplier = 4.25
+        self.speedMultiplier = 5
 
         self.anakinIsKilling = False
 
@@ -48,6 +48,9 @@ class BattleManagement():
 
         self.frameDetectionInterval = 0 if getGlobalSetting(
         ).settings.detectionFPS == 0 else 1000 / getGlobalSetting().settings.detectionFPS
+
+        ## currentDirection detected movement: (x, y) x +-1, y +-1
+        self.currentDirection = [0, 0]
 
     def start(self):
         self.isBattleAlreadyActive = True
@@ -125,18 +128,17 @@ class BattleManagement():
                                             int(currentBattleFrame.posData.pos.y)), 1, (0, 0, 255), 2)
             debug_test_mask = self.debugMask.copy()
 
-            if currentBattleFrame.center:
+            if currentBattleFrame.posData.pos and currentBattleFrame.center:
                 cv2.line(debug_test_mask,
-                         (int(currentBattleFrame.center.far_rev.pos.x),
-                          int(currentBattleFrame.center.far_rev.pos.y)), (int(currentBattleFrame.center.far.pos.x), int(currentBattleFrame.center.far.pos.y)), (255, 0, 0), 2)
-            if currentBattleFrame.posData.pos and currentBattleFrame.center and currentBattleFrame.left and currentBattleFrame.right:
-                pass
-                # cv2.line(debug_test_mask,
-                #          (int(currentBattleFrame.posData.pos.x),
-                #           int(currentBattleFrame.posData.pos.y)), (int(currentBattleFrame.left.pos.x), int(currentBattleFrame.left.pos.y)), (255, 0, 0), 1)
-                # cv2.line(debug_test_mask,
-                #          (int(currentBattleFrame.posData.pos.x),
-                #           int(currentBattleFrame.posData.pos.y)), (int(currentBattleFrame.right.pos.x), int(currentBattleFrame.right.pos.y)), (255, 0, 0), 1)
+                         (int(currentBattleFrame.posData.pos.x),
+                          int(currentBattleFrame.posData.pos.y)), (int(currentBattleFrame.center.far.pos.x), int(currentBattleFrame.center.far.pos.y)), (255, 0, 0), 2)
+            if currentBattleFrame.posData.pos and currentBattleFrame.left and currentBattleFrame.right:
+                cv2.line(debug_test_mask,
+                         (int(currentBattleFrame.posData.pos.x),
+                          int(currentBattleFrame.posData.pos.y)), (int(currentBattleFrame.left.pos.x), int(currentBattleFrame.left.pos.y)), (255, 0, 0), 1)
+                cv2.line(debug_test_mask,
+                         (int(currentBattleFrame.posData.pos.x),
+                          int(currentBattleFrame.posData.pos.y)), (int(currentBattleFrame.right.pos.x), int(currentBattleFrame.right.pos.y)), (255, 0, 0), 1)
             getDebugger().debugDisplay(debug_test_mask)
 
     def __acceptNewFrame(self):
@@ -181,57 +183,49 @@ class BattleManagement():
         arrow_frame_width_start = int((minimap_frame_width - arrow_frame_width) / 2)
         minimap_arrow_frame = minimap_frame[arrow_frame_height_start:arrow_frame_height_start + arrow_frame_height, arrow_frame_width_start: arrow_frame_width_start + arrow_frame_width] 
 
+        saveThisFrame = True
+
+        ## For first frame ever recorded, save it without any calculation
         if len(self.battleFrameStack) == 0:
             pos_data = PointData(current_pos, self.__calcTooClose(current_pos))
-            return BattleFrame(True, time, 0, 0, pos_data, None, None, None, None)
-        elif len(self.battleFrameStack) < 10: 
-            prev_bf = self.battleFrameStack[0]
-            pos_data = PointData(current_pos, self.__calcTooClose(current_pos))
-            pixel_distance = self.__calcDistance(
-                prev_bf.posData.pos, current_pos)
-            return BattleFrame(True, time, pixel_distance, 0, pos_data, None, None, None, None)
+            return BattleFrame(saveThisFrame, time, 0, 0, pos_data, None, None, None, None)
+
+        prev_bf = self.battleFrameStack[0]
 
 
+        if current_pos == prev_bf.posData.pos:
+            # print("Point did not move at all")
+            saveThisFrame = False
+        if current_pos.x > prev_bf.posData.pos.x:
+            self.currentDirection[0] = 1
+        elif current_pos.x < prev_bf.posData.pos.x:
+            self.currentDirection[0] = -1
+        else:
+            # print("x didn't change.")
+            pass
 
-        prev_bf = self.battleFrameStack[5]
-        pixel_distance = self.__calcDistance(prev_bf.posData.pos, current_pos)
-
-        # if pixel_distance < 4:
-        #     print("PIXEL", pixel_distance)
-        #     if pixel_distance == 0:
-        #         self.currentStuckTimerCount += 1
-        #         return None
-        #     else:
-        #         i = 0
-        #         while i < len(self.battleFrameStack):
-        #             total_distance = self.__calcDistance(
-        #                 self.battleFrameStack[i].posData.pos, current_pos)
-        #             if total_distance > 4:
-        #                 prev_bf = self.battleFrameStack[i]
-        #                 break
-        #             i += 1
-        #         if total_distance < 4:
-        #             return None
-
-
-        print(self.__calcRadWithContour(minimap_arrow_frame))
-
-
-        # self.currentStuckTimerCount = 0
-
-        # if self.battleFrameStack[0].centerRad:
+        if current_pos.y > prev_bf.posData.pos.y:
+            self.currentDirection[1] = 1
+        elif current_pos.y < prev_bf.posData.pos.y:
+            self.currentDirection[1] = -1
+        else:
+            # print("y didn't change.")
+            pass
             
-
-        center_rad = self.__calcRad(prev_bf.posData.pos, current_pos, minimap_arrow_frame)
-
-        # if center_rad:
-        #     pass
-        # else:
+        center_rad = self.__calcRadWithContour(minimap_arrow_frame)
         if center_rad is None:
             return None
-            
 
-        speed = pixel_distance / (time - prev_bf.time) * self.speedMultiplier
+
+        pos_data = PointData(current_pos, self.__calcTooClose(current_pos))
+
+        if len(self.battleFrameStack) < 5:
+            speed = 0
+            pixel_distance = 0
+        else:
+            prev_4_bf = self.battleFrameStack[3] ## use 4 battleframe stack back, to make sure distance is high enough for accurate speed calculation
+            pixel_distance = self.__calcDistance(prev_4_bf.posData.pos, current_pos)
+            speed = pixel_distance / (time - prev_4_bf.time) * self.speedMultiplier
 
 
         left_rad = center_rad + self.detect_angle_rad
@@ -257,30 +251,14 @@ class BattleManagement():
         center_far_pd = PointData(
             center_far_dist_pos, self.__calcTooClose(center_far_dist_pos))
 
-
-
-        center_low_dist_rev_pos = self.__calcEndPoint(
-            current_pos, math.pi + center_rad, self.center_low_distance)
-        center_mid_dist_rev_pos = self.__calcEndPoint(
-            current_pos, math.pi + center_rad, self.center_mid_distance)
-        center_far_dist_rev_pos = self.__calcEndPoint(
-            current_pos, math.pi + center_rad, self.center_far_distance)
-    
-        center_low_rev_pd = PointData(
-            center_low_dist_rev_pos, self.__calcTooClose(center_low_dist_rev_pos))
-        center_mid_rev_pd = PointData(
-            center_mid_dist_rev_pos, self.__calcTooClose(center_mid_dist_rev_pos))
-        center_far_rev_pd = PointData(
-            center_far_dist_rev_pos, self.__calcTooClose(center_far_dist_rev_pos))
-
-        center_data = CenterData(center_low_pd, center_mid_pd, center_far_pd, center_low_rev_pd, center_mid_rev_pd, center_far_rev_pd)
+        center_data = CenterData(center_low_pd, center_mid_pd, center_far_pd)
 
         left_low_pd = PointData(
             left_low_dist, self.__calcTooClose(left_low_dist))
         right_low_pd = PointData(
             right_low_dist, self.__calcTooClose(right_low_dist))
 
-        return BattleFrame(True, time, pixel_distance, speed, pos_data, center_rad, center_data, left_low_pd, right_low_pd)
+        return BattleFrame(saveThisFrame, time, pixel_distance, speed, pos_data, center_rad, center_data, left_low_pd, right_low_pd)
 
     def __getMiniMapReadLoc(self, src_map, minimap_frame) -> Point:
         grey_minimap_frame = cv2.cvtColor(minimap_frame, cv2.COLOR_RGB2GRAY)
@@ -316,87 +294,73 @@ class BattleManagement():
         if len(contours) >= 1:
             cnt = contours[0]
             [vx,vy,x,y] = cv2.fitLine(cnt, cv2.DIST_L2,0,0.01,0.01)
-            # print(math.atan(vy,vx))
-            return -1 * math.atan(vy / vx)
+            rad = math.atan(vy / vx)
+            #### - - | + -
+            #### - + | + +
+            newImg = imgRotate(thresh, 90 - (rad * -180 / math.pi) )
+            upperImg = newImg[0:15,0:30]
+            lowerImg = newImg[15:30,0:30]
+            if cv2.countNonZero(upperImg) < cv2.countNonZero(lowerImg):
+                # print("Going through 1 and 4 Quadrant")
+                return -1 * rad
+            else:
+                # print("going through 2, 3 quadrant")
+                return math.pi + -1 * rad
+            # hsv_minimap_frame = cv2.cvtColor(minimap_frame, cv2.COLOR_BGR2HSV)
+            # lower_red = np.array([0, 180, 180])
+            # upper_red = np.array([10, 255, 255])
+            # mask = cv2.inRange(hsv_minimap_frame, lower_red, upper_red)
+            # if cv2.countNonZero(mask) > 10:
+            #     return True
+            # return False
+
+            # if self.currentDirection == [-1, -1]:
+            #     return math.pi - abs(rad)
+            # elif self.currentDirection == [-1, 1]:
+            #     return math.pi + abs(rad)
+            # elif self.currentDirection == [1, -1]:
+            #     return abs(rad)
+            # elif self.currentDirection == [1, 1]:
+            #     return -1 * abs(rad)
+            # else:
+            #     return -1 * rad
         else:
             print("CONTOUR IS 0")
         return None
 
-    def __calcRad(self, start_pos: Point, end_pos: Point, minimap_arrow_frame) -> float:
-
-        contour_rad = self.__calcRadWithContour(minimap_arrow_frame)
-        if contour_rad:
-            # if end_pos.x > start_pos.x:
-            #     if end_pos.y > start_pos.y:                 # BotRight
-            #         return -1 * abs(contour_rad) 
-            #     else:                                       # TopRight
-            #         return abs(contour_rad) 
-            # else:
-            #     if end_pos.y > start_pos.y:                 # BotLeft
-            #         return math.pi + abs(contour_rad) 
-            #     else:                                       # TopLeft
-            #         return math.pi - abs(contour_rad) 
-            print(contour_rad)
-            return contour_rad
-        else:
-            return None
-
-
-        # if end_pos.x == start_pos.x:
-        #     if end_pos.y > start_pos.y:
-        #         return -1 * contour_rad if contour_rad else -1 * math.pi / 2
-        #     else:
-        #         return contour_rad if contour_rad else math.pi / 2
-        # else:
-        #     center_tan = abs((end_pos.y - start_pos.y) /
-        #                      (end_pos.x - start_pos.x))
-        #     center_rad = math.atan(center_tan)
-
-        #     print(center_rad, contour_rad)
-            
-
-        #     if end_pos.x > start_pos.x:
-        #         if end_pos.y > start_pos.y:                 # BotRight
-                    
-        #             return -1 * contour_rad if contour_rad else -1 * center_rad
-        #         else:                                       # TopRight
-        #             return contour_rad if contour_rad else center_rad
-        #     else:
-        #         if end_pos.y > start_pos.y:                 # BotLeft
-        #             return math.pi + contour_rad if contour_rad else math.pi + center_rad
-        #         else:                                       # TopLeft
-        #             return math.pi - contour_rad if contour_rad else math.pi - center_rad
-
     def __calcEndPoint(self, start_pos: Point, rad: float, distance: float) -> Point:
 
-        
-        if rad > 0 and rad <= math.pi / 2:
-            pos_x = start_pos.x + \
-                distance * abs(math.cos(rad))
-            pos_y = start_pos.y - \
-                distance * abs(math.sin(rad))
-            return Point(pos_x, pos_y)
-        elif rad > math.pi / 2 and rad <= math.pi:
-            pos_x = start_pos.x - \
-                distance * abs(math.cos(rad))
-            pos_y = start_pos.y - \
-                distance * abs(math.sin(rad))
-            return Point(pos_x, pos_y)
-        elif (rad > math.pi and rad <= math.pi / 2 * 3) or (rad <= -1 * math.pi / 2):
-            pos_x = start_pos.x - \
-                distance * abs(math.cos(rad))
-            pos_y = start_pos.y + \
-                distance * abs(math.sin(rad))
-            return Point(pos_x, pos_y)
-        elif (rad >= -1 * math.pi / 2 and rad <= 0) or (rad > math.pi / 2 * 3 and rad <= math.pi * 2):
-            pos_x = start_pos.x + \
-                distance * abs(math.cos(rad))
-            pos_y = start_pos.y + \
-                distance * abs(math.sin(rad))
-            return Point(pos_x, pos_y)
-        else:
-            print(rad)
-            raise Exception("Check Rad Failed")
+        pos_x = start_pos.x + distance * math.cos(rad)
+        pos_y = start_pos.y - distance * math.sin(rad)
+        return Point(pos_x, pos_y)
+    
+        # if rad > 0 and rad <= math.pi / 2:
+        #     pos_x = start_pos.x + \
+        #         distance * abs(math.cos(rad))
+        #     pos_y = start_pos.y - \
+        #         distance * abs(math.sin(rad))
+        #     return Point(pos_x, pos_y)
+        # elif rad > math.pi / 2 and rad <= math.pi:
+        #     pos_x = start_pos.x - \
+        #         distance * abs(math.cos(rad))
+        #     pos_y = start_pos.y - \
+        #         distance * abs(math.sin(rad))
+        #     return Point(pos_x, pos_y)
+        # elif (rad > math.pi and rad <= math.pi / 2 * 3) or (rad <= -1 * math.pi / 2):
+        #     pos_x = start_pos.x - \
+        #         distance * abs(math.cos(rad))
+        #     pos_y = start_pos.y + \
+        #         distance * abs(math.sin(rad))
+        #     return Point(pos_x, pos_y)
+        # elif (rad >= -1 * math.pi / 2 and rad <= 0) or (rad > math.pi / 2 * 3 and rad <= math.pi * 2):
+        #     pos_x = start_pos.x + \
+        #         distance * abs(math.cos(rad))
+        #     pos_y = start_pos.y + \
+        #         distance * abs(math.sin(rad))
+        #     return Point(pos_x, pos_y)
+        # else:
+        #     print(rad)
+        #     raise Exception("Check Rad Failed")
 
     def __isEnemyNear(self, minimap_frame) -> bool:
         hsv_minimap_frame = cv2.cvtColor(minimap_frame, cv2.COLOR_BGR2HSV)

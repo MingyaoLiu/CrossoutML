@@ -58,6 +58,7 @@ class MoveManagement():
         
 
         if bf.center.far.isOutside or bf.center.mid.isOutside or bf.center.low.isOutside or bf.left.isOutside or bf.right.isOutside:
+            print(bf.speed)
             # Determine Forward Speed
             if bf.speed > 80:
                 kbUp("w")
@@ -75,31 +76,31 @@ class MoveManagement():
 
 
             # print("No Init Turning Direction, Could be turning not yet set, or not turning, or left and right enter turning at the same time.")
-            # kbUp("a")
-            # kbUp("d")
+            kbUp("a")
+            kbUp("d")
 
-            # if bf.left.isOutside and bf.right.isOutside:
-            #     if bf.posData.isOutside:
-            #         print("CAR IS OUTSIDE")
-            #         self.forceToBack()
-            #     else:
-            #         print("Both Tentacle Outside, No Init")
+            if bf.left.isOutside and bf.right.isOutside:
+                if bf.posData.isOutside:
+                    print("CAR IS OUTSIDE")
+                    self.forceToBack()
+                else:
+                    print("Both Tentacle Outside, No Init")
 
-            # elif bf.right.isOutside:
-            #     if bf.center.low.isOutside:
-            #         self.initTooCloseDirection = "RIGHT"
-            #         kbDown("a")
-            #     else:
-            #         print("RIGHT but still have distance to go.")
+            elif bf.right.isOutside:
+                if bf.center.low.isOutside:
+                    self.initTooCloseDirection = "RIGHT"
+                    kbDown("a")
+                else:
+                    print("RIGHT but still have distance to go.")
 
-            # elif bf.left.isOutside:
-            #     if bf.center.low.isOutside:
-            #         self.initTooCloseDirection = "LEFT"
-            #         kbDown("d")
-            #     else:
-            #         print("LEFT but still have distance to go.")
-            # else:
-            #     pass
+            elif bf.left.isOutside:
+                if bf.center.low.isOutside:
+                    self.initTooCloseDirection = "LEFT"
+                    kbDown("d")
+                else:
+                    print("LEFT but still have distance to go.")
+            else:
+                pass
 
         else:
             kbUp("spacebar")
