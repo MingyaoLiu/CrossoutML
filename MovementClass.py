@@ -60,10 +60,10 @@ class MoveManagement():
         if bf.center.far.isOutside or bf.center.mid.isOutside or bf.center.low.isOutside or bf.left.isOutside or bf.right.isOutside:
             print(bf.speed)
             # Determine Forward Speed
-            if bf.speed > 80:
+            if bf.speed > 50:
                 kbUp("w")
                 kbDown("spacebar")
-            elif bf.speed > 30:
+            elif bf.speed > 20:
                 kbUp("spacebar")
                 kbUp("w")
             elif bf.speed < 10:
@@ -76,8 +76,7 @@ class MoveManagement():
 
 
             # print("No Init Turning Direction, Could be turning not yet set, or not turning, or left and right enter turning at the same time.")
-            kbUp("a")
-            kbUp("d")
+
 
             if bf.left.isOutside and bf.right.isOutside:
                 if bf.posData.isOutside:
@@ -87,17 +86,21 @@ class MoveManagement():
                     print("Both Tentacle Outside, No Init")
 
             elif bf.right.isOutside:
+                kbUp("d")
                 if bf.center.low.isOutside:
                     self.initTooCloseDirection = "RIGHT"
                     kbDown("a")
                 else:
+                    kbUp("a")
                     print("RIGHT but still have distance to go.")
 
             elif bf.left.isOutside:
+                kbUp("a")
                 if bf.center.low.isOutside:
                     self.initTooCloseDirection = "LEFT"
                     kbDown("d")
                 else:
+                    kbUp("d")
                     print("LEFT but still have distance to go.")
             else:
                 pass

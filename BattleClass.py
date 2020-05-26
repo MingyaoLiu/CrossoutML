@@ -25,7 +25,7 @@ class BattleManagement():
         self.battleFrameStack = []
         self.currentBattleFrame = None
 
-        self.delayTime = 4
+        self.delayTime = 5
 
         self.acceptNewFrame = True
         self.isBattleAlreadyActive = False
@@ -49,8 +49,6 @@ class BattleManagement():
         self.frameDetectionInterval = 0 if getGlobalSetting(
         ).settings.detectionFPS == 0 else 1000 / getGlobalSetting().settings.detectionFPS
 
-        ## currentDirection detected movement: (x, y) x +-1, y +-1
-        self.currentDirection = [0, 0]
 
     def start(self):
         self.isBattleAlreadyActive = True
@@ -196,22 +194,7 @@ class BattleManagement():
         if current_pos == prev_bf.posData.pos:
             # print("Point did not move at all")
             saveThisFrame = False
-        if current_pos.x > prev_bf.posData.pos.x:
-            self.currentDirection[0] = 1
-        elif current_pos.x < prev_bf.posData.pos.x:
-            self.currentDirection[0] = -1
-        else:
-            # print("x didn't change.")
-            pass
 
-        if current_pos.y > prev_bf.posData.pos.y:
-            self.currentDirection[1] = 1
-        elif current_pos.y < prev_bf.posData.pos.y:
-            self.currentDirection[1] = -1
-        else:
-            # print("y didn't change.")
-            pass
-            
         center_rad = self.__calcRadWithContour(minimap_arrow_frame)
         if center_rad is None:
             return None
@@ -227,10 +210,8 @@ class BattleManagement():
             pixel_distance = self.__calcDistance(prev_4_bf.posData.pos, current_pos)
             speed = pixel_distance / (time - prev_4_bf.time) * self.speedMultiplier
 
-
         left_rad = center_rad + self.detect_angle_rad
         right_rad = center_rad - self.detect_angle_rad
-
         pos_data = PointData(current_pos, self.__calcTooClose(current_pos))
 
         center_low_dist_pos = self.__calcEndPoint(
@@ -291,21 +272,30 @@ class BattleManagement():
         img = cv2.cvtColor(minimap_arrow_frame, cv2.COLOR_BGR2GRAY)
         ret, thresh = cv2.threshold(img, 195, 255, cv2.THRESH_BINARY)
         contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL , cv2.CHAIN_APPROX_NONE )
-        if len(contours) >= 1:
+        if len(contours) == 1:
             cnt = contours[0]
             [vx,vy,x,y] = cv2.fitLine(cnt, cv2.DIST_L2,0,0.01,0.01)
             rad = math.atan(vy / vx)
             #### - - | + -
             #### - + | + +
-            newImg = imgRotate(thresh, 90 - (rad * -180 / math.pi) )
+
+            img2 = img.copy()
+            ret2, thresh2 = cv2.threshold(img2, 230, 255, cv2.THRESH_BINARY)
+            cv2.drawContours(thresh2, [cnt], 0, (0,255,0), 1)
+            cv2.fillPoly(thresh2, pts =[cnt], color=(255,255,255))
+
+            newImg = imgRotate(img2, 90 - (rad * -180 / math.pi))
             upperImg = newImg[0:15,0:30]
             lowerImg = newImg[15:30,0:30]
+            cv2.imshow("Upper", upperImg)
+            cv2.imshow("Lower", lowerImg)
             if cv2.countNonZero(upperImg) < cv2.countNonZero(lowerImg):
-                # print("Going through 1 and 4 Quadrant")
+                print("Going through 1 and 4 Quadrant")
                 return -1 * rad
             else:
-                # print("going through 2, 3 quadrant")
+                print("going through 2, 3 quadrant")
                 return math.pi + -1 * rad
+
             # hsv_minimap_frame = cv2.cvtColor(minimap_frame, cv2.COLOR_BGR2HSV)
             # lower_red = np.array([0, 180, 180])
             # upper_red = np.array([10, 255, 255])
@@ -325,7 +315,7 @@ class BattleManagement():
             # else:
             #     return -1 * rad
         else:
-            print("CONTOUR IS 0")
+            print("CONTOUR IS Not 1")
         return None
 
     def __calcEndPoint(self, start_pos: Point, rad: float, distance: float) -> Point:
