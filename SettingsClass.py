@@ -7,6 +7,7 @@ class Settings(object):
 
     def __init__(self):
         self.settings = crossml_pb2.CrossoutMLSetting()
+        self.acct_proto = crossml_pb2.CrossoutMLAccount()
         self.getSettingsFile()
 
     def getSettingsFile(self):

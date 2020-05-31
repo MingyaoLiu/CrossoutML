@@ -19,6 +19,7 @@ Grinder
 ## Init Protobuf database
 .\protoc.exe -I="C:\Users\gaming\Documents\GitHub\CrossoutML" --python_out="C:\Users\gaming\Documents\GitHub\CrossoutML" C:\Users\gaming\Documents\GitHub\CrossoutML\crossml.proto
 
+.\protoc.exe -I="C:\Users\game\Documents\GitHub\CrossoutML" --python_out="C:\Users\game\Documents\GitHub\CrossoutML" C:\Users\game\Documents\GitHub\CrossoutML\crossml.proto
 
 ## Movement Principle
 

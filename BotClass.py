@@ -13,6 +13,8 @@ import random
 import threading
 import numpy as np
 import math
+from DebugClass import getDebugger
+from LoginScreenClass import LoginScreen
 
 class BotProgram():
 
@@ -30,7 +32,7 @@ class BotProgram():
 
         self.inBattleDelayTimer = None
 
-        self.LoginScreen = Screen(ScreenStep.Login, const.login_crops, 10)
+        self.LoginScreen = LoginScreen(ScreenStep.Login, const.login_crops, 10)
         self.WelcomeScreen = Screen(ScreenStep.WelcomeScreen,
                                     const.welcome_crops, 20)
 
@@ -247,11 +249,14 @@ class BotProgram():
         while self.killBotNow is False:
             np_frame = self.d.get_latest_frame()
             self.frame = cv2.cvtColor(np_frame, cv2.COLOR_BGR2RGB)
+            self.prev_frame = self.d.get_frame(20)
             self.__processFrame()
             
 
             # test_frame = self.frame[const.in_battle_mini_map_arrow_height_start:const.in_battle_mini_map_arrow_height_end,
             #    const.in_battle_mini_map_arrow_width_start:const.in_battle_mini_map_arrow_width_end]
+            
+            # getDebugger().debugDisplay(test_frame)
 
             # img = cv2.cvtColor(test_frame, cv2.COLOR_BGR2GRAY)
 

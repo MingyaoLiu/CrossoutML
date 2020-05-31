@@ -7,6 +7,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5 import uic
 import time
 from SettingsClass import getGlobalSetting
+from ui_addaccountwindow import UIAddAccountWindow
+from operator import itemgetter
 
 class UI_SettingWindow(QtWidgets.QMainWindow):
     
@@ -17,7 +19,21 @@ class UI_SettingWindow(QtWidgets.QMainWindow):
         
         self.saveBtn.clicked.connect(self.saveSettings)
         
-        
+        self.addAcctBtn.clicked.connect(self.__goToAddAcct)
+        self.delAcctBtn.clicked.connect(self.__deleteCurrentAcct)
+
+
+    def __goToAddAcct(self):
+        self.window = QtWidgets.QDialog()
+        self.ui = UIAddAccountWindow(self.window)
+        self.ui.show()
+
+    def __deleteCurrentAcct(self):
+        del getGlobalSetting().settings.accounts[self.acctDropdown.currentIndex()]
+        getGlobalSetting().saveSettings()
+        print("delete")
+        self.loadSettings()
+
         
     def loadSettings(self):
         setting = getGlobalSetting().settings
@@ -53,6 +69,9 @@ class UI_SettingWindow(QtWidgets.QMainWindow):
             self.startScreenDropDown.setCurrentIndex(4)
         else:
             self.startScreenDropDown.setCurrentIndex(0)
+
+        self.acctDropdown.clear()
+        self.acctDropdown.addItems(str(i) + " - " + x.username for i,x in enumerate(setting.accounts))
             
         
         

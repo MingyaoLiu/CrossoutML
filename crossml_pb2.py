@@ -18,7 +18,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=b'\n\rcrossml.proto\"\xb1\x03\n\x11\x43rossoutMLSetting\x12\x14\n\x0c\x64isplayIndex\x18\x01 \x01(\x05\x12\x10\n\x08\x66ullAuto\x18\x02 \x01(\x08\x12\x15\n\rdisplayShiftX\x18\x03 \x01(\x05\x12\x15\n\rdisplayShiftY\x18\x04 \x01(\x05\x12\x13\n\x0bmouseShiftX\x18\x05 \x01(\x05\x12\x13\n\x0bmouseShiftY\x18\x06 \x01(\x05\x12\x13\n\x0b\x63\x61rMaxSpeed\x18\x07 \x01(\x05\x12\x1f\n\x17\x63\x65nterFarDetectDistance\x18\x08 \x01(\x05\x12\x1f\n\x17\x63\x65nterLowDetectDistance\x18\t \x01(\x05\x12\x18\n\x10lrDetectDistance\x18\n \x01(\x05\x12\x19\n\x11\x66rontDetectDegree\x18\x0b \x01(\x05\x12\x18\n\x10targetDisplayFPS\x18\x0c \x01(\x05\x12\x14\n\x0c\x64\x65tectionFPS\x18\r \x01(\x05\x12\x17\n\x0fshowDebugWindow\x18\x0e \x01(\x08\x12\x1c\n\x14\x63heckStuckFrameCount\x18\x0f \x01(\x05\x12\x14\n\x0cisFullScreen\x18\x10 \x01(\x08\x12\x13\n\x0bstartScreen\x18\x11 \x01(\x05\x62\x06proto3'
+  serialized_pb=b'\n\rcrossml.proto\"\xd7\x03\n\x11\x43rossoutMLSetting\x12\x14\n\x0c\x64isplayIndex\x18\x01 \x01(\x05\x12\x10\n\x08\x66ullAuto\x18\x02 \x01(\x08\x12\x15\n\rdisplayShiftX\x18\x03 \x01(\x05\x12\x15\n\rdisplayShiftY\x18\x04 \x01(\x05\x12\x13\n\x0bmouseShiftX\x18\x05 \x01(\x05\x12\x13\n\x0bmouseShiftY\x18\x06 \x01(\x05\x12\x13\n\x0b\x63\x61rMaxSpeed\x18\x07 \x01(\x05\x12\x1f\n\x17\x63\x65nterFarDetectDistance\x18\x08 \x01(\x05\x12\x1f\n\x17\x63\x65nterLowDetectDistance\x18\t \x01(\x05\x12\x18\n\x10lrDetectDistance\x18\n \x01(\x05\x12\x19\n\x11\x66rontDetectDegree\x18\x0b \x01(\x05\x12\x18\n\x10targetDisplayFPS\x18\x0c \x01(\x05\x12\x14\n\x0c\x64\x65tectionFPS\x18\r \x01(\x05\x12\x17\n\x0fshowDebugWindow\x18\x0e \x01(\x08\x12\x1c\n\x14\x63heckStuckFrameCount\x18\x0f \x01(\x05\x12\x14\n\x0cisFullScreen\x18\x10 \x01(\x08\x12\x13\n\x0bstartScreen\x18\x11 \x01(\x05\x12$\n\x08\x61\x63\x63ounts\x18\x12 \x03(\x0b\x32\x12.CrossoutMLAccount\"7\n\x11\x43rossoutMLAccount\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\tb\x06proto3'
 )
 
 
@@ -150,6 +150,13 @@ _CROSSOUTMLSETTING = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='accounts', full_name='CrossoutMLSetting.accounts', index=17,
+      number=18, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -163,10 +170,50 @@ _CROSSOUTMLSETTING = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=18,
-  serialized_end=451,
+  serialized_end=489,
 )
 
+
+_CROSSOUTMLACCOUNT = _descriptor.Descriptor(
+  name='CrossoutMLAccount',
+  full_name='CrossoutMLAccount',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='username', full_name='CrossoutMLAccount.username', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='password', full_name='CrossoutMLAccount.password', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=491,
+  serialized_end=546,
+)
+
+_CROSSOUTMLSETTING.fields_by_name['accounts'].message_type = _CROSSOUTMLACCOUNT
 DESCRIPTOR.message_types_by_name['CrossoutMLSetting'] = _CROSSOUTMLSETTING
+DESCRIPTOR.message_types_by_name['CrossoutMLAccount'] = _CROSSOUTMLACCOUNT
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 CrossoutMLSetting = _reflection.GeneratedProtocolMessageType('CrossoutMLSetting', (_message.Message,), {
@@ -175,6 +222,13 @@ CrossoutMLSetting = _reflection.GeneratedProtocolMessageType('CrossoutMLSetting'
   # @@protoc_insertion_point(class_scope:CrossoutMLSetting)
   })
 _sym_db.RegisterMessage(CrossoutMLSetting)
+
+CrossoutMLAccount = _reflection.GeneratedProtocolMessageType('CrossoutMLAccount', (_message.Message,), {
+  'DESCRIPTOR' : _CROSSOUTMLACCOUNT,
+  '__module__' : 'crossml_pb2'
+  # @@protoc_insertion_point(class_scope:CrossoutMLAccount)
+  })
+_sym_db.RegisterMessage(CrossoutMLAccount)
 
 
 # @@protoc_insertion_point(module_scope)

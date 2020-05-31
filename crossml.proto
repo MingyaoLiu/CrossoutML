@@ -18,5 +18,11 @@ message CrossoutMLSetting {
     int32 checkStuckFrameCount = 15;
     bool isFullScreen = 16;
     int32 startScreen = 17;
+    repeated CrossoutMLAccount accounts = 18;
+}
 
+
+message CrossoutMLAccount {
+    string username = 1;
+    string password = 2;
 }
