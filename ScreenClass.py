@@ -21,9 +21,10 @@ class Screen():
         ).settings.isFullScreen else 0
         crop_frame = frame[crop.area.y - heightShift:crop.area.ys -
                            heightShift, crop.area.x:crop.area.xs]
-        getDebugger().debugDisplay(crop_frame)
+        getDebugger().debugDisplay(crop_frame, "Third")
 
         low_txt = pytesseract.image_to_string(crop_frame, lang='eng').lower()
+        print(low_txt)
         if crop.requiredMatch and (low_txt not in crop.expectedStrs):
             return (False, low_txt)
         return (True, low_txt)

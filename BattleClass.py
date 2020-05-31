@@ -137,7 +137,7 @@ class BattleManagement():
                 cv2.line(debug_test_mask,
                          (int(currentBattleFrame.posData.pos.x),
                           int(currentBattleFrame.posData.pos.y)), (int(currentBattleFrame.right.pos.x), int(currentBattleFrame.right.pos.y)), (255, 0, 0), 1)
-            getDebugger().debugDisplay(debug_test_mask)
+            getDebugger().debugDisplay(debug_test_mask, "Main")
 
     def __acceptNewFrame(self):
         if self.frameDetectionInterval:
@@ -276,81 +276,34 @@ class BattleManagement():
             cnt = contours[0]
             [vx,vy,x,y] = cv2.fitLine(cnt, cv2.DIST_L2,0,0.01,0.01)
             rad = math.atan(vy / vx)
-            #### - - | + -
-            #### - + | + +
-
+            # - - | + -
+            # ——————————
+            # - + | + +
             img2 = img.copy()
             ret2, thresh2 = cv2.threshold(img2, 230, 255, cv2.THRESH_BINARY)
             cv2.drawContours(thresh2, [cnt], 0, (0,255,0), 1)
             cv2.fillPoly(thresh2, pts =[cnt], color=(255,255,255))
 
-            newImg = imgRotate(img2, 90 - (rad * -180 / math.pi))
-            upperImg = newImg[0:15,0:30]
-            lowerImg = newImg[15:30,0:30]
-            cv2.imshow("Upper", upperImg)
-            cv2.imshow("Lower", lowerImg)
+            newImg = imgRotate(thresh2, 90 - (rad * -180 / math.pi))
+            upperImg = newImg[0:12,0:30]
+            lowerImg = newImg[18:30,0:30]
+            sideBySideArrow = np.hstack((upperImg, lowerImg))
+
+            getDebugger().debugDisplay(sideBySideArrow, "Second")
             if cv2.countNonZero(upperImg) < cv2.countNonZero(lowerImg):
                 print("Going through 1 and 4 Quadrant")
                 return -1 * rad
             else:
                 print("going through 2, 3 quadrant")
                 return math.pi + -1 * rad
-
-            # hsv_minimap_frame = cv2.cvtColor(minimap_frame, cv2.COLOR_BGR2HSV)
-            # lower_red = np.array([0, 180, 180])
-            # upper_red = np.array([10, 255, 255])
-            # mask = cv2.inRange(hsv_minimap_frame, lower_red, upper_red)
-            # if cv2.countNonZero(mask) > 10:
-            #     return True
-            # return False
-
-            # if self.currentDirection == [-1, -1]:
-            #     return math.pi - abs(rad)
-            # elif self.currentDirection == [-1, 1]:
-            #     return math.pi + abs(rad)
-            # elif self.currentDirection == [1, -1]:
-            #     return abs(rad)
-            # elif self.currentDirection == [1, 1]:
-            #     return -1 * abs(rad)
-            # else:
-            #     return -1 * rad
         else:
             print("CONTOUR IS Not 1")
         return None
 
     def __calcEndPoint(self, start_pos: Point, rad: float, distance: float) -> Point:
-
         pos_x = start_pos.x + distance * math.cos(rad)
         pos_y = start_pos.y - distance * math.sin(rad)
         return Point(pos_x, pos_y)
-    
-        # if rad > 0 and rad <= math.pi / 2:
-        #     pos_x = start_pos.x + \
-        #         distance * abs(math.cos(rad))
-        #     pos_y = start_pos.y - \
-        #         distance * abs(math.sin(rad))
-        #     return Point(pos_x, pos_y)
-        # elif rad > math.pi / 2 and rad <= math.pi:
-        #     pos_x = start_pos.x - \
-        #         distance * abs(math.cos(rad))
-        #     pos_y = start_pos.y - \
-        #         distance * abs(math.sin(rad))
-        #     return Point(pos_x, pos_y)
-        # elif (rad > math.pi and rad <= math.pi / 2 * 3) or (rad <= -1 * math.pi / 2):
-        #     pos_x = start_pos.x - \
-        #         distance * abs(math.cos(rad))
-        #     pos_y = start_pos.y + \
-        #         distance * abs(math.sin(rad))
-        #     return Point(pos_x, pos_y)
-        # elif (rad >= -1 * math.pi / 2 and rad <= 0) or (rad > math.pi / 2 * 3 and rad <= math.pi * 2):
-        #     pos_x = start_pos.x + \
-        #         distance * abs(math.cos(rad))
-        #     pos_y = start_pos.y + \
-        #         distance * abs(math.sin(rad))
-        #     return Point(pos_x, pos_y)
-        # else:
-        #     print(rad)
-        #     raise Exception("Check Rad Failed")
 
     def __isEnemyNear(self, minimap_frame) -> bool:
         hsv_minimap_frame = cv2.cvtColor(minimap_frame, cv2.COLOR_BGR2HSV)
@@ -368,26 +321,3 @@ class BattleManagement():
 
     def __carJack(self):
         KBPress("r").start()
-
-    ########## MINIMAP TRACK ENEMY COUNT #############
-
-    ########## FRONT VIEW CHECK STUCK #############
-    # front_frame = np_frame[const.in_battle_front_view_height_start:const.in_battle_front_view_height_end,
-    #                        const.in_battle_front_view_width_start:const.in_battle_front_view_width_end]
-    # prev_front_frame = prev_1_frame[const.in_battle_front_view_height_start:const.in_battle_front_view_height_end,
-    #                               const.in_battle_front_view_width_start:const.in_battle_front_view_width_end]
-    # comp = cv2.absdiff(front_frame, prev_front_frame)
-    # res = comp.astype(np.uint8)
-    # percentage = (np.count_nonzero(res) * 100) / res.size
-    # if percentage < 75:
-    #     determineBackStir()
-
-    ########## HEALTH BAR CHECK HEALTH #############
-    # health_frame = frame[ const.in_battle_health_digit_height_start:const.in_battle_health_digit_height_end, const.in_battle_health_digit_width_start:const.in_battle_health_digit_width_end ]
-    # a = pytesseract.image_to_string(health_frame)
-    # try:
-    #     inta = int(a)
-    #     if (inta <= 150):
-    #         selfDesctruct()
-    # except ValueError:
-    #     pass

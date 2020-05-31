@@ -143,9 +143,7 @@ map_mask_file_path = {
 
 screenWidth = 1920
 screenHeight = 1080
-
 topTitleBarHeight = 30
-
 
 scrap_btn_width = 40
 scrap_btn_height = 40
@@ -299,16 +297,14 @@ battle_type_title_label_trigger_pos_x = int(
 battle_type_title_label_trigger_pos_y = int(
     battle_type_title_label_height_start + battle_type_title_label_height / 2)
 
-battle_map_name_label_width = 450
+battle_map_name_label_width = 360
 battle_map_name_label_width_start = int(
-    screenWidth - 250 - battle_map_name_label_width / 2)
+    screenWidth - 275 - battle_map_name_label_width / 2)
 battle_map_name_label_width_end = int(
-    screenWidth - 250 + battle_map_name_label_width / 2)
-battle_map_name_label_height = 60
-battle_map_name_label_height_start = int(
-    screenHeight / 13.5 - battle_map_name_label_height / 2)
-battle_map_name_label_height_end = int(
-    screenHeight / 13.5 + battle_map_name_label_height / 2)
+    screenWidth - 275 + battle_map_name_label_width / 2)
+battle_map_name_label_height = 54
+battle_map_name_label_height_start = int(82 - battle_map_name_label_height / 2)
+battle_map_name_label_height_end = int(82 + battle_map_name_label_height / 2)
 battle_map_name_label_trigger_pos_x = int(
     battle_map_name_label_width_start + battle_map_name_label_width / 2)
 battle_map_name_label_trigger_pos_y = int(

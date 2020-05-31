@@ -33,3 +33,10 @@ then start press turn keys, a or d
 to make sure it turns only along th edge not 180 backwards, the turn should stop when the front detection is in allowed zone, so that the car is parallel (kind of) to the edge of allowed zone.
 
 However because of the delay, the car will receive the information a little too late.
+
+
+## To read
+
+How to be miserable
+48 Law of Power
+The power of habit

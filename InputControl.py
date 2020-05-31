@@ -8,6 +8,7 @@ import threading
 from ctypes import windll
 
 from Constants import Point
+import random
 
 vk_key_dict = {
     "spacebar": 0x20,
@@ -79,6 +80,7 @@ class MouseMove:
 def mouseClick(pos: Point):
     setMousePos(pos)
     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, pos.x, pos.y, 0, 0)
+    time.sleep(random.random() / 100)
     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, pos.x, pos.y, 0, 0)
 
 

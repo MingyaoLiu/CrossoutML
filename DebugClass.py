@@ -6,7 +6,9 @@ class Debug():
 
     def __init__(self):
         print("INIT Debug Manager")
-        self.debug_window_name = "DebugWindow"
+        self.main_debug_window_name = "MainDebugWindow"
+        self.secondary_debug_window_name = "SecondaryDebugWindow"
+        self.third_debug_window_name = "ThirdDebugWindow"
         self.startedDebugger = False
 
     def createDebugWindow(self):
@@ -15,17 +17,31 @@ class Debug():
         else:
             self.startedDebugger = True
             cv2.namedWindow(
-                self.debug_window_name, cv2.WINDOW_NORMAL)
-            cv2.resizeWindow(self.debug_window_name, 1280, 720)
+                self.main_debug_window_name, cv2.WINDOW_NORMAL)
+            cv2.namedWindow(
+                self.secondary_debug_window_name, cv2.WINDOW_NORMAL)
+            cv2.namedWindow(
+                self.third_debug_window_name, cv2.WINDOW_NORMAL)
+            cv2.resizeWindow(self.main_debug_window_name, 1280, 720)
+            cv2.resizeWindow(self.secondary_debug_window_name, 640, 480)
+            cv2.resizeWindow(self.third_debug_window_name, 480, 320)
+
 
     def closeDebugWindow(self):
         if self.startedDebugger:
-            cv2.destroyWindow(self.debug_window_name)
+            cv2.destroyWindow(self.main_debug_window_name)
+            cv2.destroyWindow(self.secondary_debug_window_name)
+            cv2.destroyWindow(self.third_debug_window_name)
             self.startedDebugger = False
 
-    def debugDisplay(self, frame):
+    def debugDisplay(self, frame, window = "Main"):
         if self.startedDebugger:
-            cv2.imshow(self.debug_window_name, frame)
+            if window == "Third":
+                cv2.imshow(self.third_debug_window_name, frame)
+            elif window == "Second":
+                cv2.imshow(self.secondary_debug_window_name, frame)
+            else:
+                cv2.imshow(self.main_debug_window_name, frame)
 
 
 global_debugger = None
