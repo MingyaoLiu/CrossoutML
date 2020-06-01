@@ -31,7 +31,7 @@ class UI_SettingWindow(QtWidgets.QMainWindow):
     def __deleteCurrentAcct(self):
         del getGlobalSetting().settings.accounts[self.acctDropdown.currentIndex()]
         getGlobalSetting().saveSettings()
-        print("delete")
+        print("deleted account")
         self.loadSettings()
 
         

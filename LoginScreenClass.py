@@ -1,6 +1,8 @@
 from ScreenClass import Screen, ScreenStep
 from Constants import CropProperty
 import time
+from SettingsClass import getGlobalSetting
+import random
 
 class LoginScreen(Screen):
 
@@ -10,6 +12,7 @@ class LoginScreen(Screen):
         self.switchMinTimeSec = 3600
         self.currentAccount = None
         self.accountStartTime = time.time()
+        self.__setRandomNewAccount()
 
     def __checkIfSwitchAccount(self):
         if time.time() > self.accountStartTime + self.switchMinTimeSec:
@@ -17,8 +20,10 @@ class LoginScreen(Screen):
         return False
 
     def __setRandomNewAccount(self):
-
-        print("a")
+        accounts = getGlobalSetting().settings.accounts
+        if accounts:
+            self.currentAccount = random.choice(accounts)
+            print(self.currentAccount)
 
 
 
