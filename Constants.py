@@ -147,30 +147,29 @@ topTitleBarHeight = 30
 
 scrap_btn_width = 40
 scrap_btn_height = 40
-scrap_btn_trigger_pos_x = int(screenWidth / 2 - scrap_btn_width / 2)
-scrap_btn_trigger_pos_y = int(screenHeight / 4 - scrap_btn_height / 2)
+scrap_btn_trigger_pos_x = int(screenWidth / 2)
+scrap_btn_trigger_pos_y = int(270)
 
 wire_btn_width = 30
 wire_btn_height = 30
-wire_btn_trigger_pos_x = int(screenWidth / 2 + 100 - wire_btn_width / 2)
-wire_btn_trigger_pos_y = int(screenHeight / 4 - wire_btn_height / 2)
+wire_btn_trigger_pos_x = int(screenWidth / 2 + 110)
+wire_btn_trigger_pos_y = int(270)
 
 battery_btn_width = 30
 battery_btn_height = 30
-battery_btn_trigger_pos_x = int(screenWidth / 2 - 100 - battery_btn_width / 2)
-battery_btn_trigger_pos_y = int(screenHeight / 4 - battery_btn_height / 2)
+battery_btn_trigger_pos_x = int(screenWidth / 2 - 110)
+battery_btn_trigger_pos_y = int(270)
 
 patrol_btn_width = 30
 patrol_btn_height = 30
-patrol_btn_trigger_pos_x = int(screenWidth / 2 - patrol_btn_width / 2)
-patrol_btn_trigger_pos_y = int(screenHeight / 4 + 120 - patrol_btn_height / 2)
+patrol_btn_trigger_pos_x = int(screenWidth / 2)
+patrol_btn_trigger_pos_y = int(390)
 
 raven_path_btn_width = 30
 raven_path_btn_height = 30
 raven_path_btn_trigger_pos_x = int(
-    screenWidth / 2 + 200 - raven_path_btn_width / 2)
-raven_path_btn_trigger_pos_y = int(
-    screenHeight / 4 - raven_path_btn_height / 2)
+    screenWidth / 2 + 220)
+raven_path_btn_trigger_pos_y = int(270)
 
 esc_return_button_width = 90
 esc_return_button_width_start = int(

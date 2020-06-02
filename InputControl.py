@@ -15,6 +15,8 @@ vk_key_dict = {
     "esc": 0x1B,
     "backspace": 0x08,
     "tab": 0x09,
+    "ctrl": 0x11,
+    "shift": 0x10,
 }
 
 
@@ -90,3 +92,19 @@ def setMousePos(pos: Point):
 
 def getMousePos():
     return win32api.GetCursorPos()
+
+
+def fillInputWithString(str):
+    kbDown("ctrl")
+    kbDown("a")
+    time.sleep(0.1)
+    kbUp("a")
+    kbUp("ctrl")
+        
+    for char in str: 
+        if char.isupper() or char in ["!", "@","#", "$", "^", "&", "*", "(", ")", "_", "+", ":", "{", "}", "<", ">", "?", "|", "~"]:
+            kbDown("shift")
+        kbDown(char)
+        time.sleep(0.1)
+        kbUp(char)
+        kbUp("shift")

@@ -91,7 +91,10 @@ class BotProgram():
                 screen.executeSingleClick(0)
             elif screen.checkSingleSatisfy(self.frame, 1)[0]:
                 screen.executeSingleClick(1)
-            elif screen.checkSingleSatisfy(self.frame, 2)[0]:
+            elif screen.checkSingleSatisfy(self.frame, 2)[0]: ## login button
+
+                screen.fillUsername()
+                screen.fillPassword()                
                 screen.resetRetryCount()
                 screen.executeSingleClick(2)
                 self.__advanceNextStep()
@@ -250,8 +253,13 @@ class BotProgram():
             np_frame = self.d.get_latest_frame()
             self.frame = cv2.cvtColor(np_frame, cv2.COLOR_BGR2RGB)
             self.prev_frame = self.d.get_frame(20)
-            self.__processFrame()
+            # self.__processFrame()
+            # detectedMap = self.frame[174:920, 587:1330]
+            detectedMap = self.frame[171:923, 583:1335]
+            cv2.imshow("FRAME", detectedMap)
+
             
+
 
             # test_frame = self.frame[const.in_battle_mini_map_arrow_height_start:const.in_battle_mini_map_arrow_height_end,
             #    const.in_battle_mini_map_arrow_width_start:const.in_battle_mini_map_arrow_width_end]
