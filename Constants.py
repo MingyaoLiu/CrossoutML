@@ -583,6 +583,24 @@ mainmenu_crops = [
         True,
         ["select mode", "selectmode", "se1ect mode"],
         1
+    ),
+    CropProperty(
+        "Escape Exit Button",
+        CropArea(883, 658, 1029, 697),
+        True,
+        Point(955,675),
+        True,
+        ["title screen", "titlescreen", "tit1e screen"],
+        1
+    ),
+    CropProperty(
+        "Exit to login yes button",
+        CropArea(820, 610, 880, 626),
+        True,
+        Point(850,620),
+        True,
+        ["yes", "ais"],
+        5
     )
 ]
 

@@ -92,7 +92,7 @@ class BotProgram():
             elif screen.checkSingleSatisfy(self.frame, 1)[0]:
                 screen.executeSingleClick(1)
             elif screen.checkSingleSatisfy(self.frame, 2)[0]: ## login button
-
+                screen.setRandomNewAccount()
                 screen.fillUsername()
                 screen.fillPassword()                
                 screen.resetRetryCount()
@@ -138,7 +138,19 @@ class BotProgram():
 
         elif self.currentStep == ScreenStep.MainMenu:
             screen = self.MainMenuScreen
-            if screen.checkSatisfy(self.frame):
+
+            if self.LoginScreen.checkIfSwitchAccount():
+                if screen.checkSingleSatisfy(self.frame, 3)[0]:
+                    screen.executeSingleClick(3)
+                    self.currentStep = ScreenStep.Login
+                    screen.resetRetryCount()
+                elif screen.checkSingleSatisfy(self.frame, 2)[0]:
+                    screen.executeSingleClick(2)
+                else:
+                    kbDown("esc")
+                    kbUp("esc")
+                    time.sleep(1)
+            elif screen.checkSingleSatisfy(self.frame, 1)[0]:
                 screen.resetRetryCount()
                 screen.executeClick()
                 self.__advanceNextStep()
@@ -253,13 +265,17 @@ class BotProgram():
             np_frame = self.d.get_latest_frame()
             self.frame = cv2.cvtColor(np_frame, cv2.COLOR_BGR2RGB)
             self.prev_frame = self.d.get_frame(20)
-            # self.__processFrame()
+            self.__processFrame()
             # detectedMap = self.frame[174:920, 587:1330]
             detectedMap = self.frame[171:923, 583:1335]
-            cv2.imshow("FRAME", detectedMap)
+            cv2.imshow("FRAME", self.frame)
+            # cv2.imshow("MAP", detectedMap)
 
-            
+            # titlescreen = self.frame[658:697, 883:1029]
+            # cv2.imshow("title", titlescreen)
+            # print(self.MainMenuScreen.checkSingleSatisfy(self.frame, 2))
 
+            # print(self.MainMenuScreen.checkSingleSatisfy(self.frame, 3))
 
             # test_frame = self.frame[const.in_battle_mini_map_arrow_height_start:const.in_battle_mini_map_arrow_height_end,
             #    const.in_battle_mini_map_arrow_width_start:const.in_battle_mini_map_arrow_width_end]

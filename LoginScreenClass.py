@@ -11,8 +11,8 @@ class LoginScreen(Screen):
     def __init__(self, screenStep: ScreenStep, crops: [CropProperty], allowedRetryCount: int):
         super().__init__(screenStep, crops, allowedRetryCount)
 
-        # self.switchMinTimeSec = 3600
-        self.switchMinTimeSec = 1
+        self.switchMinTimeSec = 3600
+        # self.switchMinTimeSec = 1
         self.currentAccount = None
         self.accountStartTime = time.time()
         self.setRandomNewAccount()
@@ -25,18 +25,22 @@ class LoginScreen(Screen):
     def setRandomNewAccount(self):
         accounts = getGlobalSetting().settings.accounts
         if accounts:
-            self.currentAccount = random.choice(accounts)
+            new_acct = random.choice(list(accounts))
+            while new_acct == self.currentAccount:
+                new_acct = random.choice(list(accounts))
+                print("same account")
+            self.currentAccount = new_acct
             self.accountStartTime = time.time()
             print(self.currentAccount)
 
     def fillUsername(self):
         usenameInputPos = getCorrectPos(Point(190,360))
         mouseClick(usenameInputPos)
-        time.sleep(0.1)
+        time.sleep(0.05)
         fillInputWithString(self.currentAccount.username)
 
     def fillPassword(self):
         passwordInputPos = getCorrectPos(Point(200,430))
         mouseClick(passwordInputPos)
-        time.sleep(0.1)
+        time.sleep(0.05)
         fillInputWithString(self.currentAccount.password)
