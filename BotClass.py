@@ -72,7 +72,7 @@ class BotProgram():
         if self.currentStep == ScreenStep.debug:
             pass
         elif self.currentStep == ScreenStep.FinishBattleScreen:
-            self.currentStep = ScreenStep.Login
+            self.currentStep = ScreenStep.MasterJackUpgradeScreen
         else:
             self.currentStep += 1
 
@@ -139,7 +139,11 @@ class BotProgram():
         elif self.currentStep == ScreenStep.MainMenu:
             screen = self.MainMenuScreen
 
-            if self.LoginScreen.checkIfSwitchAccount():
+            if screen.retryCount == 0:
+
+                print("esc")
+
+            elif self.LoginScreen.checkIfSwitchAccount():
                 if screen.checkSingleSatisfy(self.frame, 3)[0]:
                     screen.executeSingleClick(3)
                     self.currentStep = ScreenStep.Login
@@ -152,7 +156,7 @@ class BotProgram():
                     time.sleep(1)
             elif screen.checkSingleSatisfy(self.frame, 1)[0]:
                 screen.resetRetryCount()
-                screen.executeClick()
+                screen.executeSingleClick(1)
                 self.__advanceNextStep()
             elif screen.addFailCount():
                 pass
@@ -265,11 +269,11 @@ class BotProgram():
             np_frame = self.d.get_latest_frame()
             self.frame = cv2.cvtColor(np_frame, cv2.COLOR_BGR2RGB)
             self.prev_frame = self.d.get_frame(20)
-            self.__processFrame()
+            # self.__processFrame()
             # detectedMap = self.frame[174:920, 587:1330]
             detectedMap = self.frame[171:923, 583:1335]
             cv2.imshow("FRAME", self.frame)
-            # cv2.imshow("MAP", detectedMap)
+            cv2.imshow("MAP", detectedMap)
 
             # titlescreen = self.frame[658:697, 883:1029]
             # cv2.imshow("title", titlescreen)
