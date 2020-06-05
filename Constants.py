@@ -114,6 +114,7 @@ class BattleFrame(tuple):
 ##                      Dicts                        ##
 #######################################################
 
+
 map_mask_file_path = {
     "engineer garage": "./assets/maps_masks/garage_map_1_mask.png",
     "naukograd": "./assets/maps_masks/naukugrad_mask.png",
@@ -466,7 +467,6 @@ in_battle_mini_map_arrow_trigger_pos_y = int(
     in_battle_mini_map_arrow_height_start + in_battle_mini_map_arrow_height / 2)
 
 
-
 co_pilot_upgrade_close_width = 54
 co_pilot_upgrade_close_width_start = int(
     screenWidth / 2 + 8 - co_pilot_upgrade_close_width / 2)
@@ -481,6 +481,34 @@ co_pilot_upgrade_close_trigger_pos_x = int(
     co_pilot_upgrade_close_width_start + co_pilot_upgrade_close_width / 2)
 co_pilot_upgrade_close_trigger_pos_y = int(
     co_pilot_upgrade_close_height_start + co_pilot_upgrade_close_height / 2)
+
+frame_crops = {
+    "login_exit_no_btn":
+    CropProperty(
+        "Exit No Button",
+        CropArea(login_exit_no_width_start, login_exit_no_height_start,
+                 login_exit_no_width_end, login_exit_no_height_end),
+        True,
+        Point(login_exit_no_trigger_pos_x,
+              login_exit_no_trigger_pos_y),
+        True,
+        ["no"],
+        1
+    ),
+    "mainmenu_escape_menu_return_button":
+    CropProperty(
+        "Escape Return Button",
+        CropArea(esc_return_button_width_start, esc_return_button_height_start,
+                 esc_return_button_width_end, esc_return_button_height_end),
+        True,
+        Point(esc_return_button_trigger_pos_x,
+              esc_return_button_trigger_pos_y),
+        True,
+        ["return", "toate"],
+        1
+    ),
+}
+
 
 login_crops = [
     CropProperty(
@@ -588,7 +616,7 @@ mainmenu_crops = [
         "Escape Exit Button",
         CropArea(883, 658, 1029, 697),
         True,
-        Point(955,675),
+        Point(955, 675),
         True,
         ["title screen", "titlescreen", "tit1e screen"],
         1
@@ -597,7 +625,7 @@ mainmenu_crops = [
         "Exit to login yes button",
         CropArea(820, 610, 880, 626),
         True,
-        Point(850,620),
+        Point(850, 620),
         True,
         ["yes", "ais"],
         5

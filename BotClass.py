@@ -15,6 +15,8 @@ import numpy as np
 import math
 from DebugClass import getDebugger
 from LoginScreenClass import LoginScreen
+from MainMenuScreenClass import MainMenuScreen
+
 
 class BotProgram():
 
@@ -42,7 +44,7 @@ class BotProgram():
         self.ChallengeCompleteScreen = Screen(
             ScreenStep.ChallengeCompleteScreen, const.mainmenu_challenge_crops, 10)
 
-        self.MainMenuScreen = Screen(
+        self.MainMenuScreen = MainMenuScreen(
             ScreenStep.MainMenu, const.mainmenu_crops, 30)
 
         self.select_mode_click_pos = [
@@ -91,10 +93,10 @@ class BotProgram():
                 screen.executeSingleClick(0)
             elif screen.checkSingleSatisfy(self.frame, 1)[0]:
                 screen.executeSingleClick(1)
-            elif screen.checkSingleSatisfy(self.frame, 2)[0]: ## login button
+            elif screen.checkSingleSatisfy(self.frame, 2)[0]:  # login button
                 screen.setRandomNewAccount()
                 screen.fillUsername()
-                screen.fillPassword()                
+                screen.fillPassword()
                 screen.resetRetryCount()
                 screen.executeSingleClick(2)
                 self.__advanceNextStep()
@@ -140,7 +142,7 @@ class BotProgram():
             screen = self.MainMenuScreen
 
             if screen.retryCount == 0:
-
+                screen.initMassEsc(6)
                 print("esc")
 
             elif self.LoginScreen.checkIfSwitchAccount():
@@ -283,12 +285,12 @@ class BotProgram():
 
             # test_frame = self.frame[const.in_battle_mini_map_arrow_height_start:const.in_battle_mini_map_arrow_height_end,
             #    const.in_battle_mini_map_arrow_width_start:const.in_battle_mini_map_arrow_width_end]
-            
+
             # getDebugger().debugDisplay(test_frame)
 
             # img = cv2.cvtColor(test_frame, cv2.COLOR_BGR2GRAY)
 
-            ## Test Center Image
+            # Test Center Image
             # ff = cv2.cvtColor(np_frame, cv2.COLOR_BGR2GRAY)
             # test_frame = ff[174:920, 587:1330]
 

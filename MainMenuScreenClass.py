@@ -6,37 +6,15 @@ import random
 from Utils import getCorrectPos
 from InputControl import mouseClick, kbDown, kbUp, fillInputWithString
 
-class MainmenuScreen(Screen):
+
+class MainMenuScreen(Screen):
 
     def __init__(self, screenStep: ScreenStep, crops: [CropProperty], allowedRetryCount: int):
         super().__init__(screenStep, crops, allowedRetryCount)
 
-        # self.switchMinTimeSec = 3600
-        self.switchMinTimeSec = 1
-        self.currentAccount = None
-        self.accountStartTime = time.time()
-        self.setRandomNewAccount()
-
-    def checkIfSwitchAccount(self):
-        if time.time() > self.accountStartTime + self.switchMinTimeSec:
-            return True
-        return False
-
-    def setRandomNewAccount(self):
-        accounts = getGlobalSetting().settings.accounts
-        if accounts:
-            self.currentAccount = random.choice(accounts)
-            self.accountStartTime = time.time()
-            print(self.currentAccount)
-
-    def fillUsername(self):
-        usenameInputPos = getCorrectPos(Point(190,360))
-        mouseClick(usenameInputPos)
-        time.sleep(0.05)
-        fillInputWithString(self.currentAccount.username)
-
-    def fillPassword(self):
-        passwordInputPos = getCorrectPos(Point(200,430))
-        mouseClick(passwordInputPos)
-        time.sleep(0.05)
-        fillInputWithString(self.currentAccount.password)
+    def initMassEsc(self, n):
+        i = 0
+        while i < n:
+            kbDown("esc")
+            kbUp("esc")
+            time.sleep(1)

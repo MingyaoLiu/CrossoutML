@@ -1,3 +1,4 @@
+import Constants
 import sys
 
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -33,6 +34,9 @@ from SettingsClass import getGlobalSetting
 
 def checkSettings():
     return getGlobalSetting()
+
+
+print(Constants.frame_crops["login_exit_no_btn"])
 
 
 if __name__ == "__main__":
