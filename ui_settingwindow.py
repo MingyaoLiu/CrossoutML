@@ -9,6 +9,8 @@ import time
 from SettingsClass import getGlobalSetting
 from ui_addaccountwindow import UIAddAccountWindow
 from operator import itemgetter
+import d3dshot
+import cv2
 
 class UI_SettingWindow(QtWidgets.QMainWindow):
     
@@ -22,6 +24,32 @@ class UI_SettingWindow(QtWidgets.QMainWindow):
         self.addAcctBtn.clicked.connect(self.__goToAddAcct)
         self.delAcctBtn.clicked.connect(self.__deleteCurrentAcct)
 
+        self.selectDisplayShiftBtn.clicked.connect(self.__goToSelectDisplayShift)
+
+    def __goToSelectDisplayShift(self):
+        d = d3dshot.create(capture_output='numpy')
+        d.display = d.displays[int(self.displayIndex.text())]
+        currentScreen = d.screenshot()
+        fullScreenShot = cv2.cvtColor(currentScreen, cv2.COLOR_BGR2GRAY)
+        selectFrameX = 400
+        selectFrameY = 200
+        enlargeFactor = 4
+        selectFrame = fullScreenShot[0: selectFrameY, 0: selectFrameX]
+        enlargedFrameSize = (selectFrameX * enlargeFactor, selectFrameY * enlargeFactor) # Choose the top left corner of the inner window.
+        resized = cv2.resize(selectFrame, enlargedFrameSize, interpolation = cv2.INTER_AREA)
+        resizedAddDot = cv2.circle(resized, (int(self.displayShiftX.text()) * enlargeFactor, int(self.displayShiftY.text()) * enlargeFactor),1, (255, 255, 255), -1)
+        cv2.imshow("ChooseGameWindowTopLeftCorner", resizedAddDot )
+        cv2.namedWindow('ChooseGameWindowTopLeftCorner', cv2.WINDOW_AUTOSIZE)
+        def on_click(event, x, y, p1, p2):
+            print(event)
+            if event == cv2.EVENT_LBUTTONDOWN:
+                print('mouse down')
+                print(x)
+                print(y)
+                self.displayShiftX.setText(str(round(x / enlargeFactor)))
+                self.displayShiftY.setText(str(round(y / enlargeFactor)))
+                cv2.destroyWindow('ChooseGameWindowTopLeftCorner') 
+        cv2.setMouseCallback('ChooseGameWindowTopLeftCorner', on_click)
 
     def __goToAddAcct(self):
         self.window = QtWidgets.QDialog()
