@@ -16,7 +16,7 @@ message CrossoutMLSetting {
     int32 detectionFPS = 13;
     bool showDebugWindow = 14;
     int32 checkStuckFrameCount = 15;
-    bool isFullScreen = 16;
+    string gameTitle = 16;
     int32 startScreen = 17;
     repeated CrossoutMLAccount accounts = 18;
 }

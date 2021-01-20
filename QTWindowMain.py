@@ -2,17 +2,28 @@ import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5 import uic
 from PyQt5.QtCore import QTimer
-from ui_settingwindow import UI_SettingWindow
+from QTWindowSettings import UI_SettingWindow
 import threading
 from BotBackgroundThread import BotBackgroundThread
 from DebugClass import getDebugger
+
+
+game_main_window = None
+
+def getMainWindow():
+    global game_main_window
+    if game_main_window:
+        return game_main_window
+    else:
+        game_main_window = UI_MainWindow()
+        return game_main_window
 
 
 class UI_MainWindow(QtWidgets.QMainWindow):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        uic.loadUi("mainwindow.ui", self)
+        uic.loadUi("QTWindowMainUI.ui", self)
 
         self.isAllowedClick = True
 

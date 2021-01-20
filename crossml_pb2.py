@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\rcrossml.proto\"\xd7\x03\n\x11\x43rossoutMLSetting\x12\x14\n\x0c\x64isplayIndex\x18\x01 \x01(\x05\x12\x10\n\x08\x66ullAuto\x18\x02 \x01(\x08\x12\x15\n\rdisplayShiftX\x18\x03 \x01(\x05\x12\x15\n\rdisplayShiftY\x18\x04 \x01(\x05\x12\x13\n\x0bmouseShiftX\x18\x05 \x01(\x05\x12\x13\n\x0bmouseShiftY\x18\x06 \x01(\x05\x12\x13\n\x0b\x63\x61rMaxSpeed\x18\x07 \x01(\x05\x12\x1f\n\x17\x63\x65nterFarDetectDistance\x18\x08 \x01(\x05\x12\x1f\n\x17\x63\x65nterLowDetectDistance\x18\t \x01(\x05\x12\x18\n\x10lrDetectDistance\x18\n \x01(\x05\x12\x19\n\x11\x66rontDetectDegree\x18\x0b \x01(\x05\x12\x18\n\x10targetDisplayFPS\x18\x0c \x01(\x05\x12\x14\n\x0c\x64\x65tectionFPS\x18\r \x01(\x05\x12\x17\n\x0fshowDebugWindow\x18\x0e \x01(\x08\x12\x1c\n\x14\x63heckStuckFrameCount\x18\x0f \x01(\x05\x12\x14\n\x0cisFullScreen\x18\x10 \x01(\x08\x12\x13\n\x0bstartScreen\x18\x11 \x01(\x05\x12$\n\x08\x61\x63\x63ounts\x18\x12 \x03(\x0b\x32\x12.CrossoutMLAccount\"7\n\x11\x43rossoutMLAccount\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\tb\x06proto3'
+  serialized_pb=b'\n\rcrossml.proto\"\xd4\x03\n\x11\x43rossoutMLSetting\x12\x14\n\x0c\x64isplayIndex\x18\x01 \x01(\x05\x12\x10\n\x08\x66ullAuto\x18\x02 \x01(\x08\x12\x15\n\rdisplayShiftX\x18\x03 \x01(\x05\x12\x15\n\rdisplayShiftY\x18\x04 \x01(\x05\x12\x13\n\x0bmouseShiftX\x18\x05 \x01(\x05\x12\x13\n\x0bmouseShiftY\x18\x06 \x01(\x05\x12\x13\n\x0b\x63\x61rMaxSpeed\x18\x07 \x01(\x05\x12\x1f\n\x17\x63\x65nterFarDetectDistance\x18\x08 \x01(\x05\x12\x1f\n\x17\x63\x65nterLowDetectDistance\x18\t \x01(\x05\x12\x18\n\x10lrDetectDistance\x18\n \x01(\x05\x12\x19\n\x11\x66rontDetectDegree\x18\x0b \x01(\x05\x12\x18\n\x10targetDisplayFPS\x18\x0c \x01(\x05\x12\x14\n\x0c\x64\x65tectionFPS\x18\r \x01(\x05\x12\x17\n\x0fshowDebugWindow\x18\x0e \x01(\x08\x12\x1c\n\x14\x63heckStuckFrameCount\x18\x0f \x01(\x05\x12\x11\n\tgameTitle\x18\x10 \x01(\t\x12\x13\n\x0bstartScreen\x18\x11 \x01(\x05\x12$\n\x08\x61\x63\x63ounts\x18\x12 \x03(\x0b\x32\x12.CrossoutMLAccount\"7\n\x11\x43rossoutMLAccount\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\tb\x06proto3'
 )
 
 
@@ -139,9 +139,9 @@ _CROSSOUTMLSETTING = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='isFullScreen', full_name='CrossoutMLSetting.isFullScreen', index=15,
-      number=16, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
+      name='gameTitle', full_name='CrossoutMLSetting.gameTitle', index=15,
+      number=16, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
@@ -172,7 +172,7 @@ _CROSSOUTMLSETTING = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=18,
-  serialized_end=489,
+  serialized_end=486,
 )
 
 
@@ -210,8 +210,8 @@ _CROSSOUTMLACCOUNT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=491,
-  serialized_end=546,
+  serialized_start=488,
+  serialized_end=543,
 )
 
 _CROSSOUTMLSETTING.fields_by_name['accounts'].message_type = _CROSSOUTMLACCOUNT

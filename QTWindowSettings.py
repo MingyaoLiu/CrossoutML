@@ -11,12 +11,18 @@ from ui_addaccountwindow import UIAddAccountWindow
 from operator import itemgetter
 import d3dshot
 import cv2
+from QTWindowOverlay import getOverlay
+import ctypes
+
+class TITLEBARINFO(ctypes.Structure):
+    _fields_ = [("cbSize", ctypes.wintypes.DWORD), ("rcTitleBar", ctypes.wintypes.RECT),
+                ("rgstate", ctypes.wintypes.DWORD * 6)]
 
 class UI_SettingWindow(QtWidgets.QMainWindow):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        uic.loadUi("settingwindow.ui", self)
+        uic.loadUi("QTWindowSettingsUI.ui", self)
         self.loadSettings()
         
         self.saveBtn.clicked.connect(self.saveSettings)
@@ -24,9 +30,59 @@ class UI_SettingWindow(QtWidgets.QMainWindow):
         self.addAcctBtn.clicked.connect(self.__goToAddAcct)
         self.delAcctBtn.clicked.connect(self.__deleteCurrentAcct)
 
-        self.selectDisplayShiftBtn.clicked.connect(self.__goToSelectDisplayShift)
+        self.detectAllSettingBtn.clicked.connect(self.__detectAllSettings)
 
-    def __goToSelectDisplayShift(self):
+    def __GetWindowRectFromName(self, name:str)-> tuple:
+        hwnd = ctypes.windll.user32.FindWindowW(0, name)
+
+        # This rect return the window rect with titlebar but no shadow.
+        rect = ctypes.wintypes.RECT()
+        foundwindow = ctypes.windll.dwmapi.DwmGetWindowAttribute
+        if foundwindow:
+            rect = ctypes.wintypes.RECT()
+            DWMWA_EXTENDED_FRAME_BOUNDS = 9
+            foundwindow(
+                hwnd,
+                ctypes.wintypes.DWORD(DWMWA_EXTENDED_FRAME_BOUNDS),
+                ctypes.byref(rect), ctypes.sizeof(rect))
+
+        # this rect return the outer window, with titlebar and 4 side shadow.
+        rect2 = ctypes.wintypes.RECT() 
+        ctypes.windll.user32.GetWindowRect(hwnd, ctypes.pointer(rect2))
+
+        # this returns the title bar rect, bottom would be the top of the inner window.
+        title_info = TITLEBARINFO()
+        title_info.cbSize = ctypes.sizeof(title_info)
+        ctypes.windll.user32.GetTitleBarInfo(hwnd, ctypes.byref(title_info))
+
+        return (rect.left, title_info.rcTitleBar.bottom, rect.right, rect.bottom) # return only inner window rect.
+    
+    def __detectAllSettings(self): ## This only support less than 2 monitor of same resolution from left to right arranged. left is the main monitor.
+        innerWindow = self.__GetWindowRectFromName(self.gameTitleInput.text())
+        left = innerWindow[0]
+        top = innerWindow[1]
+        right = innerWindow[2]
+        bottom = innerWindow[3]
+        width = innerWindow[2] - innerWindow[0]
+        height = innerWindow[3] - innerWindow[1]
+        getOverlay().resize((left, top, width, height))
+        d = d3dshot.create(capture_output='numpy')
+        d.display = d.displays[int(self.displayIndex.text())]
+        if (left > d.displays[0].resolution[0]):
+            self.displayIndex.setText(str(1))
+            self.displayShiftX.setText(str(left - d.displays[0].resolution[0]))
+        else:
+            self.displayShiftX.setText(str(left))
+        
+        self.displayShiftY.setText(str(top))
+
+        self.mouseShiftX.setText(str(left))
+        self.mouseShiftY.setText(str(top))
+
+        d.stop()
+        
+
+    def __goToSelectDisplayShift(self): # NOT USED RN
         d = d3dshot.create(capture_output='numpy')
         d.display = d.displays[int(self.displayIndex.text())]
         currentScreen = d.screenshot()
@@ -66,11 +122,11 @@ class UI_SettingWindow(QtWidgets.QMainWindow):
     def loadSettings(self):
         setting = getGlobalSetting().settings
         self.displayIndex.setText(str(setting.displayIndex))
+        self.gameTitleInput.setText(setting.gameTitle)
         self.displayShiftX.setText(str(setting.displayShiftX))
         self.displayShiftY.setText(str(setting.displayShiftY))
         self.mouseShiftX.setText(str(setting.mouseShiftX))
         self.mouseShiftY.setText(str(setting.mouseShiftY))
-        self.isFullScreenCheckbox.setChecked(setting.isFullScreen)
         
         self.targetFPSInput.setText(str(setting.targetDisplayFPS or 20))
         self.centerFarDetectDistance.setText(
@@ -106,11 +162,11 @@ class UI_SettingWindow(QtWidgets.QMainWindow):
     def saveSettings(self):
         setting = getGlobalSetting().settings
         setting.displayIndex = int(self.displayIndex.text())
+        setting.gameTitle = self.gameTitleInput.text() or 'Crossout X.XX.XX.XXXXXX'
         setting.displayShiftX = int(self.displayShiftX.text())
         setting.displayShiftY = int(self.displayShiftY.text())
         setting.mouseShiftX = int(self.mouseShiftX.text())
         setting.mouseShiftY = int(self.mouseShiftY.text())
-        setting.isFullScreen = self.isFullScreenCheckbox.isChecked()
         setting.targetDisplayFPS = int(self.targetFPSInput.text()) or 20
         setting.centerFarDetectDistance = int(
             self.centerFarDetectDistance.text()) or 3 * (setting.lrDetectDistance or 10)
