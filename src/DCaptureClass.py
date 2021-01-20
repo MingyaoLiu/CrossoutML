@@ -33,7 +33,7 @@ class DCaptureClass:
 
 
     def getFrame(self, previous_n: int):
-        if (previous_n):
+        if (previous_n != 0):
             return self.d.get_frame(previous_n)
         else:
             return self.d.get_latest_frame()

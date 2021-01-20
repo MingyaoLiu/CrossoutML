@@ -7,6 +7,10 @@ import threading
 from BotBackgroundThread import BotBackgroundThread
 from DebugClass import getDebugger
 
+from uis.QTWindowOverlay import getOverlay
+
+from DCaptureClass import getDCapture
+from SettingsClass import getGlobalSetting
 
 game_main_window = None
 
@@ -28,7 +32,7 @@ class UI_MainWindow(QtWidgets.QMainWindow):
         self.isAllowedClick = True
 
         self.botWorker = None
-
+        self.dcapture = None
         self.startBtn.clicked.connect(self.startApp)
         self.stopBtn.clicked.connect(self.stopApp)
         self.settingBtn.clicked.connect(self.goToSettingWindow)
@@ -49,15 +53,26 @@ class UI_MainWindow(QtWidgets.QMainWindow):
         if self.isAllowedClick and self.botWorker is not None:
             self.debugger.closeDebugWindow()
             self.__disableClick()
+            self.dcapture.stopCapture()
             # self.botWorker.stopBot()
             # self.botWorker.quit()
             self.botWorker.exit()
             self.botWorker = None
 
     def startApp(self):
+
         if self.isAllowedClick and self.botWorker is None:
             self.debugger.createDebugWindow()
             self.__disableClick()
+
+            overlay = getOverlay()
+            if (getGlobalSetting().settings.showDebugWindow):
+                
+                overlay.show()
+
+            self.dcapture = getDCapture().startCapture()
+
+
             self.botWorker = BotBackgroundThread()
             self.botWorker.start()
             # self.botWorker.startBot()

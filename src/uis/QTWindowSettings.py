@@ -9,7 +9,6 @@ import time
 from SettingsClass import getGlobalSetting
 from uis.ui_addaccountwindow import UIAddAccountWindow
 from operator import itemgetter
-import d3dshot
 import cv2
 from uis.QTWindowOverlay import getOverlay
 import ctypes

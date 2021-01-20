@@ -8,7 +8,6 @@ from uis.QTWindowMain import getMainWindow
 from uis.QTWindowOverlay import getOverlay
 
 # temporary
-import d3dshot
 import cv2
 import pytesseract
 import numpy
@@ -50,12 +49,6 @@ if __name__ == "__main__":
 
     window = getMainWindow()
     window.show()
-
-
-    overlay = getOverlay()
-    if (getGlobalSetting().settings.showDebugWindow):
-        
-        overlay.show()
 
 
     app.exec_()

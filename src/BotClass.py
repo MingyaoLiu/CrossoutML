@@ -1,5 +1,4 @@
 import cv2
-import d3dshot
 import Constants as const
 from Constants import ScreenStep, Point
 from screens.ScreenClass import Screen
@@ -16,6 +15,7 @@ import math
 from DebugClass import getDebugger
 from screens.LoginScreenClass import LoginScreen
 from screens.MainMenuScreenClass import MainMenuScreen
+from DCaptureClass import getDCapture
 
 
 class BotProgram():
@@ -25,8 +25,6 @@ class BotProgram():
         self.killBotNow = False
 
         # self.prev_frame_dist = 10
-
-        self.d = d3dshot.create(capture_output='numpy')
 
         self.currentStep = ScreenStep(getGlobalSetting().settings.startScreen)
 
@@ -188,7 +186,7 @@ class BotProgram():
         elif self.currentStep == ScreenStep.BattlePrepareScreen:
             screen = self.BattlePreparationScreen
 
-            prev_frame = self.d.get_frame(20)
+            prev_frame = getDCapture().getFrame(20)
 
             if screen.retryCount % 100 == 0 and screen.retryCount != 0:
                 kbDown("tab")
@@ -251,26 +249,18 @@ class BotProgram():
     def stop(self):
         print("STOP BOT")
         self.killBotNow = True
-        self.d.stop()
         self.battleMgm.stop()
 
     def start(self):
         print("START BOT")
         mouseClick(getCorrectPos(Point(400, 10)))
-        target_fps = getGlobalSetting().settings.targetDisplayFPS or 20
-        self.d.display = self.d.displays[getGlobalSetting(
-        ).settings.displayIndex]
-        displayShiftX = getGlobalSetting().settings.displayShiftX
-        displayShiftY = getGlobalSetting().settings.displayShiftY
-        self.d.capture(target_fps=target_fps, region=(
-            0 + displayShiftX, 0 + displayShiftY, const.screenWidth, const.screenHeight))
 
         time.sleep(1)
 
         while self.killBotNow is False:
-            np_frame = self.d.get_latest_frame()
+            np_frame = getDCapture().getFrame(0)
             self.frame = cv2.cvtColor(np_frame, cv2.COLOR_BGR2RGB)
-            self.prev_frame = self.d.get_frame(20)
+            self.prev_frame = getDCapture().getFrame(20)
             # self.__processFrame()
             # detectedMap = self.frame[174:920, 587:1330]
             detectedMap = self.frame[171:923, 583:1335]
