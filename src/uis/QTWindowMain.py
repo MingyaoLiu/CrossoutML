@@ -32,7 +32,9 @@ class UI_MainWindow(QtWidgets.QMainWindow):
         self.isAllowedClick = True
 
         self.botWorker = None
-        self.dcapture = None
+        self.dcapture = getDCapture()
+
+
         self.startBtn.clicked.connect(self.startApp)
         self.stopBtn.clicked.connect(self.stopApp)
         self.settingBtn.clicked.connect(self.goToSettingWindow)
@@ -62,15 +64,15 @@ class UI_MainWindow(QtWidgets.QMainWindow):
     def startApp(self):
 
         if self.isAllowedClick and self.botWorker is None:
-            self.debugger.createDebugWindow()
+            # self.debugger.createDebugWindow()  # will no longer use the debug window
             self.__disableClick()
 
             overlay = getOverlay()
             if (getGlobalSetting().settings.showDebugWindow):
-                
+                overlay.autoResize()
                 overlay.show()
 
-            self.dcapture = getDCapture().startCapture()
+            self.dcapture.startCapture()
 
 
             self.botWorker = BotBackgroundThread()

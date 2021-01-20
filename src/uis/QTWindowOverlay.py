@@ -6,6 +6,8 @@ from PyQt5.QtGui import QIcon, QWindow, QPaintDeviceWindow, QPainter, QPen, QBru
 from PyQt5.QtWidgets import QDesktopWidget, QWidget, QMainWindow
 from PyQt5.QtCore import Qt
 from SettingsClass import getGlobalSetting
+from DCaptureClass import getDCapture
+import Constants as const
 
 game_overlay = None
 
@@ -34,16 +36,14 @@ class OverlayWindow(QMainWindow ):
         self.setGeometry(rect[0], rect[1], rect[2], rect[3])
 
     def autoResize(self):
-        setting = getGlobalSetting().settings
-        left = setting
-        top = innerWindow[1]
-        right = innerWindow[2]
-        bottom = innerWindow[3]
-        width = innerWindow[2] - innerWindow[0]
-        height = innerWindow[3] - innerWindow[1]
-        getOverlay().resize((left, top, width, height))
-        overlay.show()
+        displayIndex = getGlobalSetting().settings.displayIndex
+        displayShiftX = getGlobalSetting().settings.displayShiftX
+        displayShiftY = getGlobalSetting().settings.displayShiftY
 
+        if (displayIndex == 1):
+            displayShiftX += getDCapture().d.displays[0].resolution[0]
+
+        self.resize((displayShiftX, displayShiftY, const.screenWidth, const.screenHeight))
 
 
     def mousePressEvent(self, event):

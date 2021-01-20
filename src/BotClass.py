@@ -250,22 +250,39 @@ class BotProgram():
         print("STOP BOT")
         self.killBotNow = True
         self.battleMgm.stop()
+        cv2.destroyAllWindows()
+
 
     def start(self):
         print("START BOT")
-        mouseClick(getCorrectPos(Point(400, 10)))
+        mouseClick(getCorrectPos(Point(0, 0)))
 
         time.sleep(1)
 
         while self.killBotNow is False:
             np_frame = getDCapture().getFrame(0)
-            self.frame = cv2.cvtColor(np_frame, cv2.COLOR_BGR2RGB)
-            self.prev_frame = getDCapture().getFrame(20)
-            # self.__processFrame()
-            # detectedMap = self.frame[174:920, 587:1330]
-            detectedMap = self.frame[171:923, 583:1335]
-            cv2.imshow("FRAME", self.frame)
-            cv2.imshow("MAP", detectedMap)
+            # self.frame = cv2.cvtColor(np_frame, cv2.COLOR_BGR2RGB)
+            # self.prev_frame = getDCapture().getFrame(20)
+            # # self.__processFrame()
+            # # detectedMap = self.frame[174:920, 587:1330]
+            # detectedMap = self.frame[171:923, 583:1335]
+            # cv2.imshow("FRAME", self.frame)
+            # cv2.imshow("MAP", detectedMap)
+
+            # self.__processFrame(np_frame)
+
+            cv2.imshow("Capture", np_frame)
+
+            
+            cv2.waitKey(1)
+
+
+
+
+
+
+
+
 
             # titlescreen = self.frame[658:697, 883:1029]
             # cv2.imshow("title", titlescreen)

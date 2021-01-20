@@ -26,7 +26,8 @@ class DCaptureClass:
         self.d.display = self.d.displays[getGlobalSetting().settings.displayIndex or 0]
         displayShiftX = getGlobalSetting().settings.displayShiftX
         displayShiftY = getGlobalSetting().settings.displayShiftY
-        self.d.capture(target_fps=fps, region=(displayShiftX, displayShiftY, const.screenWidth, const.screenHeight))
+        print("START CAPTURE")
+        self.d.capture(target_fps=fps, region=(displayShiftX, displayShiftY, const.screenWidth + displayShiftX, const.screenHeight + displayShiftY))
 
     def stopCapture(self):
         self.d.stop()
