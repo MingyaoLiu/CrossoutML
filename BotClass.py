@@ -2,7 +2,7 @@ import cv2
 import d3dshot
 import Constants as const
 from Constants import ScreenStep, Point
-from ScreenClass import Screen
+from screens.ScreenClass import Screen
 from Utils import getCorrectPos
 from InputControl import kbDown, kbUp, KBPress, mouseClick
 from MovementClass import MoveManagement
@@ -14,8 +14,8 @@ import threading
 import numpy as np
 import math
 from DebugClass import getDebugger
-from LoginScreenClass import LoginScreen
-from MainMenuScreenClass import MainMenuScreen
+from screens.LoginScreenClass import LoginScreen
+from screens.MainMenuScreenClass import MainMenuScreen
 
 
 class BotProgram():

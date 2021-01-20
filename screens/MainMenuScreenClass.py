@@ -1,4 +1,4 @@
-from ScreenClass import Screen, ScreenStep
+from screens.ScreenClass import Screen, ScreenStep
 from Constants import CropProperty, Point
 import time
 from SettingsClass import getGlobalSetting

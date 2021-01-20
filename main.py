@@ -4,8 +4,8 @@ import sys
 
 from PyQt5.QtWidgets import QApplication
 
-from QTWindowMain import getMainWindow
-from QTWindowOverlay import getOverlay
+from uis.QTWindowMain import getMainWindow
+from uis.QTWindowOverlay import getOverlay
 
 # temporary
 import d3dshot

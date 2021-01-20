@@ -7,11 +7,11 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5 import uic
 import time
 from SettingsClass import getGlobalSetting
-from ui_addaccountwindow import UIAddAccountWindow
+from uis.ui_addaccountwindow import UIAddAccountWindow
 from operator import itemgetter
 import d3dshot
 import cv2
-from QTWindowOverlay import getOverlay
+from uis.QTWindowOverlay import getOverlay
 import ctypes
 
 class TITLEBARINFO(ctypes.Structure):
@@ -22,7 +22,7 @@ class UI_SettingWindow(QtWidgets.QMainWindow):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        uic.loadUi("QTWindowSettingsUI.ui", self)
+        uic.loadUi("uis/QTWindowSettingsUI.ui", self)
         self.loadSettings()
         
         self.saveBtn.clicked.connect(self.saveSettings)

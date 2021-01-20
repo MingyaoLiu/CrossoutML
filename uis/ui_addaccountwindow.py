@@ -11,7 +11,7 @@ class UIAddAccountWindow(QtWidgets.QDialog):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        uic.loadUi("ui_addaccount.ui", self)
+        uic.loadUi("uis/ui_addaccount.ui", self)
         
         self.saveBtn.clicked.connect(self.__saveAccount)
         

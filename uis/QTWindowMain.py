@@ -2,7 +2,7 @@ import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5 import uic
 from PyQt5.QtCore import QTimer
-from QTWindowSettings import UI_SettingWindow
+from uis.QTWindowSettings import UI_SettingWindow
 import threading
 from BotBackgroundThread import BotBackgroundThread
 from DebugClass import getDebugger
@@ -23,7 +23,7 @@ class UI_MainWindow(QtWidgets.QMainWindow):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        uic.loadUi("QTWindowMainUI.ui", self)
+        uic.loadUi("uis/QTWindowMainUI.ui", self)
 
         self.isAllowedClick = True
 
