@@ -1082,7 +1082,7 @@
             </font>
            </property>
            <property name="text">
-            <string>Show Debug Window</string>
+            <string>Show Debug Overlay</string>
            </property>
           </widget>
          </item>

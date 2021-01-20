@@ -40,15 +40,11 @@ import ctypes
 from SettingsClass import getGlobalSetting
 
 
-def checkSettings():
-    return getGlobalSetting()
-
-
 
 if __name__ == "__main__":
     
     
-    checkSettings()
+    getGlobalSetting()
 
     app = QApplication(sys.argv)
 
@@ -57,7 +53,9 @@ if __name__ == "__main__":
 
 
     overlay = getOverlay()
-    overlay.show()
+    if (getGlobalSetting().settings.showDebugWindow):
+        
+        overlay.show()
 
 
     app.exec_()

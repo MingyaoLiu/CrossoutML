@@ -13,6 +13,7 @@ import d3dshot
 import cv2
 from uis.QTWindowOverlay import getOverlay
 import ctypes
+from DCaptureClass import getDCapture
 
 class TITLEBARINFO(ctypes.Structure):
     _fields_ = [("cbSize", ctypes.wintypes.DWORD), ("rcTitleBar", ctypes.wintypes.RECT),
@@ -66,8 +67,10 @@ class UI_SettingWindow(QtWidgets.QMainWindow):
         width = innerWindow[2] - innerWindow[0]
         height = innerWindow[3] - innerWindow[1]
         getOverlay().resize((left, top, width, height))
-        d = d3dshot.create(capture_output='numpy')
-        d.display = d.displays[int(self.displayIndex.text())]
+        if (self.showDebugCheckbox.isChecked()):
+            getOverlay().show()
+        d = getDCapture().d
+        d.ddisplay = d.displays[int(self.displayIndex.text())]
         if (left > d.displays[0].resolution[0]):
             self.displayIndex.setText(str(1))
             self.displayShiftX.setText(str(left - d.displays[0].resolution[0]))
@@ -80,10 +83,11 @@ class UI_SettingWindow(QtWidgets.QMainWindow):
         self.mouseShiftY.setText(str(top))
 
         d.stop()
+        d = None
         
 
     def __goToSelectDisplayShift(self): # NOT USED RN
-        d = d3dshot.create(capture_output='numpy')
+        d = getDCapture()
         d.display = d.displays[int(self.displayIndex.text())]
         currentScreen = d.screenshot()
         fullScreenShot = cv2.cvtColor(currentScreen, cv2.COLOR_BGR2GRAY)
