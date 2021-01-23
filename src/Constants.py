@@ -7,6 +7,10 @@ import operator
 
 import enum
 
+class StepStatus(enum.Enum):
+    unknown = 0
+    succeed = 1
+    failed = 2
 
 class MoveDirection(enum.Enum):
     backLeft = 0
@@ -33,7 +37,6 @@ class BattleMode(enum.IntEnum):
     battery = 2
     # patrol = 3
     raven = 3
-
 
 class ScreenStep(enum.IntEnum):
     Login = 0
@@ -70,17 +73,18 @@ class CropArea(tuple):
         return tuple.__new__(CropArea, (x, y, xs, ys))
 
 
-class CropProperty(tuple):
-    def __new__(self, name: str, area: CropArea, requiredMatch: bool, clickPos: Point, willClick: bool, expectedStrs: [str],  clickWaitTime: int):
-        CropProperty.name = property(operator.itemgetter(0))
-        CropProperty.area = property(operator.itemgetter(1))
-        CropProperty.requiredMatch = property(operator.itemgetter(2))
-        CropProperty.clickPos = property(operator.itemgetter(3))
-        CropProperty.willClick = property(operator.itemgetter(4))
-        CropProperty.expectedStrs = property(operator.itemgetter(5))
-        CropProperty.clickWaitTime = property(operator.itemgetter(6))
-        return tuple.__new__(CropProperty, (name, area, requiredMatch, clickPos, willClick, expectedStrs, clickWaitTime))
-
+class DetectClickPair(tuple):
+    def __new__(self, name: str, area: CropArea, requiredMatch: bool, clickPos: Point, willClick: bool, expectedStrs: [str],  waitBeforeDetect: int,  waitBeforeClick: int):
+        DetectClickPair.name = property(operator.itemgetter(0))
+        DetectClickPair.area = property(operator.itemgetter(1))
+        DetectClickPair.requiredMatch = property(operator.itemgetter(2))
+        DetectClickPair.clickPos = property(operator.itemgetter(3))
+        DetectClickPair.willClick = property(operator.itemgetter(4))
+        DetectClickPair.expectedStrs = property(operator.itemgetter(5))
+        DetectClickPair.waitBeforeDetect = property(operator.itemgetter(6))
+        DetectClickPair.waitBeforeClick = property(operator.itemgetter(7))
+        return tuple.__new__(DetectClickPair, (name, area, requiredMatch, clickPos, willClick, expectedStrs, waitBeforeDetect, waitBeforeClick))
+ 
 
 class PointData(tuple):
     def __new__(self, pos: Point, isOutside: bool):
@@ -144,7 +148,6 @@ map_mask_file_path = {
 
 screenWidth = 1920
 screenHeight = 1080
-topTitleBarHeight = 30
 
 scrap_btn_width = 40
 scrap_btn_height = 40
@@ -482,59 +485,10 @@ co_pilot_upgrade_close_trigger_pos_x = int(
 co_pilot_upgrade_close_trigger_pos_y = int(
     co_pilot_upgrade_close_height_start + co_pilot_upgrade_close_height / 2)
 
-frame_crops = {
-    "login_exit_no_btn":
-    CropProperty(
-        "Exit No Button",
-        CropArea(login_exit_no_width_start, login_exit_no_height_start,
-                 login_exit_no_width_end, login_exit_no_height_end),
-        True,
-        Point(login_exit_no_trigger_pos_x,
-              login_exit_no_trigger_pos_y),
-        True,
-        ["no"],
-        1
-    ),
-    "mainmenu_escape_menu_return_button":
-    CropProperty(
-        "Escape Return Button",
-        CropArea(esc_return_button_width_start, esc_return_button_height_start,
-                 esc_return_button_width_end, esc_return_button_height_end),
-        True,
-        Point(esc_return_button_trigger_pos_x,
-              esc_return_button_trigger_pos_y),
-        True,
-        ["return", "toate"],
-        1
-    ),
-}
 
+DetailStep = {
 
-login_crops = [
-    CropProperty(
-        "Exit No Button",
-        CropArea(login_exit_no_width_start, login_exit_no_height_start,
-                 login_exit_no_width_end, login_exit_no_height_end),
-        True,
-        Point(login_exit_no_trigger_pos_x,
-              login_exit_no_trigger_pos_y),
-        True,
-        ["no"],
-        1
-    ),
-    CropProperty(
-        "Escape Return Button",
-        CropArea(esc_return_button_width_start, esc_return_button_height_start,
-                 esc_return_button_width_end, esc_return_button_height_end),
-        True,
-        Point(esc_return_button_trigger_pos_x,
-              esc_return_button_trigger_pos_y),
-        True,
-        ["return", "toate"],
-        1
-    ),
-
-    CropProperty(
+    "login_btn": DetectClickPair(
         "Login Button",
         CropArea(login_label_width_start, login_label_height_start,
                  login_label_width_end, login_label_height_end),
@@ -543,12 +497,87 @@ login_crops = [
               login_label_trigger_pos_y),
         True,
         ["login", "log in", "log ln", "logln"],
-        10
+        10,
+        1
+    )
+}
+
+
+
+
+
+frame_crops = {
+    "login_exit_no_btn":
+    DetectClickPair(
+        "Exit No Button",
+        CropArea(login_exit_no_width_start, login_exit_no_height_start,
+                 login_exit_no_width_end, login_exit_no_height_end),
+        True,
+        Point(login_exit_no_trigger_pos_x,
+              login_exit_no_trigger_pos_y),
+        True,
+        ["no"],
+        2,
+        2
+    ),
+    "mainmenu_escape_menu_return_button":
+    DetectClickPair(
+        "Escape Return Button",
+        CropArea(esc_return_button_width_start, esc_return_button_height_start,
+                 esc_return_button_width_end, esc_return_button_height_end),
+        True,
+        Point(esc_return_button_trigger_pos_x,
+              esc_return_button_trigger_pos_y),
+        True,
+        ["return", "toate"],
+        1,
+        1
+    ),
+}
+
+
+login_crops = [
+    DetectClickPair(
+        "Exit No Button",
+        CropArea(login_exit_no_width_start, login_exit_no_height_start,
+                 login_exit_no_width_end, login_exit_no_height_end),
+        True,
+        Point(login_exit_no_trigger_pos_x,
+              login_exit_no_trigger_pos_y),
+        True,
+        ["no"],
+        1,
+        1
+    ),
+    DetectClickPair(
+        "Escape Return Button",
+        CropArea(esc_return_button_width_start, esc_return_button_height_start,
+                 esc_return_button_width_end, esc_return_button_height_end),
+        True,
+        Point(esc_return_button_trigger_pos_x,
+              esc_return_button_trigger_pos_y),
+        True,
+        ["return", "toate"],
+        1,
+        1
+    ),
+
+    DetectClickPair(
+        "Login Button",
+        CropArea(login_label_width_start, login_label_height_start,
+                 login_label_width_end, login_label_height_end),
+        True,
+        Point(login_label_trigger_pos_x,
+              login_label_trigger_pos_y),
+        True,
+        ["login", "log in", "log ln", "logln"],
+        10,
+        1
     )
 ]
 
 welcome_crops = [
-    CropProperty(
+    DetectClickPair(
         "Welcome Promo Close Button",
         CropArea(welcome_promo_label_width_start, welcome_promo_label_height_start,
                  welcome_promo_label_width_end, welcome_promo_label_height_end),
@@ -557,12 +586,13 @@ welcome_crops = [
               welcome_promo_label_trigger_pos_y),
         True,
         ["close", "c1ose", "ciose"],
-        2
+        2,
+        1
     )
 ]
 
 mainmenu_master_jack_crops = [
-    CropProperty(
+    DetectClickPair(
         "Mainmenu MasterJack Upgrade level Close",
         CropArea(co_pilot_upgrade_close_width_start, co_pilot_upgrade_close_height_start,
                  co_pilot_upgrade_close_width_end, co_pilot_upgrade_close_height_end),
@@ -571,12 +601,13 @@ mainmenu_master_jack_crops = [
               co_pilot_upgrade_close_trigger_pos_x),
         True,
         ["close", "c1ose"],
-        2
+        2,
+        1
     )
 ]
 
 mainmenu_challenge_crops = [
-    CropProperty(
+    DetectClickPair(
         "Mainmenu Challenge Complete OK Button",
         CropArea(mainmenu_challenge_complete_ok_width_start, mainmenu_challenge_complete_ok_height_start,
                  mainmenu_challenge_complete_ok_width_end, mainmenu_challenge_complete_ok_height_end),
@@ -585,12 +616,13 @@ mainmenu_challenge_crops = [
               mainmenu_challenge_complete_ok_trigger_pos_y),
         True,
         ["ok", "0k"],
-        2
+        2,
+        1
     )
 ]
 
 mainmenu_crops = [
-    CropProperty(
+    DetectClickPair(
         "Main Menu Battle Button",
         CropArea(mainmenu_battle_label_width_start, mainmenu_battle_label_height_start,
                  mainmenu_battle_label_width_end, mainmenu_battle_label_height_end),
@@ -599,9 +631,10 @@ mainmenu_crops = [
               mainmenu_battle_label_trigger_pos_y),
         False,
         ["battle", "batt1e"],
+        1,
         1
     ),
-    CropProperty(
+    DetectClickPair(
         "Main Menu Select Mode Button",
         CropArea(mainmenu_select_mode_label_width_start, mainmenu_select_mode_label_height_start,
                  mainmenu_select_mode_label_width_end, mainmenu_select_mode_label_height_end),
@@ -610,30 +643,33 @@ mainmenu_crops = [
               mainmenu_select_mode_label_trigger_pos_y),
         True,
         ["select mode", "selectmode", "se1ect mode"],
+        1,
         1
     ),
-    CropProperty(
+    DetectClickPair(
         "Escape Exit Button",
         CropArea(883, 658, 1029, 697),
         True,
         Point(955, 675),
         True,
         ["title screen", "titlescreen", "tit1e screen"],
+        1,
         1
     ),
-    CropProperty(
+    DetectClickPair(
         "Exit to login yes button",
         CropArea(820, 610, 880, 626),
         True,
         Point(850, 620),
         True,
         ["yes", "ais"],
-        5
+        5,
+        1
     )
 ]
 
 resource_prepare_crops = [
-    CropProperty(
+    DetectClickPair(
         "Scrap/Wire/Battery Prepare to Battle Button",
         CropArea(get_resource_battle_label_width_start, get_resource_battle_label_height_start,
                  get_resource_battle_label_width_end, get_resource_battle_label_height_end),
@@ -642,9 +678,10 @@ resource_prepare_crops = [
               get_resource_battle_label_trigger_pos_y),
         True,
         ["battle", "batt1e"],
+        1,
         1
     ),
-    CropProperty(
+    DetectClickPair(
         "Patrol Mode Prepare to Battle Button",
         CropArea(get_resource_battle_label_width_start, get_resource_patrol_battle_label_height_start,
                  get_resource_battle_label_width_end, get_resource_patrol_battle_label_height_end),
@@ -653,12 +690,13 @@ resource_prepare_crops = [
               get_resource_patrol_battle_label_trigger_pos_y),
         False,
         ["battle", "batt1e"],
+        1,
         1
     )
 ]
 
 battle_preparation_crops = [
-    CropProperty(
+    DetectClickPair(
         "Prepare to Battle Summary Screen Title",
         CropArea(battle_type_title_label_width_start, battle_type_title_label_height_start,
                  battle_type_title_label_width_end, battle_type_title_label_height_end),
@@ -667,9 +705,10 @@ battle_preparation_crops = [
               mainmenu_challenge_complete_ok_trigger_pos_y),
         True,
         ["assault", "encounter", "domination"],
+        1,
         1
     ),
-    CropProperty(
+    DetectClickPair(
         "Prepare to Battle Summary Screen Map Name",
         CropArea(battle_map_name_label_width_start, battle_map_name_label_height_start,
                  battle_map_name_label_width_end, battle_map_name_label_height_end),
@@ -678,12 +717,13 @@ battle_preparation_crops = [
               battle_map_name_label_trigger_pos_y),
         True,
         list(map_mask_file_path.keys()),
+        1,
         1
     )
 ]
 
 # in_battle_crops = [
-#     CropProperty(
+#     DetectClickPair(
 #         "Defeat / Victory Screen",
 #         CropArea(battle_lose_survivor_part_width_start,battle_lose_survivor_part_height_start,battle_lose_survivor_part_width_end,battle_lose_survivor_part_height_end),
 #         False,
@@ -692,7 +732,7 @@ battle_preparation_crops = [
 #         ["survivor's parts", "survivors parts", "survivorsparts"],
 #         1
 #     ),
-#     CropProperty(
+#     DetectClickPair(
 #         "Survivor's Kit",
 #         CropArea(battle_lose_survivor_part_width_start,battle_lose_survivor_part_height_start,battle_lose_survivor_part_width_end,battle_lose_survivor_part_height_end),
 #         False,
@@ -704,7 +744,7 @@ battle_preparation_crops = [
 # ]
 
 finish_battle_crops = [
-    CropProperty(
+    DetectClickPair(
         "Finish Battle Close Button",
         CropArea(finish_battle_close_label_width_start, finish_battle_close_label_height_start,
                  finish_battle_close_label_width_end, finish_battle_close_label_height_end),
@@ -713,9 +753,10 @@ finish_battle_crops = [
               finish_battle_close_label_trigger_pos_y),
         True,
         ["close", "c1ose"],
+        1,
         1
     ),
-    CropProperty(
+    DetectClickPair(
         "Finish Battle BATTLE Button",
         CropArea(finish_battle_battle_label_width_start, finish_battle_battle_label_height_start,
                  finish_battle_battle_label_width_end, finish_battle_battle_label_height_end),
@@ -724,6 +765,7 @@ finish_battle_crops = [
               finish_battle_battle_label_trigger_pos_y),
         False,
         ["battle", "batt1e"],
+        1,
         1
     )
 ]

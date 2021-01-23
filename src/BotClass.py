@@ -16,34 +16,39 @@ from DebugClass import getDebugger
 from screens.LoginScreenClass import LoginScreen
 from screens.MainMenuScreenClass import MainMenuScreen
 from DCaptureClass import getDCapture
-
+from multiprocess import Value
+from ProcessFrameClass import ProcessFrame, ProcessThread
+import Constants as const
 
 class BotProgram():
 
     def __init__(self):
 
+        self.isProcessingFrameIndication = Value('i', 1)
+        self.pf = None
+
         self.killBotNow = False
 
         # self.prev_frame_dist = 10
+        self.lastProcessTime = None
 
-        self.currentStep = ScreenStep(getGlobalSetting().settings.startScreen)
 
         self.battleMgm = BattleManagement()
 
         self.inBattleDelayTimer = None
 
-        self.LoginScreen = LoginScreen(ScreenStep.Login, const.login_crops, 10)
+        self.LoginScreen = LoginScreen(None)
         self.WelcomeScreen = Screen(ScreenStep.WelcomeScreen,
-                                    const.welcome_crops, 20)
+                                    const.welcome_crops, 20, None)
 
         self.MasterJackUpgradeScreen = Screen(
-            ScreenStep.MasterJackUpgradeScreen, const.mainmenu_master_jack_crops, 10)
+            ScreenStep.MasterJackUpgradeScreen, const.mainmenu_master_jack_crops, 10, None)
 
         self.ChallengeCompleteScreen = Screen(
-            ScreenStep.ChallengeCompleteScreen, const.mainmenu_challenge_crops, 10)
+            ScreenStep.ChallengeCompleteScreen, const.mainmenu_challenge_crops, 10, None)
 
         self.MainMenuScreen = MainMenuScreen(
-            ScreenStep.MainMenu, const.mainmenu_crops, 30)
+            ScreenStep.MainMenu, const.mainmenu_crops, 30, None)
 
         self.select_mode_click_pos = [
             getCorrectPos(Point(const.scrap_btn_trigger_pos_x,
@@ -55,28 +60,57 @@ class BotProgram():
             getCorrectPos(Point(const.raven_path_btn_trigger_pos_x,
                                 const.raven_path_btn_trigger_pos_y))
         ]
-        self.SelectModeScreen = Screen(ScreenStep.SelectMode, [], 30)
+        self.SelectModeScreen = Screen(ScreenStep.SelectMode, [], 30, None)
 
         self.ResourcePrepareBattleScreen = Screen(
-            ScreenStep.GetResourceMenu, const.resource_prepare_crops, 30)
+            ScreenStep.GetResourceMenu, const.resource_prepare_crops, 30, None)
 
         self.BattlePreparationScreen = Screen(
-            ScreenStep.BattlePrepareScreen, const.battle_preparation_crops, 1500)
+            ScreenStep.BattlePrepareScreen, const.battle_preparation_crops, 1500, None)
 
-        self.InBattleScreen = Screen(ScreenStep.InBattleNow, [], 30)
+        self.InBattleScreen = Screen(ScreenStep.InBattleNow, [], 30, None)
 
         self.FinishBattleScreen = Screen(
-            ScreenStep.FinishBattleScreen, const.finish_battle_crops, 3000)
+            ScreenStep.FinishBattleScreen, const.finish_battle_crops, 3000, None)
+
+
+        self.currentStep = Value('i',  ScreenStep(getGlobalSetting().settings.startScreen))
+
+        self.currentScreen = self.LoginScreen
+        self.StepFlow = [
+            self.LoginScreen,
+            self.WelcomeScreen,
+            self.MainMenuScreen
+        ]
 
     def __advanceNextStep(self):
-        if self.currentStep == ScreenStep.debug:
-            pass
-        elif self.currentStep == ScreenStep.FinishBattleScreen:
+        if self.currentStep == ScreenStep.FinishBattleScreen:
             self.currentStep = ScreenStep.MasterJackUpgradeScreen
         else:
             self.currentStep += 1
 
-    def __processFrame(self):
+    def getLastStepScreen(self):
+        currentIndex = self.StepFlow.index(self.currentScreen)
+        if (currentIndex == len(self.StepFlow) - 1):
+            return self.StepFlow[len(self.StepFlow) - 1]
+        return self.StepFlow[currentIndex - 1]
+
+    def getNextStepScreen(self):
+        currentIndex = self.StepFlow.index(self.currentScreen)
+        if (currentIndex == len(self.StepFlow) - 1):
+            return self.StepFlow[0]
+        return self.StepFlow[currentIndex + 1]
+
+
+    def __processFrame(self, newFrame):
+        currentTimeSecond = time.time()
+        if (self.lastProcessTime):
+            if ((currentTimeSecond - self.lastProcessTime) < 5):
+                return 0
+        self.lastProcessTime = currentTimeSecond
+        print(self.lastProcessTime)
+
+    def OLD__processFrame(self):
         if self.currentStep == ScreenStep.Login:
             screen = self.LoginScreen
             if screen.retryCount == 0:
@@ -251,13 +285,20 @@ class BotProgram():
         self.killBotNow = True
         self.battleMgm.stop()
         cv2.destroyAllWindows()
+        if (self.pf):
+            self.pf.terminate()
 
+
+    def monitorImageClick(self, event, x, y, p1, p2):
+        if event == cv2.EVENT_LBUTTONDOWN:
+            print('mouse down on:')
+            print((x, y))
 
     def start(self):
-        print("START BOT")
-        mouseClick(getCorrectPos(Point(0, 0)))
 
-        time.sleep(1)
+        print("START BOT")
+        # mouseClick(getCorrectPos(Point(0, 0)))
+
 
         while self.killBotNow is False:
             np_frame = getDCapture().getFrame(0)
@@ -271,9 +312,32 @@ class BotProgram():
 
             # self.__processFrame(np_frame)
 
-            cv2.imshow("Capture", np_frame)
-
             
+            if (self.isProcessingFrameIndication.value == 1):
+                detectClickPair = const.DetectClickPair(
+                    "Login Button",
+                    const.CropArea(const.login_label_width_start, const.login_label_height_start,
+                            const.login_label_width_end, const.login_label_height_end),
+                    True,
+                    const.Point(const.login_label_trigger_pos_x,
+                        const.login_label_trigger_pos_y),
+                    True,
+                    ["login", "log in", "log ln", "logln"],
+                    10,
+                    1
+                )
+                # if (self.pf):
+                #     self.pf.terminate()
+                # self.isProcessingFrameIndication.value = 0
+                # self.pf = ProcessFrame(procIsDoneIndicator = self.isProcessingFrameIndication, dcap= getDCapture().d)
+                # self.pf.start()
+
+                # self.pf = ProcessThread(1, "Thread-1", 1)
+                # self.pf.start()
+            
+            
+            cv2.imshow("Capture", np_frame)
+            cv2.setMouseCallback('Capture', self.monitorImageClick)
             cv2.waitKey(1)
 
 

@@ -32,9 +32,7 @@ class UI_MainWindow(QtWidgets.QMainWindow):
         self.isAllowedClick = True
 
         self.botWorker = None
-        self.dcapture = getDCapture()
-
-
+        self.dcapture = None
         self.startBtn.clicked.connect(self.startApp)
         self.stopBtn.clicked.connect(self.stopApp)
         self.settingBtn.clicked.connect(self.goToSettingWindow)
@@ -72,6 +70,7 @@ class UI_MainWindow(QtWidgets.QMainWindow):
                 overlay.autoResize()
                 overlay.show()
 
+            self.dcapture = getDCapture()
             self.dcapture.startCapture()
 
 

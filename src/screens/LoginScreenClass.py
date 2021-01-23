@@ -1,15 +1,17 @@
 from screens.ScreenClass import Screen, ScreenStep
-from Constants import CropProperty, Point
+from Constants import DetectClickPair, Point
 import time
 from SettingsClass import getGlobalSetting
 import random
 from Utils import getCorrectPos
 from InputControl import mouseClick, kbDown, kbUp, fillInputWithString
+import Constants as const
 
 class LoginScreen(Screen):
 
-    def __init__(self, screenStep: ScreenStep, crops: [CropProperty], allowedRetryCount: int):
-        super().__init__(screenStep, crops, allowedRetryCount)
+    def __init__(self, dcap):
+
+        super().__init__(ScreenStep.Login, const.login_crops, 10, dcap)
 
         self.switchMinTimeSec = 3600
         # self.switchMinTimeSec = 1

@@ -3,7 +3,7 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QIcon, QWindow, QPaintDeviceWindow, QPainter, QPen, QBrush, QFontMetrics
-from PyQt5.QtWidgets import QDesktopWidget, QWidget, QMainWindow
+from PyQt5.QtWidgets import QDesktopWidget, QWidget, QMainWindow, QPushButton
 from PyQt5.QtCore import Qt
 from SettingsClass import getGlobalSetting
 from DCaptureClass import getDCapture
@@ -31,6 +31,7 @@ class OverlayWindow(QMainWindow ):
             # QtCore.Qt.WindowTransparentForInput
         )
         self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
+        skipbutton = QPushButton("SKIP", self)
 
     def resize(self, rect):
         self.setGeometry(rect[0], rect[1], rect[2], rect[3])

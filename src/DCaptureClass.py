@@ -4,6 +4,7 @@
 import d3dshot
 from SettingsClass import getGlobalSetting
 import Constants as const
+import time
 
 dcapture = None
 
@@ -28,6 +29,7 @@ class DCaptureClass:
         displayShiftY = getGlobalSetting().settings.displayShiftY
         print("START CAPTURE")
         self.d.capture(target_fps=fps, region=(displayShiftX, displayShiftY, const.screenWidth + displayShiftX, const.screenHeight + displayShiftY))
+        time.sleep(1)
 
     def stopCapture(self):
         self.d.stop()

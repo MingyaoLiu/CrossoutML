@@ -4,7 +4,7 @@ import numpy as np
 import Constants as const
 from MovementClass import MoveManagement, Move
 from InputControl import KBPress, kbUp, kbDown
-from Constants import CropProperty, Point, PointData, CenterData, BattleFrame
+from Constants import DetectClickPair, Point, PointData, CenterData, BattleFrame
 import threading
 import random
 from SettingsClass import getGlobalSetting

@@ -68,7 +68,7 @@ class UI_SettingWindow(QtWidgets.QMainWindow):
         getOverlay().resize((left, top, width, height))
         if (self.showDebugCheckbox.isChecked()):
             getOverlay().show()
-        d = getDCapture().d
+        d = getDCapture()
         d.ddisplay = d.displays[int(self.displayIndex.text())]
         if (left > d.displays[0].resolution[0]):
             self.displayIndex.setText(str(1))
