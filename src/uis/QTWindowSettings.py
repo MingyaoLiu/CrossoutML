@@ -68,8 +68,8 @@ class UI_SettingWindow(QtWidgets.QMainWindow):
         getOverlay().resize((left, top, width, height))
         if (self.showDebugCheckbox.isChecked()):
             getOverlay().show()
-        d = getDCapture()
-        d.ddisplay = d.displays[int(self.displayIndex.text())]
+        d = getDCapture().d
+        d.display = d.displays[int(self.displayIndex.text())]
         if (left > d.displays[0].resolution[0]):
             self.displayIndex.setText(str(1))
             self.displayShiftX.setText(str(left - d.displays[0].resolution[0]))
@@ -81,8 +81,6 @@ class UI_SettingWindow(QtWidgets.QMainWindow):
         self.mouseShiftX.setText(str(left))
         self.mouseShiftY.setText(str(top))
 
-        d.stop()
-        d = None
         
 
     def __goToSelectDisplayShift(self): # NOT USED RN

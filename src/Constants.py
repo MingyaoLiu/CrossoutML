@@ -490,15 +490,14 @@ DetailStep = {
 
     "login_btn": DetectClickPair(
         "Login Button",
-        CropArea(login_label_width_start, login_label_height_start,
-                 login_label_width_end, login_label_height_end),
+        CropArea(229, 464,
+                 290, 490), # x, y, xs, ys
         True,
-        Point(login_label_trigger_pos_x,
-              login_label_trigger_pos_y),
+        Point(257, 478),
         True,
-        ["login", "log in", "log ln", "logln"],
-        10,
-        1
+        ["login", "log in", "log ln", "logln", "Log in"],
+        5,
+        2
     )
 }
 
