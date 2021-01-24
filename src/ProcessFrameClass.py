@@ -2,7 +2,6 @@
 from multiprocessing import Process, Value
 import time
 from DCaptureClass import getDCapture
-from screens.LoginScreenClass import LoginScreen
 import pytesseract
 from Constants import DetectClickPair, Area, StepStatus, Point, findStepById, Step, loadNewUser, Action, getPassword, getUsername, getRunningStepId, setRunningStepId
 import Constants as const

@@ -1,6 +1,5 @@
 
 from PyQt5.QtCore import QThread
-from BotClass import BotProgram
 from ProcessFrameClass import DebugThread, DetectClickThread
 from DCaptureClass import getDCapture
 
