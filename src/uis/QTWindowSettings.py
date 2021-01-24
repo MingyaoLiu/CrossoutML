@@ -1,7 +1,3 @@
-
-
-
-
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5 import uic
@@ -26,10 +22,8 @@ class UI_SettingWindow(QtWidgets.QMainWindow):
         self.loadSettings()
         
         self.saveBtn.clicked.connect(self.saveSettings)
-        
         self.addAcctBtn.clicked.connect(self.__goToAddAcct)
         self.delAcctBtn.clicked.connect(self.__deleteCurrentAcct)
-
         self.detectAllSettingBtn.clicked.connect(self.__detectAllSettings)
 
     def __GetWindowRectFromName(self, name:str)-> tuple:

@@ -38,43 +38,206 @@ class BattleMode(enum.IntEnum):
     # patrol = 3
     raven = 3
 
-class ScreenStep(enum.IntEnum):
-    Login = 0
-    WelcomeScreen = 1
-    MasterJackUpgradeScreen = 2
-    ChallengeCompleteScreen = 3
-    MainMenu = 4
-    SelectMode = 5
-    GetResourceMenu = 6
-    BattlePrepareScreen = 7
-    InBattleNow = 8
-    DeathWaiting = 9
-    FinishBattleScreen = 10
-    debug = 11
+#
+# Step - Type of actions that can be performed.
+# 
+class Action(enum.Enum):
+    textDetect = enum.auto()
+    colorDetect = enum.auto()
+    textInput = enum.auto()
+    mouseClick = enum.auto()
+    keyDown = enum.auto()
+    keyUp = enum.auto()
+    wait = enum.auto()
+
 
 #######################################################
 ##                      tuples                       ##
 #######################################################
 
-
+#
+# Point - coordinate data
+# x: horizontal
+# y: vertical
+#
 class Point(tuple):
     def __new__(self, x, y):
         Point.x = property(operator.itemgetter(0))
         Point.y = property(operator.itemgetter(1))
         return tuple.__new__(Point, (x, y))
 
-
-class CropArea(tuple):
+#
+# Area - coordinate data of an area
+# x: horizontal start
+# y: vertical start
+# xs: horizontal end
+# ys: vertical end
+#
+class Area(tuple):
     def __new__(self, x, y, xs, ys):
-        CropArea.x = property(operator.itemgetter(0))
-        CropArea.y = property(operator.itemgetter(1))
-        CropArea.xs = property(operator.itemgetter(2))
-        CropArea.ys = property(operator.itemgetter(3))
-        return tuple.__new__(CropArea, (x, y, xs, ys))
+        Area.x = property(operator.itemgetter(0))
+        Area.y = property(operator.itemgetter(1))
+        Area.xs = property(operator.itemgetter(2))
+        Area.ys = property(operator.itemgetter(3))
+        return tuple.__new__(Area, (x, y, xs, ys))
+
+#
+# Step - Each step is meant to be 1 action to perform, with details.
+# id: identifier of this step.
+# area: used for text detection, color detection.
+# point: used for mouse click.
+# strings: used for text detection, text input, keyDown, keyUp. 
+#   for text input, if strings array has more than 1 element, it will fill a random one.
+#   for keyDown keyUp, strings array should be array of char as string. It will apply keyboard status to all in array.
+# waitBeforeAction: Wait timer before an action is executed.
+#
+class Step(tuple):
+    def __new__(self, id: str, action: Action, area: Area, point: Point, strings: [str],  waitBefore: int, waitAfter: int):
+        Step.id = property(operator.itemgetter(0))
+        Step.action = property(operator.itemgetter(1))
+        Step.area = property(operator.itemgetter(2))
+        Step.point = property(operator.itemgetter(3))
+        Step.strings = property(operator.itemgetter(4))
+        Step.waitBefore = property(operator.itemgetter(5))
+        Step.waitAfter = property(operator.itemgetter(6))
+        return tuple.__new__(Step, (id, action, area, point, strings, waitBefore, waitAfter))
+
+#
+# All the steps that's possible in game
+#
+Steps = [
+
+    Step(
+        id = "login_button",
+        action = Action.textDetect,
+        area = Area(229, 464, 290, 490), 
+        point = None,
+        strings = ["login", "log in", "log ln", "logln"],
+        waitBefore = 5,
+        waitAfter = 2
+    ),
+    Step(
+        id = "login_username_click",
+        action = Action.mouseClick,
+        area = None, 
+        point = Point(116,300),
+        strings = None,
+        waitBefore = 1,
+        waitAfter = 1
+    ),
+    Step(
+        id = "login_username_input",
+        action = Action.textInput,
+        area = None, 
+        point = None,
+        strings = None,
+        waitBefore = 1,
+        waitAfter = 1
+    ),
+    Step(
+        id = "login_password_click",
+        action = Action.mouseClick,
+        area = None, 
+        point = Point(124,366),
+        strings = None,
+        waitBefore = 1,
+        waitAfter = 1
+    ),
+    Step(
+        id = "login_password_input",
+        action = Action.textInput,
+        area = None, 
+        point = None,
+        strings = None,
+        waitBefore = 1,
+        waitAfter = 1
+    ),
+    Step(
+        id = "login_disconnect_btn_text",
+        action = Action.textDetect,
+        area = Area(924, 573, 1014, 603), 
+        point = None,
+        strings = ["ok", "0k"],
+        waitBefore = 1,
+        waitAfter = 1
+    ),
+    Step(
+        id = "login_disconnect_click",
+        action = Action.mouseClick,
+        area = None, 
+        point = Point(963, 589),
+        strings = None,
+        waitBefore = 1,
+        waitAfter = 1
+    ),
+    Step(
+        id = "TEMPLATE",
+        action = Action.mouseClick,
+        area = None, 
+        point = None,
+        strings = None,
+        waitBefore = 1,
+        waitAfter = 1
+    ),
+]
+
+def findStepById(id: str):
+    global Steps
+    for step in Steps:
+        if step.id == id:
+            return step
+    print("can't find step with id: " + id)
+    return None
+
+from SettingsClass import getGlobalSetting
+import random
+
+
+username = None
+password = None
+def loadNewUser():
+    global username
+    global password
+    newAccount = random.choice(getGlobalSetting().settings.accounts)
+    username = newAccount.username
+    password = newAccount.password
+    print("Account now switched to " + username)
+    return True
+
+def getUsername():
+    global username
+    if username:
+        return username
+    else:
+        loadNewUser()
+        return username
+
+def getPassword():
+    global password
+    if password:
+        return password
+    else:
+        loadNewUser()
+        return password
+
+
+currentRunningStep = None
+
+def getRunningStepId():
+    global currentRunningStep
+    if currentRunningStep:
+        return currentRunningStep
+    else:
+        currentRunningStep = "login_disconnect_btn_text"
+        return currentRunningStep
+
+def setRunningStepId(id: str):
+    global currentRunningStep
+    currentRunningStep = id
 
 
 class DetectClickPair(tuple):
-    def __new__(self, name: str, area: CropArea, requiredMatch: bool, clickPos: Point, willClick: bool, expectedStrs: [str],  waitBeforeDetect: int,  waitBeforeClick: int):
+    def __new__(self, name: str, area: Area, requiredMatch: bool, clickPos: Point, willClick: bool, expectedStrs: [str],  waitBeforeDetect: int,  waitBeforeClick: int):
         DetectClickPair.name = property(operator.itemgetter(0))
         DetectClickPair.area = property(operator.itemgetter(1))
         DetectClickPair.requiredMatch = property(operator.itemgetter(2))
@@ -486,30 +649,12 @@ co_pilot_upgrade_close_trigger_pos_y = int(
     co_pilot_upgrade_close_height_start + co_pilot_upgrade_close_height / 2)
 
 
-DetailStep = {
-
-    "login_btn": DetectClickPair(
-        "Login Button",
-        CropArea(229, 464,
-                 290, 490), # x, y, xs, ys
-        True,
-        Point(257, 478),
-        True,
-        ["login", "log in", "log ln", "logln", "Log in"],
-        5,
-        2
-    )
-}
-
-
-
-
 
 frame_crops = {
     "login_exit_no_btn":
     DetectClickPair(
         "Exit No Button",
-        CropArea(login_exit_no_width_start, login_exit_no_height_start,
+        Area(login_exit_no_width_start, login_exit_no_height_start,
                  login_exit_no_width_end, login_exit_no_height_end),
         True,
         Point(login_exit_no_trigger_pos_x,
@@ -522,7 +667,7 @@ frame_crops = {
     "mainmenu_escape_menu_return_button":
     DetectClickPair(
         "Escape Return Button",
-        CropArea(esc_return_button_width_start, esc_return_button_height_start,
+        Area(esc_return_button_width_start, esc_return_button_height_start,
                  esc_return_button_width_end, esc_return_button_height_end),
         True,
         Point(esc_return_button_trigger_pos_x,
@@ -538,7 +683,7 @@ frame_crops = {
 login_crops = [
     DetectClickPair(
         "Exit No Button",
-        CropArea(login_exit_no_width_start, login_exit_no_height_start,
+        Area(login_exit_no_width_start, login_exit_no_height_start,
                  login_exit_no_width_end, login_exit_no_height_end),
         True,
         Point(login_exit_no_trigger_pos_x,
@@ -550,7 +695,7 @@ login_crops = [
     ),
     DetectClickPair(
         "Escape Return Button",
-        CropArea(esc_return_button_width_start, esc_return_button_height_start,
+        Area(esc_return_button_width_start, esc_return_button_height_start,
                  esc_return_button_width_end, esc_return_button_height_end),
         True,
         Point(esc_return_button_trigger_pos_x,
@@ -563,7 +708,7 @@ login_crops = [
 
     DetectClickPair(
         "Login Button",
-        CropArea(login_label_width_start, login_label_height_start,
+        Area(login_label_width_start, login_label_height_start,
                  login_label_width_end, login_label_height_end),
         True,
         Point(login_label_trigger_pos_x,
@@ -578,7 +723,7 @@ login_crops = [
 welcome_crops = [
     DetectClickPair(
         "Welcome Promo Close Button",
-        CropArea(welcome_promo_label_width_start, welcome_promo_label_height_start,
+        Area(welcome_promo_label_width_start, welcome_promo_label_height_start,
                  welcome_promo_label_width_end, welcome_promo_label_height_end),
         True,
         Point(welcome_promo_label_trigger_pos_x,
@@ -593,7 +738,7 @@ welcome_crops = [
 mainmenu_master_jack_crops = [
     DetectClickPair(
         "Mainmenu MasterJack Upgrade level Close",
-        CropArea(co_pilot_upgrade_close_width_start, co_pilot_upgrade_close_height_start,
+        Area(co_pilot_upgrade_close_width_start, co_pilot_upgrade_close_height_start,
                  co_pilot_upgrade_close_width_end, co_pilot_upgrade_close_height_end),
         True,
         Point(co_pilot_upgrade_close_trigger_pos_x,
@@ -608,7 +753,7 @@ mainmenu_master_jack_crops = [
 mainmenu_challenge_crops = [
     DetectClickPair(
         "Mainmenu Challenge Complete OK Button",
-        CropArea(mainmenu_challenge_complete_ok_width_start, mainmenu_challenge_complete_ok_height_start,
+        Area(mainmenu_challenge_complete_ok_width_start, mainmenu_challenge_complete_ok_height_start,
                  mainmenu_challenge_complete_ok_width_end, mainmenu_challenge_complete_ok_height_end),
         True,
         Point(mainmenu_challenge_complete_ok_trigger_pos_x,
@@ -623,7 +768,7 @@ mainmenu_challenge_crops = [
 mainmenu_crops = [
     DetectClickPair(
         "Main Menu Battle Button",
-        CropArea(mainmenu_battle_label_width_start, mainmenu_battle_label_height_start,
+        Area(mainmenu_battle_label_width_start, mainmenu_battle_label_height_start,
                  mainmenu_battle_label_width_end, mainmenu_battle_label_height_end),
         False,
         Point(mainmenu_battle_label_trigger_pos_x,
@@ -635,7 +780,7 @@ mainmenu_crops = [
     ),
     DetectClickPair(
         "Main Menu Select Mode Button",
-        CropArea(mainmenu_select_mode_label_width_start, mainmenu_select_mode_label_height_start,
+        Area(mainmenu_select_mode_label_width_start, mainmenu_select_mode_label_height_start,
                  mainmenu_select_mode_label_width_end, mainmenu_select_mode_label_height_end),
         True,
         Point(mainmenu_select_mode_label_trigger_pos_x,
@@ -647,7 +792,7 @@ mainmenu_crops = [
     ),
     DetectClickPair(
         "Escape Exit Button",
-        CropArea(883, 658, 1029, 697),
+        Area(883, 658, 1029, 697),
         True,
         Point(955, 675),
         True,
@@ -657,7 +802,7 @@ mainmenu_crops = [
     ),
     DetectClickPair(
         "Exit to login yes button",
-        CropArea(820, 610, 880, 626),
+        Area(820, 610, 880, 626),
         True,
         Point(850, 620),
         True,
@@ -670,7 +815,7 @@ mainmenu_crops = [
 resource_prepare_crops = [
     DetectClickPair(
         "Scrap/Wire/Battery Prepare to Battle Button",
-        CropArea(get_resource_battle_label_width_start, get_resource_battle_label_height_start,
+        Area(get_resource_battle_label_width_start, get_resource_battle_label_height_start,
                  get_resource_battle_label_width_end, get_resource_battle_label_height_end),
         True,
         Point(get_resource_battle_label_trigger_pos_x,
@@ -682,7 +827,7 @@ resource_prepare_crops = [
     ),
     DetectClickPair(
         "Patrol Mode Prepare to Battle Button",
-        CropArea(get_resource_battle_label_width_start, get_resource_patrol_battle_label_height_start,
+        Area(get_resource_battle_label_width_start, get_resource_patrol_battle_label_height_start,
                  get_resource_battle_label_width_end, get_resource_patrol_battle_label_height_end),
         False,
         Point(get_resource_patrol_battle_label_trigger_pos_x,
@@ -697,7 +842,7 @@ resource_prepare_crops = [
 battle_preparation_crops = [
     DetectClickPair(
         "Prepare to Battle Summary Screen Title",
-        CropArea(battle_type_title_label_width_start, battle_type_title_label_height_start,
+        Area(battle_type_title_label_width_start, battle_type_title_label_height_start,
                  battle_type_title_label_width_end, battle_type_title_label_height_end),
         True,
         Point(mainmenu_challenge_complete_ok_trigger_pos_x,
@@ -709,7 +854,7 @@ battle_preparation_crops = [
     ),
     DetectClickPair(
         "Prepare to Battle Summary Screen Map Name",
-        CropArea(battle_map_name_label_width_start, battle_map_name_label_height_start,
+        Area(battle_map_name_label_width_start, battle_map_name_label_height_start,
                  battle_map_name_label_width_end, battle_map_name_label_height_end),
         True,
         Point(battle_map_name_label_trigger_pos_x,
@@ -724,7 +869,7 @@ battle_preparation_crops = [
 # in_battle_crops = [
 #     DetectClickPair(
 #         "Defeat / Victory Screen",
-#         CropArea(battle_lose_survivor_part_width_start,battle_lose_survivor_part_height_start,battle_lose_survivor_part_width_end,battle_lose_survivor_part_height_end),
+#         Area(battle_lose_survivor_part_width_start,battle_lose_survivor_part_height_start,battle_lose_survivor_part_width_end,battle_lose_survivor_part_height_end),
 #         False,
 #         Point(battle_lose_survivor_part_trigger_pos_x,battle_lose_survivor_part_trigger_pos_y),
 #         False,
@@ -733,7 +878,7 @@ battle_preparation_crops = [
 #     ),
 #     DetectClickPair(
 #         "Survivor's Kit",
-#         CropArea(battle_lose_survivor_part_width_start,battle_lose_survivor_part_height_start,battle_lose_survivor_part_width_end,battle_lose_survivor_part_height_end),
+#         Area(battle_lose_survivor_part_width_start,battle_lose_survivor_part_height_start,battle_lose_survivor_part_width_end,battle_lose_survivor_part_height_end),
 #         False,
 #         Point(battle_lose_survivor_part_trigger_pos_x,battle_lose_survivor_part_trigger_pos_y),
 #         False,
@@ -745,7 +890,7 @@ battle_preparation_crops = [
 finish_battle_crops = [
     DetectClickPair(
         "Finish Battle Close Button",
-        CropArea(finish_battle_close_label_width_start, finish_battle_close_label_height_start,
+        Area(finish_battle_close_label_width_start, finish_battle_close_label_height_start,
                  finish_battle_close_label_width_end, finish_battle_close_label_height_end),
         True,
         Point(finish_battle_close_label_trigger_pos_x,
@@ -757,7 +902,7 @@ finish_battle_crops = [
     ),
     DetectClickPair(
         "Finish Battle BATTLE Button",
-        CropArea(finish_battle_battle_label_width_start, finish_battle_battle_label_height_start,
+        Area(finish_battle_battle_label_width_start, finish_battle_battle_label_height_start,
                  finish_battle_battle_label_width_end, finish_battle_battle_label_height_end),
         False,
         Point(finish_battle_battle_label_trigger_pos_x,

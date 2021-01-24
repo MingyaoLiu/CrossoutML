@@ -2,12 +2,12 @@
 
 
 
-from Constants import CropArea
+from Constants import Area
 
 
 
 class MapProperty(tuple):
-    def __new__(self, name: str, maskFileLoc: str, startLocaion: CropArea, endLocation: CropArea):
+    def __new__(self, name: str, maskFileLoc: str, startLocaion: Area, endLocation: Area):
         MapProperty.name = property(operator.itemgetter(0))
         MapProperty.maskFileLoc = property(operator.itemgetter(1))
         MapProperty.startLocaion = property(operator.itemgetter(2))
