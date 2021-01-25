@@ -9,6 +9,7 @@ import cv2
 from uis.QTWindowOverlay import getOverlay
 import ctypes
 from DCaptureClass import getDCapture
+import Constants as const
 
 class TITLEBARINFO(ctypes.Structure):
     _fields_ = [("cbSize", ctypes.wintypes.DWORD), ("rcTitleBar", ctypes.wintypes.RECT),
@@ -135,19 +136,17 @@ class UI_SettingWindow(QtWidgets.QMainWindow):
         self.showDebugCheckbox.setChecked(setting.showDebugWindow)
         self.checkStuckFrameCount.setText(
             str(setting.checkStuckFrameCount or 20))
-        
-        if setting.startScreen == 0:
-            self.startScreenDropDown.setCurrentIndex(0)
-        elif setting.startScreen == 4:
-            self.startScreenDropDown.setCurrentIndex(1)
-        elif setting.startScreen == 7:
-            self.startScreenDropDown.setCurrentIndex(2)
-        elif setting.startScreen == 10:
-            self.startScreenDropDown.setCurrentIndex(3)
-        elif setting.startScreen == 11:
-            self.startScreenDropDown.setCurrentIndex(4)
+
+        self.startScreenDropDown.clear()
+        self.stepIds = [val.id for val in const.Steps]
+
+        self.startScreenDropDown.addItems(self.stepIds)
+
+        if (setting.startScreen is not None):
+            self.startScreenDropDown.setCurrentIndex(setting.startScreen)
         else:
             self.startScreenDropDown.setCurrentIndex(0)
+
 
         self.acctDropdown.clear()
         self.acctDropdown.addItems(str(i) + " - " + x.username for i,x in enumerate(setting.accounts))
@@ -173,19 +172,9 @@ class UI_SettingWindow(QtWidgets.QMainWindow):
         setting.showDebugWindow = self.showDebugCheckbox.isChecked()
         setting.checkStuckFrameCount = int(
             self.checkStuckFrameCount.text()) or 20
-        if self.startScreenDropDown.currentIndex() == 0:
-            setting.startScreen = 0
-        elif self.startScreenDropDown.currentIndex() == 1:
-            setting.startScreen = 4
-        elif self.startScreenDropDown.currentIndex() == 2:
-            setting.startScreen = 7
-        elif self.startScreenDropDown.currentIndex() == 3:
-            setting.startScreen = 10
-        elif self.startScreenDropDown.currentIndex() == 4:
-            setting.startScreen = 11
-        else:
-            setting.startScreen = 0
         
+        setting.startScreen = self.startScreenDropDown.currentIndex()
+
         getGlobalSetting().saveSettings()
         self.close()
         

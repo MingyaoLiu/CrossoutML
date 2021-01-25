@@ -32,7 +32,6 @@ class UI_MainWindow(QtWidgets.QMainWindow):
         self.isAllowedClick = True
 
         self.botWorker = None
-        self.dcapture = None
         self.startBtn.clicked.connect(self.startApp)
         self.stopBtn.clicked.connect(self.stopApp)
         self.settingBtn.clicked.connect(self.goToSettingWindow)
@@ -53,7 +52,6 @@ class UI_MainWindow(QtWidgets.QMainWindow):
         if self.isAllowedClick and self.botWorker is not None:
             self.debugger.closeDebugWindow()
             self.__disableClick()
-            self.dcapture.stopCapture()
             # self.botWorker.stopBot()
             # self.botWorker.quit()
             self.botWorker.exit()
@@ -69,10 +67,6 @@ class UI_MainWindow(QtWidgets.QMainWindow):
             if (getGlobalSetting().settings.showDebugWindow):
                 overlay.autoResize()
                 overlay.show()
-
-            self.dcapture = getDCapture()
-            self.dcapture.startCapture()
-
 
             self.botWorker = BotBackgroundThread()
             self.botWorker.start()

@@ -2,6 +2,35 @@ import operator
 
 
 #######################################################
+##                      Dicts                        ##
+#######################################################
+
+
+map_mask_file_path = {
+    # "engineer garage": "./assets/maps_masks/garage_map_1_mask.png",
+    "engineer garage": "./assets/maps_masks/garage_map_2_mask.png",
+    "naukograd": "./assets/maps_masks/naukugrad_mask.png",
+    "sandy gulf": "./assets/maps_masks/sandy_gulf_mask.png",
+    "sector ex": "./assets/maps_masks/sector_ex_mask.png",
+    "rock city": "./assets/maps_masks/rock_city_mask.png",
+    "founders canyon": "./assets/maps_masks/founders_canyon_mask.png",
+    "factory": "./assets/maps_masks/factory_mask.png",
+    "bridge": "./assets/maps_masks/bridge_mask.png",
+    "powerplant": "./assets/maps_masks/powerplant_mask.png",
+    "old town": "./assets/maps_masks/default_test.png",
+    "broken arrow": "./assets/maps_masks/broken_arrow_mask.png",
+    "fortress": "./assets/maps_masks/fortress_mask.png",
+    "“control-17” station": "./assets/maps_masks/control-17_station_mask.png",
+    "ship graveyard": "./assets/maps_masks/ship_graveyard_mask.png",
+    "desert valley": "./assets/maps_masks/desert_valley_mask.png",
+    "nameless tower": "./assets/maps_masks/nameless tower_mask.png",
+    "chemical plant": "./assets/maps_masks/chemical_plant_mask.png",
+    "crater": "./assets/maps_masks/crater_mask.png",
+    "clean island": "./assets/maps_masks/garage_map_2_mask.png",
+    "ravagers foothold": "./assets/maps_masks/garage_map_2_mask.png",
+}
+
+#######################################################
 ##                      Enums                        ##
 #######################################################
 
@@ -153,6 +182,15 @@ Steps = [
         waitAfter = 1
     ),
     Step(
+        id = "login_btn_click",
+        action = Action.mouseClick,
+        area = None, 
+        point = Point(251,475),
+        strings = None,
+        waitBefore = 1,
+        waitAfter = 20
+    ),
+    Step(
         id = "login_disconnect_btn_text",
         action = Action.textDetect,
         area = Area(924, 573, 1014, 603), 
@@ -171,6 +209,132 @@ Steps = [
         waitAfter = 1
     ),
     Step(
+        id = "in_game_map_name_label",
+        action = Action.textDetect,
+        area = Area(1440, 37, 1830, 73), 
+        point = None,
+        strings = list(map_mask_file_path.keys()),
+        waitBefore = 1,
+        waitAfter = 1
+    ),    
+    Step(
+        id = "in_game_wait_for_finish",
+        action = Action.mouseClick,
+        area = None, 
+        point = Point(10,10),
+        strings = None,
+        waitBefore = 30,
+        waitAfter = 1
+    ),
+    Step(
+        id = "finish_battle_close_btn_label",
+        action = Action.textDetect,
+        area = Area(1180, 955, 1310, 1025), 
+        point = None,
+        strings = ["close", "c1ose"],
+        waitBefore = 1,
+        waitAfter = 1
+    ),
+    Step(
+        id = "finish_battle_close_btn_click",
+        action = Action.mouseClick,
+        area = None, 
+        point = Point(1230, 1000),
+        strings = None,
+        waitBefore = 1,
+        waitAfter = 1
+    ),
+    Step(
+        id = "mainmenu_battle_label",
+        action = Action.textDetect,
+        area = Area(883,143, 1032, 187), 
+        point = None,
+        strings = ["battle", "batt1e"],
+        waitBefore = 1,
+        waitAfter = 1
+    ),
+    Step(
+        id = "mainmenu_select_click",
+        action = Action.mouseClick,
+        area = None, 
+        point = Point(950,245),
+        strings = None,
+        waitBefore = 1,
+        waitAfter = 1
+    ),
+    Step(
+        id = "battle_select_scrap_click",
+        action = Action.mouseClick,
+        area = None, 
+        point = Point(962,237),
+        strings = None,
+        waitBefore = 1,
+        waitAfter = 1
+    ),
+    Step(
+        id = "battle_select_battery_click",
+        action = Action.mouseClick,
+        area = None, 
+        point = Point(843,240),
+        strings = None,
+        waitBefore = 1,
+        waitAfter = 1
+    ),
+    Step(
+        id = "battle_select_wire_click",
+        action = Action.mouseClick,
+        area = None, 
+        point = Point(1072,240),
+        strings = None,
+        waitBefore = 1,
+        waitAfter = 1
+    ),
+    Step(
+        id = "battle_select_battle_start_click",
+        action = Action.mouseClick,
+        area = None, 
+        point = Point(556,759),
+        strings = None,
+        waitBefore = 1,
+        waitAfter = 1
+    ),
+    Step(
+        id = "mainmenu_welcome_close_btn_label",
+        action = Action.textDetect,
+        area = Area(1478, 981, 1558,1009), 
+        point = None,
+        strings = ['close'],
+        waitBefore = 1,
+        waitAfter = 1
+    ),
+    Step(
+        id = "mainmenu_esc_return_btn_label",
+        action = Action.textDetect,
+        area = Area(910,417,1007,447), 
+        point = None,
+        strings = ['return'],
+        waitBefore = 1,
+        waitAfter = 1
+    ),
+    Step(
+        id = "mainmenu_esc_return_btn_click",
+        action = Action.mouseClick,
+        area = None, 
+        point = Point(950,430),
+        strings = None,
+        waitBefore = 1,
+        waitAfter = 1
+    ),
+    Step(
+        id = "before_game_wait",
+        action = Action.mouseClick,
+        area = None, 
+        point = Point(10,10),
+        strings = None,
+        waitBefore = 10,
+        waitAfter = 1
+    ),
+    Step(
         id = "TEMPLATE",
         action = Action.mouseClick,
         area = None, 
@@ -178,8 +342,26 @@ Steps = [
         strings = None,
         waitBefore = 1,
         waitAfter = 1
-    ),
+    )
 ]
+
+BattleMiniMapArea = Area( # square with 240 edge length (max around 247, circle is 175 in radius)
+    1579,
+    738,
+    1819,
+    978
+)
+BattleMiniMapCenter = Point(
+    1699,
+    858
+)
+
+BattleFullMap = Area( # square of in game map
+    585,
+    141,
+    1337,
+    893
+)
 
 def findStepById(id: str):
     global Steps
@@ -228,12 +410,17 @@ def getRunningStepId():
     if currentRunningStep:
         return currentRunningStep
     else:
-        currentRunningStep = "login_disconnect_btn_text"
+        if getGlobalSetting().settings.startScreen is not None:
+            currentRunningStep = Steps[getGlobalSetting().settings.startScreen].id
+        else:
+            currentRunningStep = "login_disconnect_btn_text"
         return currentRunningStep
 
 def setRunningStepId(id: str):
     global currentRunningStep
     currentRunningStep = id
+
+
 
 
 class DetectClickPair(tuple):
@@ -277,32 +464,29 @@ class BattleFrame(tuple):
         BattleFrame.right = property(operator.itemgetter(8))
         return tuple.__new__(BattleFrame, (record, time, distance, speed, posData, centerRad, center, left, right))
 
-#######################################################
-##                      Dicts                        ##
-#######################################################
+class VehicleMovementData(tuple):
+    def __new__(self, time: float, pos: Point, rad: float):
+        VehicleMovementData.time = property(operator.itemgetter(0))
+        VehicleMovementData.pos = property(operator.itemgetter(1))
+        VehicleMovementData.rad = property(operator.itemgetter(2))
+        return tuple.__new__(VehicleMovementData, (time, pos, rad))
 
+vehicleMovementStack: [VehicleMovementData] = []
+def getVehicleMovementStack():
+    global vehicleMovementStack
+    return vehicleMovementStack
 
-map_mask_file_path = {
-    "engineer garage": "./assets/maps_masks/garage_map_1_mask.png",
-    "naukograd": "./assets/maps_masks/naukugrad_mask.png",
-    "sandy gulf": "./assets/maps_masks/sandy_gulf_mask.png",
-    "sector ex": "./assets/maps_masks/sector_ex_mask.png",
-    "rock city": "./assets/maps_masks/rock_city_mask.png",
-    "founders canyon": "./assets/maps_masks/founders_canyon_mask.png",
-    "factory": "./assets/maps_masks/factory_mask.png",
-    "bridge": "./assets/maps_masks/bridge_mask.png",
-    "powerplant": "./assets/maps_masks/powerplant_mask.png",
-    "old town": "./assets/maps_masks/default_test.png",
-    "broken arrow": "./assets/maps_masks/broken_arrow_mask.png",
-    "fortress": "./assets/maps_masks/fortress_mask.png",
-    "“control-17” station": "./assets/maps_masks/control-17_station_mask.png",
-    "ship graveyard": "./assets/maps_masks/ship_graveyard_mask.png",
-    "desert valley": "./assets/maps_masks/desert_valley_mask.png",
-    "nameless tower": "./assets/maps_masks/nameless tower_mask.png",
-    "chemical plant": "./assets/maps_masks/chemical_plant_mask.png",
-    "crater": "./assets/maps_masks/crater_mask.png",
+def updateVehicleMovementStack(newData: VehicleMovementData):
+    global vehicleMovementStack
+    vehicleMovementStack.insert(0, newData)
+    if len(vehicleMovementStack) > 30:
+        vehicleMovementStack.pop()
 
-}
+def clearVehicleMovementStack():
+    global vehicleMovementStack
+    vehicleMovementStack = []
+    return True
+
 
 
 #######################################################
@@ -524,14 +708,14 @@ battle_lose_survivor_part_trigger_pos_y = int(
 
 finish_battle_close_label_width = 120
 finish_battle_close_label_width_start = int(
-    screenWidth / 5 * 3.25 - finish_battle_close_label_width / 2)
+    screenWidth / 5 * 3.25 - finish_battle_close_label_width / 2) # 1188
 finish_battle_close_label_width_end = int(
-    screenWidth / 5 * 3.25 + finish_battle_close_label_width / 2)
+    screenWidth / 5 * 3.25 + finish_battle_close_label_width / 2) # 1308
 finish_battle_close_label_height = 50
 finish_battle_close_label_height_start = int(
-    screenHeight / 13 * 12.1 - finish_battle_close_label_height / 2)
+    screenHeight / 13 * 12.1 - finish_battle_close_label_height / 2) # 955
 finish_battle_close_label_height_end = int(
-    screenHeight / 13 * 12.1 + finish_battle_close_label_height / 2)
+    screenHeight / 13 * 12.1 + finish_battle_close_label_height / 2) # 1055
 finish_battle_close_label_trigger_pos_x = int(
     finish_battle_close_label_width_start + finish_battle_close_label_width / 2)
 finish_battle_close_label_trigger_pos_y = int(

@@ -91,33 +91,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QComboBox" name="startScreenDropDown">
-             <item>
-              <property name="text">
-               <string notr="true">Login</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string notr="true">Main Menu</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string notr="true">Battle Prepare</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string notr="true">Finish Battle</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>DEBUG</string>
-              </property>
-             </item>
-            </widget>
+            <widget class="QComboBox" name="startScreenDropDown"/>
            </item>
           </layout>
          </item>
