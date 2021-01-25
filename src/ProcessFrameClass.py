@@ -70,6 +70,8 @@ class DetectClickThread(Thread):
         self.thisMap = None
         self.thisMask = None
 
+        self.lastLoginTime = time.time()
+
         InputControl.mouseClick(getCorrectPos(Point(10, 10)))
 
 
@@ -183,8 +185,12 @@ class DetectClickThread(Thread):
             if thisStepResult == True:
                 setRunningStepId('login_username_click')
             else:
+                setRunningStepId('login_button_steam')
+        elif step == 'login_button_steam':
+            if thisStepResult == True:
+                setRunningStepId('login_username_click')
+            else:
                 setRunningStepId('login_btn_click')
-
 
 
         elif step == 'login_username_click':
@@ -196,6 +202,10 @@ class DetectClickThread(Thread):
         elif step == 'login_password_input':
             setRunningStepId('login_btn_click')
         elif step == 'login_btn_click':
+            setRunningStepId('login_btn_steam_click')
+        elif step == 'login_btn_steam_click':
+                        
+            self.lastLoginTime = time.time()
             InputControl.kbDown('esc')
             time.sleep(0.01)
             InputControl.kbUp('esc')
@@ -220,16 +230,33 @@ class DetectClickThread(Thread):
 
         elif step == 'mainmenu_esc_return_btn_label':
             if thisStepResult == True:
+
+                if (time.time() - self.lastLoginTime > 3600):
+                    const.loadNewUser()
+                    setRunningStepId('mainmenu_esc_titlescreen_btn_click')
+                else:
+                    InputControl.kbDown('esc')
+                    time.sleep(0.01)
+                    InputControl.kbUp('esc')
+                    time.sleep(0.5)
+            
+        
+            if (time.time() - self.lastLoginTime > 3600):
+                const.loadNewUser()
                 InputControl.kbDown('esc')
                 time.sleep(0.01)
                 InputControl.kbUp('esc')
                 time.sleep(0.5)
-            
-            InputControl.mouseClick(getCorrectPos(Point(120,41)) )
-                
-            setRunningStepId('mainmenu_battle_label')
+                setRunningStepId('mainmenu_esc_titlescreen_btn_click')
+            else:
+                InputControl.mouseClick(getCorrectPos(Point(120,41)) )
+                setRunningStepId('mainmenu_battle_label')
 
+        elif step == 'mainmenu_esc_titlescreen_btn_click':
+            setRunningStepId('mainmenu_esc_titlescreen_confirm_btn_click')
 
+        elif step == 'mainmenu_esc_titlescreen_confirm_btn_click':
+            setRunningStepId('login_username_click')
         
         elif step == 'mainmenu_battle_label':
             if thisStepResult == True:
@@ -418,19 +445,23 @@ class InCombatDeployWeaponThread(Thread):
     def run(self):
         while self.isRunning:
             frame = getDCapture().getFrame(0)
-            thisMinimap = frame[const.BattleMiniMapArea.y:const.BattleMiniMapArea.ys, const.BattleMiniMapArea.x:const.BattleMiniMapArea.xs]
-            if (self.__isEnemyNear(thisMinimap) and (time.time() - self.lastPulledOut > 10)):
+            thisMinimap = frame[const.BattleMiniMapArea.y + 20:const.BattleMiniMapArea.ys - 20, const.BattleMiniMapArea.x + 20:const.BattleMiniMapArea.xs - 20]
+            if (self.__isEnemyNear(thisMinimap) and (time.time() - self.lastPulledOut > 5)):
+            # if self.__isEnemyNear(thisMinimap):
+                print("shoot")
                 self.lastPulledOut = time.time()
                 InputControl.kbDown('1')
-                time.sleep(0.1)
+                time.sleep(0.2)
                 InputControl.kbUp('1')
                 time.sleep(1)
 
+            cv2.waitKey(1)
+
+
     def __isEnemyNear(self, minimap_frame) -> bool:
         hsv_minimap_frame = cv2.cvtColor(minimap_frame, cv2.COLOR_BGR2HSV)
-        lower_red = np.array([0, 180, 180])
-        upper_red = np.array([10, 255, 255])
-        mask = cv2.inRange(hsv_minimap_frame, lower_red, upper_red)
+        mask = cv2.inRange(hsv_minimap_frame, (100, 200, 100), (120, 255, 255))
+        # cv2.imshow("EnenmyDetection", mask)
         if cv2.countNonZero(mask) > 10:
             return True
         return False
@@ -455,15 +486,16 @@ class InCombatVehicleControlThread(Thread):
             InputControl.kbUp("d")
             time.sleep(0.1)
 
-            latestMovement = const.getVehicleMovementStack()[0]
-            center_low_dist_pos = self.__calcEndPoint(latestMovement, 20)
-            if (self.__calcTooClose(center_low_dist_pos)):
-                print("TOO CLOSE")
-                InputControl.kbDown('w')
-                InputControl.kbDown('d')
-            else:
-                print("Just Fine")
-                InputControl.kbDown('w')
+            movements = const.getVehicleMovementStack()
+            if len(movements) > 0:
+                center_low_dist_pos = self.__calcEndPoint(movements[0], 20)
+                if (self.__calcTooClose(center_low_dist_pos)):
+                    print("TOO CLOSE")
+                    InputControl.kbDown('w')
+                    InputControl.kbDown('d')
+                else:
+                    print("Just Fine")
+                    InputControl.kbDown('w')
 
             time.sleep(0.1)
 

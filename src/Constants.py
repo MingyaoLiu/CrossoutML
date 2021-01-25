@@ -139,11 +139,38 @@ Steps = [
     Step(
         id = "login_button",
         action = Action.textDetect,
-        area = Area(229, 464, 290, 490), 
+        area = Area(229, 512, 290, 538), 
         point = None,
         strings = ["login", "log in", "log ln", "logln"],
         waitBefore = 5,
-        waitAfter = 2
+        waitAfter = 1
+    ),    
+    Step(
+        id = "login_btn_click",
+        action = Action.mouseClick,
+        area = None, 
+        point = Point(251,520),
+        strings = None,
+        waitBefore = 1,
+        waitAfter = 1 # it will click the steam one after, so delay will be there.
+    ),
+    Step(
+        id = "login_button_steam",
+        action = Action.textDetect,
+        area = Area(229, 464, 290, 490), 
+        point = None,
+        strings = ["login", "log in", "log ln", "logln"],
+        waitBefore = 1,
+        waitAfter = 1
+    ),
+    Step(
+        id = "login_btn_steam_click",
+        action = Action.mouseClick,
+        area = None, 
+        point = Point(251,475),
+        strings = None,
+        waitBefore = 1,
+        waitAfter = 20
     ),
     Step(
         id = "login_username_click",
@@ -180,15 +207,6 @@ Steps = [
         strings = None,
         waitBefore = 1,
         waitAfter = 1
-    ),
-    Step(
-        id = "login_btn_click",
-        action = Action.mouseClick,
-        area = None, 
-        point = Point(251,475),
-        strings = None,
-        waitBefore = 1,
-        waitAfter = 20
     ),
     Step(
         id = "login_disconnect_btn_text",
@@ -324,6 +342,24 @@ Steps = [
         strings = None,
         waitBefore = 1,
         waitAfter = 1
+    ),
+    Step(
+        id = "mainmenu_esc_titlescreen_btn_click",
+        action = Action.mouseClick,
+        area = None, 
+        point = Point(954,672),
+        strings = None,
+        waitBefore = 1,
+        waitAfter = 1
+    ),
+    Step(
+        id = "mainmenu_esc_titlescreen_confirm_btn_click",
+        action = Action.mouseClick,
+        area = None, 
+        point = Point(846,587),
+        strings = None,
+        waitBefore = 1,
+        waitAfter = 10
     ),
     Step(
         id = "before_game_wait",
