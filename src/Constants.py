@@ -180,7 +180,7 @@ Steps = [
         point = Point(116,300),
         strings = None,
         waitBefore = 1,
-        waitAfter = 1
+        waitAfter = 0.5
     ),
     Step(
         id = "login_username_input",
@@ -189,7 +189,7 @@ Steps = [
         point = None,
         strings = None,
         waitBefore = 1,
-        waitAfter = 1
+        waitAfter = 0.5
     ),
     Step(
         id = "login_password_click",
@@ -198,7 +198,7 @@ Steps = [
         point = Point(124,366),
         strings = None,
         waitBefore = 1,
-        waitAfter = 1
+        waitAfter = 0.5
     ),
     Step(
         id = "login_password_input",
@@ -207,7 +207,7 @@ Steps = [
         point = None,
         strings = None,
         waitBefore = 1,
-        waitAfter = 1
+        waitAfter = 0.5
     ),
     Step(
         id = "login_disconnect_btn_text",
@@ -216,7 +216,7 @@ Steps = [
         point = None,
         strings = ["ok", "0k"],
         waitBefore = 1,
-        waitAfter = 1
+        waitAfter = 0.5
     ),
     Step(
         id = "login_disconnect_click",
@@ -225,7 +225,7 @@ Steps = [
         point = Point(963, 589),
         strings = None,
         waitBefore = 1,
-        waitAfter = 1
+        waitAfter = 0.5
     ),
     Step(
         id = "in_game_map_name_label",
@@ -234,7 +234,7 @@ Steps = [
         point = None,
         strings = list(map_mask_file_path.keys()),
         waitBefore = 1,
-        waitAfter = 1
+        waitAfter = 0.5
     ),    
     Step(
         id = "in_game_wait_for_finish",
@@ -243,7 +243,7 @@ Steps = [
         point = Point(10,10),
         strings = None,
         waitBefore = 30,
-        waitAfter = 1
+        waitAfter = 0.5
     ),
     Step(
         id = "finish_battle_close_btn_label",
@@ -252,7 +252,7 @@ Steps = [
         point = None,
         strings = ["close", "c1ose"],
         waitBefore = 1,
-        waitAfter = 1
+        waitAfter = 0.5
     ),
     Step(
         id = "finish_battle_close_btn_click",
@@ -261,7 +261,7 @@ Steps = [
         point = Point(1230, 1000),
         strings = None,
         waitBefore = 1,
-        waitAfter = 1
+        waitAfter = 0.5
     ),
     Step(
         id = "mainmenu_battle_label",
@@ -269,8 +269,8 @@ Steps = [
         area = Area(883,143, 1032, 187), 
         point = None,
         strings = ["battle", "batt1e"],
-        waitBefore = 1,
-        waitAfter = 1
+        waitBefore = 0.5,
+        waitAfter = 0.5
     ),
     Step(
         id = "mainmenu_select_click",
@@ -278,8 +278,8 @@ Steps = [
         area = None, 
         point = Point(950,245),
         strings = None,
-        waitBefore = 1,
-        waitAfter = 1
+        waitBefore = 0.5,
+        waitAfter = 0.5,
     ),
     Step(
         id = "battle_select_scrap_click",
@@ -287,8 +287,8 @@ Steps = [
         area = None, 
         point = Point(962,237),
         strings = None,
-        waitBefore = 1,
-        waitAfter = 1
+        waitBefore = 0.5,
+        waitAfter = 0.5
     ),
     Step(
         id = "battle_select_battery_click",
@@ -296,8 +296,8 @@ Steps = [
         area = None, 
         point = Point(843,240),
         strings = None,
-        waitBefore = 1,
-        waitAfter = 1
+        waitBefore = 0.5,
+        waitAfter = 0.5
     ),
     Step(
         id = "battle_select_wire_click",
@@ -305,8 +305,8 @@ Steps = [
         area = None, 
         point = Point(1072,240),
         strings = None,
-        waitBefore = 1,
-        waitAfter = 1
+        waitBefore = 0.5,
+        waitAfter = 0.5
     ),
     Step(
         id = "battle_select_battle_start_click",
@@ -314,8 +314,8 @@ Steps = [
         area = None, 
         point = Point(556,759),
         strings = None,
-        waitBefore = 1,
-        waitAfter = 1
+        waitBefore = 0.5,
+        waitAfter = 0.5
     ),
     Step(
         id = "mainmenu_welcome_close_btn_label",
@@ -460,18 +460,6 @@ def setRunningStepId(id: str):
 
 
 
-class DetectClickPair(tuple):
-    def __new__(self, name: str, area: Area, requiredMatch: bool, clickPos: Point, willClick: bool, expectedStrs: [str],  waitBeforeDetect: int,  waitBeforeClick: int):
-        DetectClickPair.name = property(operator.itemgetter(0))
-        DetectClickPair.area = property(operator.itemgetter(1))
-        DetectClickPair.requiredMatch = property(operator.itemgetter(2))
-        DetectClickPair.clickPos = property(operator.itemgetter(3))
-        DetectClickPair.willClick = property(operator.itemgetter(4))
-        DetectClickPair.expectedStrs = property(operator.itemgetter(5))
-        DetectClickPair.waitBeforeDetect = property(operator.itemgetter(6))
-        DetectClickPair.waitBeforeClick = property(operator.itemgetter(7))
-        return tuple.__new__(DetectClickPair, (name, area, requiredMatch, clickPos, willClick, expectedStrs, waitBeforeDetect, waitBeforeClick))
- 
 
 class PointData(tuple):
     def __new__(self, pos: Point, isOutside: bool):
@@ -486,20 +474,6 @@ class CenterData(tuple):
         CenterData.mid = property(operator.itemgetter(1))
         CenterData.far = property(operator.itemgetter(2))
         return tuple.__new__(CenterData, (low, mid, far))
-
-
-class BattleFrame(tuple):
-    def __new__(self, record: bool, time: float, distance: float, speed: float, posData: PointData, centerRad: float, center: CenterData, left: PointData, right: PointData):
-        BattleFrame.record = property(operator.itemgetter(0))
-        BattleFrame.time = property(operator.itemgetter(1))
-        BattleFrame.distance = property(operator.itemgetter(2))
-        BattleFrame.speed = property(operator.itemgetter(3))
-        BattleFrame.posData = property(operator.itemgetter(4))
-        BattleFrame.centerRad = property(operator.itemgetter(5))
-        BattleFrame.center = property(operator.itemgetter(6))
-        BattleFrame.left = property(operator.itemgetter(7))
-        BattleFrame.right = property(operator.itemgetter(8))
-        return tuple.__new__(BattleFrame, (record, time, distance, speed, posData, centerRad, center, left, right))
 
 class VehicleMovementData(tuple):
     def __new__(self, time: float, pos: Point, rad: float):
@@ -516,7 +490,7 @@ def getVehicleMovementStack():
 def updateVehicleMovementStack(newData: VehicleMovementData):
     global vehicleMovementStack
     vehicleMovementStack.insert(0, newData)
-    if len(vehicleMovementStack) > 30:
+    if len(vehicleMovementStack) > 50:
         vehicleMovementStack.pop()
 
 def clearVehicleMovementStack():
@@ -532,605 +506,3 @@ def clearVehicleMovementStack():
 
 screenWidth = 1920
 screenHeight = 1080
-
-scrap_btn_width = 40
-scrap_btn_height = 40
-scrap_btn_trigger_pos_x = int(screenWidth / 2)
-scrap_btn_trigger_pos_y = int(270)
-
-wire_btn_width = 30
-wire_btn_height = 30
-wire_btn_trigger_pos_x = int(screenWidth / 2 + 110)
-wire_btn_trigger_pos_y = int(270)
-
-battery_btn_width = 30
-battery_btn_height = 30
-battery_btn_trigger_pos_x = int(screenWidth / 2 - 110)
-battery_btn_trigger_pos_y = int(270)
-
-patrol_btn_width = 30
-patrol_btn_height = 30
-patrol_btn_trigger_pos_x = int(screenWidth / 2)
-patrol_btn_trigger_pos_y = int(390)
-
-raven_path_btn_width = 30
-raven_path_btn_height = 30
-raven_path_btn_trigger_pos_x = int(
-    screenWidth / 2 + 220)
-raven_path_btn_trigger_pos_y = int(270)
-
-esc_return_button_width = 90
-esc_return_button_width_start = int(
-    screenWidth / 2 - esc_return_button_width / 2)
-esc_return_button_width_end = int(
-    screenWidth / 2 + esc_return_button_width / 2)
-esc_return_button_height = 26
-esc_return_button_height_start = int(
-    screenHeight / 2.27 - esc_return_button_height / 2)
-esc_return_button_height_end = int(
-    screenHeight / 2.27 + esc_return_button_height / 2)
-esc_return_button_trigger_pos_x = int(
-    esc_return_button_width_start + esc_return_button_width / 2)
-esc_return_button_trigger_pos_y = int(
-    esc_return_button_height_start + esc_return_button_height / 2)
-
-
-login_label_width = 70
-login_label_width_start = int(screenWidth / 7.5 - login_label_width / 2)
-login_label_width_end = int(screenWidth / 7.5 + login_label_width / 2)
-login_label_height = 40
-login_label_height_start = int(screenHeight / 2 - login_label_height / 2)
-login_label_height_end = int(screenHeight / 2 + login_label_height / 2)
-login_label_trigger_pos_x = int(
-    login_label_width_start + login_label_width / 2)
-login_label_trigger_pos_y = int(
-    login_label_height_start + login_label_height / 2)
-
-
-login_exit_no_width = 35
-login_exit_no_width_start = int(screenWidth / 1.785 - login_exit_no_width / 2)
-login_exit_no_width_end = int(screenWidth / 1.785 + login_exit_no_width / 2)
-login_exit_no_height = 25
-login_exit_no_height_start = int(
-    screenHeight / 1.75 - login_exit_no_height / 2)
-login_exit_no_height_end = int(screenHeight / 1.75 + login_exit_no_height / 2)
-login_exit_no_trigger_pos_x = int(
-    login_exit_no_width_start + login_exit_no_width / 2)
-login_exit_no_trigger_pos_y = int(
-    login_exit_no_height_start + login_exit_no_height / 2)
-
-
-welcome_promo_label_width = 70
-welcome_promo_label_width_start = int(
-    screenWidth / 1.5 - welcome_promo_label_width / 2)
-welcome_promo_label_width_end = int(
-    screenWidth / 1.5 + welcome_promo_label_width / 2)
-welcome_promo_label_height = 40
-welcome_promo_label_height_start = int(
-    screenHeight / 1.5 - welcome_promo_label_height / 2)
-welcome_promo_label_height_end = int(
-    screenHeight / 1.5 + welcome_promo_label_height / 2)
-welcome_promo_label_trigger_pos_x = int(
-    welcome_promo_label_width_start + welcome_promo_label_width / 2)
-welcome_promo_label_trigger_pos_y = int(
-    welcome_promo_label_height_start + welcome_promo_label_height / 2)
-
-mainmenu_battle_label_width = 140
-mainmenu_battle_label_width_start = int(
-    screenWidth / 2 - mainmenu_battle_label_width / 2)
-mainmenu_battle_label_width_end = int(
-    screenWidth / 2 + mainmenu_battle_label_width / 2)
-mainmenu_battle_label_height = 50
-mainmenu_battle_label_height_start = int(
-    screenHeight / 5.65 - mainmenu_battle_label_height / 2)
-mainmenu_battle_label_height_end = int(
-    screenHeight / 5.65 + mainmenu_battle_label_height / 2)
-mainmenu_battle_label_trigger_pos_x = int(
-    mainmenu_battle_label_width_start + mainmenu_battle_label_width / 2)
-mainmenu_battle_label_trigger_pos_y = int(
-    mainmenu_battle_label_height_start + mainmenu_battle_label_height / 2)
-
-mainmenu_select_mode_label_width = 130
-mainmenu_select_mode_label_width_start = int(
-    screenWidth / 2 - mainmenu_select_mode_label_width / 2)
-mainmenu_select_mode_label_width_end = int(
-    screenWidth / 2 + mainmenu_select_mode_label_width / 2)
-mainmenu_select_mode_label_height = 60
-mainmenu_select_mode_label_height_start = int(
-    screenHeight / 4 - mainmenu_select_mode_label_height / 2)
-mainmenu_select_mode_label_height_end = int(
-    screenHeight / 4 + mainmenu_select_mode_label_height / 2)
-mainmenu_select_mode_label_trigger_pos_x = int(
-    mainmenu_select_mode_label_width_start + mainmenu_select_mode_label_width / 2)
-mainmenu_select_mode_label_trigger_pos_y = int(
-    mainmenu_select_mode_label_height_start + mainmenu_select_mode_label_height / 2)
-
-get_resource_battle_label_width = 130
-get_resource_battle_label_width_start = int(
-    screenWidth / 3 - get_resource_battle_label_width / 2)
-get_resource_battle_label_width_end = int(
-    screenWidth / 3 + get_resource_battle_label_width / 2)
-get_resource_battle_label_height = 60
-get_resource_battle_label_height_start = int(
-    screenHeight / 1.37 - get_resource_battle_label_height / 2)
-get_resource_battle_label_height_end = int(
-    screenHeight / 1.37 + get_resource_battle_label_height / 2)
-get_resource_battle_label_trigger_pos_x = int(
-    get_resource_battle_label_width_start + get_resource_battle_label_width / 2)
-get_resource_battle_label_trigger_pos_y = int(
-    get_resource_battle_label_height_start + get_resource_battle_label_height / 2)
-
-get_resource_patrol_battle_label_height_start = int(
-    screenHeight / 1.3 - get_resource_battle_label_height / 2)
-get_resource_patrol_battle_label_height_end = int(
-    screenHeight / 1.3 + get_resource_battle_label_height / 2)
-get_resource_patrol_battle_label_trigger_pos_x = int(
-    get_resource_battle_label_width_start + get_resource_battle_label_width / 2)
-get_resource_patrol_battle_label_trigger_pos_y = int(
-    get_resource_patrol_battle_label_height_start + get_resource_battle_label_height / 2)
-
-battle_type_title_label_width = 250
-battle_type_title_label_width_start = int(
-    screenWidth / 12 + 10 - battle_type_title_label_width / 2)
-battle_type_title_label_width_end = int(
-    screenWidth / 12 + 10 + battle_type_title_label_width / 2)
-battle_type_title_label_height = 65
-battle_type_title_label_height_start = int(
-    screenHeight / 13.5 - battle_type_title_label_height / 2)
-battle_type_title_label_height_end = int(
-    screenHeight / 13.5 + battle_type_title_label_height / 2)
-battle_type_title_label_trigger_pos_x = int(
-    battle_type_title_label_width_start + battle_type_title_label_width / 2)
-battle_type_title_label_trigger_pos_y = int(
-    battle_type_title_label_height_start + battle_type_title_label_height / 2)
-
-battle_map_name_label_width = 360
-battle_map_name_label_width_start = int(
-    screenWidth - 275 - battle_map_name_label_width / 2)
-battle_map_name_label_width_end = int(
-    screenWidth - 275 + battle_map_name_label_width / 2)
-battle_map_name_label_height = 54
-battle_map_name_label_height_start = int(82 - battle_map_name_label_height / 2)
-battle_map_name_label_height_end = int(82 + battle_map_name_label_height / 2)
-battle_map_name_label_trigger_pos_x = int(
-    battle_map_name_label_width_start + battle_map_name_label_width / 2)
-battle_map_name_label_trigger_pos_y = int(
-    battle_map_name_label_height_start + battle_map_name_label_height / 2)
-
-battle_victory_defeat_giant_width = 550
-battle_victory_defeat_giant_width_start = int(
-    screenWidth / 2 - battle_victory_defeat_giant_width / 2)
-battle_victory_defeat_giant_width_end = int(
-    screenWidth / 2 + battle_victory_defeat_giant_width / 2)
-battle_victory_defeat_giant_width_height = 150
-battle_victory_defeat_giant_width_height_start = int(
-    screenHeight / 2.1 - battle_victory_defeat_giant_width_height / 2)
-battle_victory_defeat_giant_width_height_end = int(
-    screenHeight / 2.1 + battle_victory_defeat_giant_width_height / 2)
-battle_victory_defeat_giant_width_trigger_pos_x = int(
-    battle_victory_defeat_giant_width_start + battle_victory_defeat_giant_width / 2)
-battle_victory_defeat_giant_width_trigger_pos_y = int(
-    battle_victory_defeat_giant_width_height_start + battle_victory_defeat_giant_width_height / 2)
-
-
-battle_lose_wait_width = 32
-battle_lose_wait_width_start = int(
-    screenWidth / 2 - 112 - battle_lose_wait_width / 2)
-battle_lose_wait_width_end = int(
-    screenWidth / 2 - 112 + battle_lose_wait_width / 2)
-battle_lose_wait_height = 32
-battle_lose_wait_height_start = int(
-    screenHeight / 1.33 - battle_lose_wait_height / 2)
-battle_lose_wait_height_end = int(
-    screenHeight / 1.33 + battle_lose_wait_height / 2)
-battle_lose_wait_trigger_pos_x = int(
-    battle_lose_wait_width_start + battle_lose_wait_width / 2)
-battle_lose_wait_trigger_pos_y = int(
-    battle_lose_wait_height_start + battle_lose_wait_height / 2)
-
-battle_lose_survivor_part_width = 240
-battle_lose_survivor_part_width_start = int(
-    screenWidth - battle_lose_survivor_part_width)
-battle_lose_survivor_part_width_end = int(screenWidth)
-battle_lose_survivor_part_height = 50
-battle_lose_survivor_part_height_start = int(
-    screenHeight / 2.4 - battle_lose_survivor_part_height / 2)
-battle_lose_survivor_part_height_end = int(
-    screenHeight / 2.4 + battle_lose_survivor_part_height / 2)
-battle_lose_survivor_part_trigger_pos_x = int(
-    battle_lose_survivor_part_width_start + battle_lose_survivor_part_width / 2)
-battle_lose_survivor_part_trigger_pos_y = int(
-    battle_lose_survivor_part_height_start + battle_lose_survivor_part_height / 2)
-
-
-finish_battle_close_label_width = 120
-finish_battle_close_label_width_start = int(
-    screenWidth / 5 * 3.25 - finish_battle_close_label_width / 2) # 1188
-finish_battle_close_label_width_end = int(
-    screenWidth / 5 * 3.25 + finish_battle_close_label_width / 2) # 1308
-finish_battle_close_label_height = 50
-finish_battle_close_label_height_start = int(
-    screenHeight / 13 * 12.1 - finish_battle_close_label_height / 2) # 955
-finish_battle_close_label_height_end = int(
-    screenHeight / 13 * 12.1 + finish_battle_close_label_height / 2) # 1055
-finish_battle_close_label_trigger_pos_x = int(
-    finish_battle_close_label_width_start + finish_battle_close_label_width / 2)
-finish_battle_close_label_trigger_pos_y = int(
-    finish_battle_close_label_height_start + finish_battle_close_label_height / 2)
-
-finish_battle_battle_label_width = 140
-finish_battle_battle_label_width_start = int(
-    screenWidth / 5 * 4.1 - finish_battle_battle_label_width / 2)
-finish_battle_battle_label_width_end = int(
-    screenWidth / 5 * 4.1 + finish_battle_battle_label_width / 2)
-finish_battle_battle_label_height = 50
-finish_battle_battle_label_height_start = int(
-    screenHeight / 13 * 12.1 - finish_battle_battle_label_height / 2)
-finish_battle_battle_label_height_end = int(
-    screenHeight / 13 * 12.1 + finish_battle_battle_label_height / 2)
-finish_battle_battle_label_trigger_pos_x = int(
-    finish_battle_battle_label_width_start + finish_battle_battle_label_width / 2)
-finish_battle_battle_label_trigger_pos_y = int(
-    finish_battle_battle_label_height_start + finish_battle_battle_label_height / 2)
-
-
-mainmenu_challenge_complete_ok_width = 60
-mainmenu_challenge_complete_ok_width_start = int(
-    screenWidth / 2 + 110 - mainmenu_challenge_complete_ok_width / 2)
-mainmenu_challenge_complete_ok_width_end = int(
-    screenWidth / 2 + 110 + mainmenu_challenge_complete_ok_width / 2)
-mainmenu_challenge_complete_ok_height = 40
-mainmenu_challenge_complete_ok_height_start = int(
-    screenHeight / 1.08 - mainmenu_challenge_complete_ok_height / 2)
-mainmenu_challenge_complete_ok_height_end = int(
-    screenHeight / 1.08 + mainmenu_challenge_complete_ok_height / 2)
-mainmenu_challenge_complete_ok_trigger_pos_x = int(
-    mainmenu_challenge_complete_ok_width_start + mainmenu_challenge_complete_ok_width / 2)
-mainmenu_challenge_complete_ok_trigger_pos_y = int(
-    mainmenu_challenge_complete_ok_height_start + mainmenu_challenge_complete_ok_height / 2)
-
-
-in_battle_front_view_width = 720
-in_battle_front_view_width_start = int(
-    screenWidth / 2 - in_battle_front_view_width / 2)
-in_battle_front_view_width_end = int(
-    screenWidth / 2 + in_battle_front_view_width / 2)
-in_battle_front_view_height = 260
-in_battle_front_view_height_start = int(
-    screenHeight / 2.2 - in_battle_front_view_height / 2)
-in_battle_front_view_height_end = int(
-    screenHeight / 2.2 + in_battle_front_view_height / 2)
-in_battle_front_view_trigger_pos_x = int(
-    in_battle_front_view_width_start + in_battle_front_view_width / 2)
-in_battle_front_view_trigger_pos_y = int(
-    in_battle_front_view_height_start + in_battle_front_view_height / 2)
-
-
-in_battle_health_digit_width = 48
-in_battle_health_digit_width_start = int(
-    screenWidth / 2 - 59 - in_battle_health_digit_width / 2)
-in_battle_health_digit_width_end = int(
-    screenWidth / 2 - 59 + in_battle_health_digit_width / 2)
-in_battle_health_digit_height = 24
-in_battle_health_digit_height_start = int(
-    screenHeight - 29 - in_battle_health_digit_height / 2)
-in_battle_health_digit_height_end = int(
-    screenHeight - 29 + in_battle_health_digit_height / 2)
-in_battle_health_digit_trigger_pos_x = int(
-    in_battle_health_digit_width_start + in_battle_health_digit_width / 2)
-in_battle_health_digit_trigger_pos_y = int(
-    in_battle_health_digit_height_start + in_battle_health_digit_height / 2)
-
-
-in_battle_mini_map_width = 150
-in_battle_mini_map_width_start = int(
-    screenWidth - 209 - in_battle_mini_map_width / 2)
-in_battle_mini_map_width_end = int(
-    screenWidth - 209 + in_battle_mini_map_width / 2)
-in_battle_mini_map_height = 150
-in_battle_mini_map_height_start = int(
-    screenHeight - 176 - in_battle_mini_map_height / 2)
-in_battle_mini_map_height_end = int(
-    screenHeight - 176 + in_battle_mini_map_height / 2)
-in_battle_mini_map_trigger_pos_x = int(
-    in_battle_mini_map_width_start + in_battle_mini_map_width / 2)
-in_battle_mini_map_trigger_pos_y = int(
-    in_battle_mini_map_height_start + in_battle_mini_map_height / 2)
-
-
-in_battle_mini_map_arrow_width = 30
-in_battle_mini_map_arrow_width_start = int(
-    screenWidth - 209 - in_battle_mini_map_arrow_width / 2)
-in_battle_mini_map_arrow_width_end = int(
-    screenWidth - 209 + in_battle_mini_map_arrow_width / 2)
-in_battle_mini_map_arrow_height = 30
-in_battle_mini_map_arrow_height_start = int(
-    screenHeight - 176 - in_battle_mini_map_arrow_height / 2)
-in_battle_mini_map_arrow_height_end = int(
-    screenHeight - 176 + in_battle_mini_map_arrow_height / 2)
-in_battle_mini_map_arrow_trigger_pos_x = int(
-    in_battle_mini_map_arrow_width_start + in_battle_mini_map_arrow_width / 2)
-in_battle_mini_map_arrow_trigger_pos_y = int(
-    in_battle_mini_map_arrow_height_start + in_battle_mini_map_arrow_height / 2)
-
-
-co_pilot_upgrade_close_width = 54
-co_pilot_upgrade_close_width_start = int(
-    screenWidth / 2 + 8 - co_pilot_upgrade_close_width / 2)
-co_pilot_upgrade_close_width_end = int(
-    screenWidth / 2 + 8 + co_pilot_upgrade_close_width / 2)
-co_pilot_upgrade_close_height = 22
-co_pilot_upgrade_close_height_start = int(
-    screenHeight / 1.527 - co_pilot_upgrade_close_height / 2)
-co_pilot_upgrade_close_height_end = int(
-    screenHeight / 1.527 + co_pilot_upgrade_close_height / 2)
-co_pilot_upgrade_close_trigger_pos_x = int(
-    co_pilot_upgrade_close_width_start + co_pilot_upgrade_close_width / 2)
-co_pilot_upgrade_close_trigger_pos_y = int(
-    co_pilot_upgrade_close_height_start + co_pilot_upgrade_close_height / 2)
-
-
-
-frame_crops = {
-    "login_exit_no_btn":
-    DetectClickPair(
-        "Exit No Button",
-        Area(login_exit_no_width_start, login_exit_no_height_start,
-                 login_exit_no_width_end, login_exit_no_height_end),
-        True,
-        Point(login_exit_no_trigger_pos_x,
-              login_exit_no_trigger_pos_y),
-        True,
-        ["no"],
-        2,
-        2
-    ),
-    "mainmenu_escape_menu_return_button":
-    DetectClickPair(
-        "Escape Return Button",
-        Area(esc_return_button_width_start, esc_return_button_height_start,
-                 esc_return_button_width_end, esc_return_button_height_end),
-        True,
-        Point(esc_return_button_trigger_pos_x,
-              esc_return_button_trigger_pos_y),
-        True,
-        ["return", "toate"],
-        1,
-        1
-    ),
-}
-
-
-login_crops = [
-    DetectClickPair(
-        "Exit No Button",
-        Area(login_exit_no_width_start, login_exit_no_height_start,
-                 login_exit_no_width_end, login_exit_no_height_end),
-        True,
-        Point(login_exit_no_trigger_pos_x,
-              login_exit_no_trigger_pos_y),
-        True,
-        ["no"],
-        1,
-        1
-    ),
-    DetectClickPair(
-        "Escape Return Button",
-        Area(esc_return_button_width_start, esc_return_button_height_start,
-                 esc_return_button_width_end, esc_return_button_height_end),
-        True,
-        Point(esc_return_button_trigger_pos_x,
-              esc_return_button_trigger_pos_y),
-        True,
-        ["return", "toate"],
-        1,
-        1
-    ),
-
-    DetectClickPair(
-        "Login Button",
-        Area(login_label_width_start, login_label_height_start,
-                 login_label_width_end, login_label_height_end),
-        True,
-        Point(login_label_trigger_pos_x,
-              login_label_trigger_pos_y),
-        True,
-        ["login", "log in", "log ln", "logln"],
-        10,
-        1
-    )
-]
-
-welcome_crops = [
-    DetectClickPair(
-        "Welcome Promo Close Button",
-        Area(welcome_promo_label_width_start, welcome_promo_label_height_start,
-                 welcome_promo_label_width_end, welcome_promo_label_height_end),
-        True,
-        Point(welcome_promo_label_trigger_pos_x,
-              welcome_promo_label_trigger_pos_y),
-        True,
-        ["close", "c1ose", "ciose"],
-        2,
-        1
-    )
-]
-
-mainmenu_master_jack_crops = [
-    DetectClickPair(
-        "Mainmenu MasterJack Upgrade level Close",
-        Area(co_pilot_upgrade_close_width_start, co_pilot_upgrade_close_height_start,
-                 co_pilot_upgrade_close_width_end, co_pilot_upgrade_close_height_end),
-        True,
-        Point(co_pilot_upgrade_close_trigger_pos_x,
-              co_pilot_upgrade_close_trigger_pos_x),
-        True,
-        ["close", "c1ose"],
-        2,
-        1
-    )
-]
-
-mainmenu_challenge_crops = [
-    DetectClickPair(
-        "Mainmenu Challenge Complete OK Button",
-        Area(mainmenu_challenge_complete_ok_width_start, mainmenu_challenge_complete_ok_height_start,
-                 mainmenu_challenge_complete_ok_width_end, mainmenu_challenge_complete_ok_height_end),
-        True,
-        Point(mainmenu_challenge_complete_ok_trigger_pos_x,
-              mainmenu_challenge_complete_ok_trigger_pos_y),
-        True,
-        ["ok", "0k"],
-        2,
-        1
-    )
-]
-
-mainmenu_crops = [
-    DetectClickPair(
-        "Main Menu Battle Button",
-        Area(mainmenu_battle_label_width_start, mainmenu_battle_label_height_start,
-                 mainmenu_battle_label_width_end, mainmenu_battle_label_height_end),
-        False,
-        Point(mainmenu_battle_label_trigger_pos_x,
-              mainmenu_battle_label_trigger_pos_y),
-        False,
-        ["battle", "batt1e"],
-        1,
-        1
-    ),
-    DetectClickPair(
-        "Main Menu Select Mode Button",
-        Area(mainmenu_select_mode_label_width_start, mainmenu_select_mode_label_height_start,
-                 mainmenu_select_mode_label_width_end, mainmenu_select_mode_label_height_end),
-        True,
-        Point(mainmenu_select_mode_label_trigger_pos_x,
-              mainmenu_select_mode_label_trigger_pos_y),
-        True,
-        ["select mode", "selectmode", "se1ect mode"],
-        1,
-        1
-    ),
-    DetectClickPair(
-        "Escape Exit Button",
-        Area(883, 658, 1029, 697),
-        True,
-        Point(955, 675),
-        True,
-        ["title screen", "titlescreen", "tit1e screen"],
-        1,
-        1
-    ),
-    DetectClickPair(
-        "Exit to login yes button",
-        Area(820, 610, 880, 626),
-        True,
-        Point(850, 620),
-        True,
-        ["yes", "ais"],
-        5,
-        1
-    )
-]
-
-resource_prepare_crops = [
-    DetectClickPair(
-        "Scrap/Wire/Battery Prepare to Battle Button",
-        Area(get_resource_battle_label_width_start, get_resource_battle_label_height_start,
-                 get_resource_battle_label_width_end, get_resource_battle_label_height_end),
-        True,
-        Point(get_resource_battle_label_trigger_pos_x,
-              get_resource_battle_label_trigger_pos_y),
-        True,
-        ["battle", "batt1e"],
-        1,
-        1
-    ),
-    DetectClickPair(
-        "Patrol Mode Prepare to Battle Button",
-        Area(get_resource_battle_label_width_start, get_resource_patrol_battle_label_height_start,
-                 get_resource_battle_label_width_end, get_resource_patrol_battle_label_height_end),
-        False,
-        Point(get_resource_patrol_battle_label_trigger_pos_x,
-              get_resource_patrol_battle_label_trigger_pos_y),
-        False,
-        ["battle", "batt1e"],
-        1,
-        1
-    )
-]
-
-battle_preparation_crops = [
-    DetectClickPair(
-        "Prepare to Battle Summary Screen Title",
-        Area(battle_type_title_label_width_start, battle_type_title_label_height_start,
-                 battle_type_title_label_width_end, battle_type_title_label_height_end),
-        True,
-        Point(mainmenu_challenge_complete_ok_trigger_pos_x,
-              mainmenu_challenge_complete_ok_trigger_pos_y),
-        True,
-        ["assault", "encounter", "domination"],
-        1,
-        1
-    ),
-    DetectClickPair(
-        "Prepare to Battle Summary Screen Map Name",
-        Area(battle_map_name_label_width_start, battle_map_name_label_height_start,
-                 battle_map_name_label_width_end, battle_map_name_label_height_end),
-        True,
-        Point(battle_map_name_label_trigger_pos_x,
-              battle_map_name_label_trigger_pos_y),
-        True,
-        list(map_mask_file_path.keys()),
-        1,
-        1
-    )
-]
-
-# in_battle_crops = [
-#     DetectClickPair(
-#         "Defeat / Victory Screen",
-#         Area(battle_lose_survivor_part_width_start,battle_lose_survivor_part_height_start,battle_lose_survivor_part_width_end,battle_lose_survivor_part_height_end),
-#         False,
-#         Point(battle_lose_survivor_part_trigger_pos_x,battle_lose_survivor_part_trigger_pos_y),
-#         False,
-#         ["survivor's parts", "survivors parts", "survivorsparts"],
-#         1
-#     ),
-#     DetectClickPair(
-#         "Survivor's Kit",
-#         Area(battle_lose_survivor_part_width_start,battle_lose_survivor_part_height_start,battle_lose_survivor_part_width_end,battle_lose_survivor_part_height_end),
-#         False,
-#         Point(battle_lose_survivor_part_trigger_pos_x,battle_lose_survivor_part_trigger_pos_y),
-#         False,
-#         ["survivor's parts", "survivors parts", "survivorsparts"],
-#         1
-#     )
-# ]
-
-finish_battle_crops = [
-    DetectClickPair(
-        "Finish Battle Close Button",
-        Area(finish_battle_close_label_width_start, finish_battle_close_label_height_start,
-                 finish_battle_close_label_width_end, finish_battle_close_label_height_end),
-        True,
-        Point(finish_battle_close_label_trigger_pos_x,
-              finish_battle_close_label_trigger_pos_y),
-        True,
-        ["close", "c1ose"],
-        1,
-        1
-    ),
-    DetectClickPair(
-        "Finish Battle BATTLE Button",
-        Area(finish_battle_battle_label_width_start, finish_battle_battle_label_height_start,
-                 finish_battle_battle_label_width_end, finish_battle_battle_label_height_end),
-        False,
-        Point(finish_battle_battle_label_trigger_pos_x,
-              finish_battle_battle_label_trigger_pos_y),
-        False,
-        ["battle", "batt1e"],
-        1,
-        1
-    )
-]

@@ -3,7 +3,7 @@ from multiprocessing import Process, Value
 import time
 from DCaptureClass import getDCapture
 import pytesseract
-from Constants import BattleFrame, DetectClickPair, Area, StepStatus, Point, findStepById, Step, loadNewUser, Action, getPassword, getUsername, getRunningStepId, setRunningStepId
+from Constants import Area, Point, findStepById, Step, loadNewUser, Action, getPassword, getUsername, getRunningStepId, setRunningStepId
 import Constants as const
 import d3dshot
 
@@ -283,6 +283,8 @@ class DetectClickThread(Thread):
                 
                 InputControl.kbUp('tab')
                 time.sleep(10)
+
+                frame = getDCapture().getFrame(0)
                 minimap = frame[const.BattleMiniMapArea.y:const.BattleMiniMapArea.ys, const.BattleMiniMapArea.x:const.BattleMiniMapArea.xs]
                 cv2.imwrite("map-" + str(self.thisMapName) + "-minimap-" + str(time.time()) + ".jpg", minimap ) 
                         
@@ -450,6 +452,7 @@ class InCombatDeployWeaponThread(Thread):
         Thread.__init__(self)
         self.isRunning = True
         self.lastPulledOut = time.time()
+        self.stuckTimer = None
 
     def run(self):
         while self.isRunning:
@@ -463,6 +466,20 @@ class InCombatDeployWeaponThread(Thread):
                 time.sleep(0.2)
                 InputControl.kbUp('1')
                 time.sleep(1)
+
+            movementStack = const.getVehicleMovementStack()
+            if len(movementStack) == 50:
+                if ((movementStack[0].pos.x == movementStack[49].pos.x) and (movementStack[0].pos.y == movementStack[49].pos.y)):
+                    if (self.stuckTimer is None):
+                        self.stuckTimer = movementStack[0].time
+                    elif (movementStack[0].time - self.stuckTimer > 10):
+                        InputControl.kbDown('backspace')
+                        time.sleep(5)
+                        InputControl.kbUp('backspace')
+                        self.isRunning = False
+                    
+                else:
+                    self.stuckTimer = None
 
 
 
@@ -484,6 +501,7 @@ class InCombatVehicleControlThread(Thread):
         self.isRunning = True
         self.mask = mask
         self.debugMask = self.mask.copy()
+        self.currentlyMakingATurn = 'no' # no / left / right
 
     def run(self):
 
@@ -580,23 +598,29 @@ class InCombatVehicleControlThread(Thread):
 
 
 
-        if center_data.mid.isOutside:
+        if center_data.mid.isOutside: # center mid is outside
                 
-            if left_low_pd.isOutside and right_low_pd.isOutside:
+            if left_low_pd.isOutside and right_low_pd.isOutside: # both left and right are outside
 
                 if center_data.low.isOutside:
-                    time.sleep(0.5)
                     pass
                 else:
-                    pass
+                    if (self.currentlyMakingATurn == 'left'):
+                        InputControl.kbDown("a")
+                    elif (self.currentlyMakingATurn == 'right'):
+                        InputControl.kbDown("d")
 
             elif left_low_pd.isOutside:
+                self.currentlyMakingATurn = 'right'
+
                 InputControl.kbDown("d")
 
             elif right_low_pd.isOutside:
+                self.currentlyMakingATurn = 'left'
+                
                 InputControl.kbDown("a")
             else:
-                pass
+                self.currentlyMakingATurn = 'no'
         else:
             pass
         
