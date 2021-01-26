@@ -624,13 +624,13 @@ class InCombatVehicleControlThread(Thread):
         else:
             pass
         
-        time.sleep(0.1)
+        time.sleep(0.15)
         InputControl.kbUp("w")
         InputControl.kbUp("a")
         InputControl.kbUp("s")
         InputControl.kbUp("d")
         InputControl.kbUp("spacebar")
-        time.sleep(0.1)
+        time.sleep(0.2)
 
 
         # if center_data.far.isOutside or center_data.mid.isOutside or center_data.low.isOutside or left_low_pd.isOutside or right_low_pd.isOutside:
