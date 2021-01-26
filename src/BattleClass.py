@@ -129,7 +129,7 @@ class BattleManagement():
             if currentBattleFrame.posData.pos and currentBattleFrame.center:
                 cv2.line(debug_test_mask,
                          (int(currentBattleFrame.posData.pos.x),
-                          int(currentBattleFrame.posData.pos.y)), (int(currentBattleFrame.center.far.pos.x), int(currentBattleFrame.center.far.pos.y)), (255, 0, 0), 2)
+                          int(currentBattleFrame.posData.pos.y)), (int(currentBattleFrame.center.mid.pos.x), int(currentBattleFrame.center.mid.pos.y)), (255, 0, 0), 2)
             if currentBattleFrame.posData.pos and currentBattleFrame.left and currentBattleFrame.right:
                 cv2.line(debug_test_mask,
                          (int(currentBattleFrame.posData.pos.x),

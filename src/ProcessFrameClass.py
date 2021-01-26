@@ -69,6 +69,7 @@ class DetectClickThread(Thread):
         self.weaponFirethread = None
         self.thisMap = None
         self.thisMask = None
+        self.thisMapName = '' # this is used to save the filename with map name
 
         self.lastLoginTime = time.time()
 
@@ -93,7 +94,7 @@ class DetectClickThread(Thread):
                     self.retryCount = 0
                     if (getRunningStepId() == 'in_game_map_name_label'): # update map frame for in battle use
                         self.thisMap = frame[const.BattleFullMap.y:const.BattleFullMap.ys, const.BattleFullMap.x:const.BattleFullMap.xs]
-                        cv2.imwrite("map" + str(time.time()) + ".jpg", self.thisMap ) 
+                        cv2.imwrite("map-" + str(self.thisMapName) + "-fullmap-" + str(time.time()) + ".jpg", self.thisMap ) 
                     self.goToNextStep(isSuccess)
                 else:
                     self.retryCount += 1
@@ -135,7 +136,7 @@ class DetectClickThread(Thread):
                 return False
             
             if (getRunningStepId() == 'in_game_map_name_label'):
-                print("this map name is " + textMatch)
+                self.thisMapName = textMatch
                 self.thisMask = cv2.imread( const.map_mask_file_path[textMatch], 0)
 
 
@@ -230,6 +231,7 @@ class DetectClickThread(Thread):
 
         elif step == 'mainmenu_esc_return_btn_label':
             if thisStepResult == True:
+                
 
                 if (time.time() - self.lastLoginTime > 3600):
                     const.loadNewUser()
@@ -281,6 +283,8 @@ class DetectClickThread(Thread):
                 
                 InputControl.kbUp('tab')
                 time.sleep(10)
+                minimap = frame[const.BattleMiniMapArea.y:const.BattleMiniMapArea.ys, const.BattleMiniMapArea.x:const.BattleMiniMapArea.xs]
+                cv2.imwrite("map-" + str(self.thisMapName) + "-minimap-" + str(time.time()) + ".jpg", minimap ) 
                         
                 self.battleVehicleCalcThread = InCombatVehicleDataCalculationThread(self.thisMap)
                 self.battleVehicleCalcThread.start()
@@ -301,6 +305,13 @@ class DetectClickThread(Thread):
         
         elif step == 'finish_battle_close_btn_label':
             if thisStepResult == True:
+                
+                InputControl.kbUp("a")
+                InputControl.kbUp("s")
+                InputControl.kbUp("d")
+                InputControl.kbUp("w")
+                InputControl.kbUp("spacebar")
+                time.sleep(0.01)
                 if self.battleVehicleCalcThread:
                     self.battleVehicleCalcThread.isRunning = False
                     self.battleVehicleCalcThread = None
@@ -372,14 +383,11 @@ class InCombatVehicleDataCalculationThread(Thread):
             if ((center_rad is not None) and (center_rad != 0)):
                 cv2.putText(updateMap, str(center_rad * 180 / math.pi), (50, 50) , cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0) , 1, cv2.LINE_AA) 
 
-            cv2.imshow("Map", updateMap)
 
             if (pos and center_rad):
                 vehicleData = const.VehicleMovementData(time.time(), pos, center_rad)
                 const.updateVehicleMovementStack(vehicleData)
 
-
-            cv2.waitKey(1)
 
 
 
@@ -432,7 +440,8 @@ class InCombatVehicleDataCalculationThread(Thread):
                 # print("going through 2, 3 quadrant")
                 return math.pi + -1 * rad
         else:
-            print("CONTOUR IS Not 1")
+            # print("CONTOUR IS Not 1")
+            pass
         return None
 
 
@@ -455,13 +464,11 @@ class InCombatDeployWeaponThread(Thread):
                 InputControl.kbUp('1')
                 time.sleep(1)
 
-            cv2.waitKey(1)
 
 
     def __isEnemyNear(self, minimap_frame) -> bool:
         hsv_minimap_frame = cv2.cvtColor(minimap_frame, cv2.COLOR_BGR2HSV)
         mask = cv2.inRange(hsv_minimap_frame, (100, 200, 100), (120, 255, 255))
-        # cv2.imshow("EnenmyDetection", mask)
         if cv2.countNonZero(mask) > 10:
             return True
         return False
@@ -476,28 +483,250 @@ class InCombatVehicleControlThread(Thread):
         Thread.__init__(self)
         self.isRunning = True
         self.mask = mask
+        self.debugMask = self.mask.copy()
 
     def run(self):
 
         while self.isRunning:
-            InputControl.kbUp("w")
-            InputControl.kbUp("a")
-            InputControl.kbUp("s")
-            InputControl.kbUp("d")
-            time.sleep(0.1)
-
             movements = const.getVehicleMovementStack()
             if len(movements) > 0:
-                center_low_dist_pos = self.__calcEndPoint(movements[0], 20)
-                if (self.__calcTooClose(center_low_dist_pos)):
-                    print("TOO CLOSE")
-                    InputControl.kbDown('w')
-                    InputControl.kbDown('d')
-                else:
-                    print("Just Fine")
-                    InputControl.kbDown('w')
+                self.__applyMovement(movements)
 
-            time.sleep(0.1)
+
+        
+            cv2.waitKey(1)
+        cv2.destroyWindow("MaskMap")
+
+    def __applyMovement(self, datas: [const.VehicleMovementData]):
+
+        data = datas[0]
+        center_rad = data.rad
+        current_pos = data.pos
+        
+        detect_angle_rad = math.radians(30)
+        lr_low_detect_distance = 15
+        lr_mid_detect_distance = 50
+        center_low_distance = 15
+        center_mid_distance = 40
+        center_far_distance = 60 # not used
+
+        speed = 0
+        if len(datas) > 10:
+            lastData = datas[10]
+            pixel_distance = self.__calcDistance(lastData.pos, current_pos)
+            speed = pixel_distance / (time.time() - lastData.time) * 5 # speed may need multiplier to be more accurate
+
+        left_rad = center_rad + detect_angle_rad
+        right_rad = center_rad - detect_angle_rad
+        pos_data = const.PointData(current_pos, self.__calcTooClose(current_pos))
+        center_low_dist_pos = self.__calcEndPoint( current_pos, center_rad, center_low_distance)
+        center_mid_dist_pos = self.__calcEndPoint( current_pos, center_rad, center_mid_distance)
+        center_far_dist_pos = self.__calcEndPoint( current_pos, center_rad, center_far_distance)
+
+        left_mid_dist = self.__calcEndPoint(
+            current_pos, left_rad, lr_mid_detect_distance)
+        right_mid_dist = self.__calcEndPoint(
+            current_pos, right_rad, lr_mid_detect_distance)
+        left_low_dist = self.__calcEndPoint(
+            current_pos, left_rad, lr_low_detect_distance)
+        right_low_dist = self.__calcEndPoint(
+            current_pos, right_rad, lr_low_detect_distance)
+
+
+        center_low_pd = const.PointData(
+            center_low_dist_pos, self.__calcTooClose(center_low_dist_pos))
+        center_mid_pd = const.PointData(
+            center_mid_dist_pos, self.__calcTooClose(center_mid_dist_pos))
+        center_far_pd = const.PointData(
+            center_far_dist_pos, self.__calcTooClose(center_far_dist_pos))
+
+        center_data = const.CenterData(center_low_pd, center_mid_pd, center_far_pd)
+
+        left_low_pd = const.PointData(
+            left_low_dist, self.__calcTooClose(left_low_dist))
+        right_low_pd = const.PointData(
+            right_low_dist, self.__calcTooClose(right_low_dist))
+        
+        debugShowMap = self.debugMask.copy()
+        cv2.circle(debugShowMap, (int(current_pos.x),
+                                            int(current_pos.y)), 1, (0, 0, 255), 2)
+        cv2.line(debugShowMap,
+                         (int(current_pos.x),
+                          int(current_pos.y)), (int(center_far_dist_pos.x), int(center_far_dist_pos.y)), (255, 0, 0), 2)
+        cv2.line(debugShowMap,
+                         (int(current_pos.x),
+                          int(current_pos.y)), (int(left_low_pd.pos.x), int(left_low_pd.pos.y)), (255, 0, 0), 1)
+        cv2.line(debugShowMap,
+                         (int(current_pos.x),
+                          int(current_pos.y)), (int(right_low_pd.pos.x), int(right_low_pd.pos.y)), (255, 0, 0), 1)
+
+        cv2.imshow("MaskMap", debugShowMap)
+
+        # Calculation Done
+
+
+        if speed > 60:
+            InputControl.kbUp("w")
+            InputControl.kbDown("spacebar")
+        elif speed > 40:
+            InputControl.kbUp("spacebar")
+            InputControl.kbUp("w")
+        elif speed < 20:
+            InputControl.kbUp("spacebar")
+            InputControl.kbDown("w")
+        else:
+            InputControl.kbUp("w")
+            InputControl.kbUp("spacebar")
+
+
+
+        if center_data.mid.isOutside:
+                
+            if left_low_pd.isOutside and right_low_pd.isOutside:
+
+                if center_data.low.isOutside:
+                    time.sleep(0.5)
+                    pass
+                else:
+                    pass
+
+            elif left_low_pd.isOutside:
+                InputControl.kbDown("d")
+
+            elif right_low_pd.isOutside:
+                InputControl.kbDown("a")
+            else:
+                pass
+        else:
+            pass
+        
+        time.sleep(0.1)
+        InputControl.kbUp("w")
+        InputControl.kbUp("a")
+        InputControl.kbUp("s")
+        InputControl.kbUp("d")
+        InputControl.kbUp("spacebar")
+        time.sleep(0.1)
+
+
+        # if center_data.far.isOutside or center_data.mid.isOutside or center_data.low.isOutside or left_low_pd.isOutside or right_low_pd.isOutside:
+
+            
+        #     InputControl.kbUp("a")
+        #     InputControl.kbUp("s")
+        #     InputControl.kbUp("d")
+
+        #     time.sleep(0.05)
+
+            # if center_data.far.isOutside:
+            #     if center_data.mid.isOutside or center_data.low.isOutside: # currently consider low mid to be same detection algorithm
+                    
+            #         if left_low_pd.isOutside and right_low_pd.isOutside: # there is no save for this now
+
+            #             if current_pos.x < 376 and current_pos.y < 376: # 2
+            #                 if (center_rad * 180 / math.pi) > -45 and (center_rad * 180 / math.pi) < 135:
+            #                     InputControl.kbDown("d")
+            #                 else:
+            #                     InputControl.kbDown("a")
+
+            #             elif current_pos.x >= 376 and current_pos.y < 376: # 1
+            #                 if (center_rad * 180 / math.pi) > 45 and (center_rad * 180 / math.pi) < 225:
+            #                     InputControl.kbDown("a")
+            #                 else:
+            #                     InputControl.kbDown("d")
+            #             elif current_pos.x >= 376 and current_pos.y >= 376: # 4
+            #                 if (center_rad * 180 / math.pi) > -45 and (center_rad * 180 / math.pi) < 135:
+            #                     InputControl.kbDown("a")
+            #                 else:
+            #                     InputControl.kbDown("d")
+            #             elif current_pos.x < 376 and current_pos.y >= 376: # 3
+
+            #                 if (center_rad * 180 / math.pi) > 45 and (center_rad * 180 / math.pi) < 225:
+            #                     InputControl.kbDown("d")
+            #                 else:
+            #                     InputControl.kbDown("a")
+            #             else:
+            #                 InputControl.kbDown("d")
+            #         elif left_low_pd.isOutside:
+
+            #             InputControl.kbDown("d")
+            #         elif right_low_pd.isOutside:
+
+            #             InputControl.kbDown("a")
+            #         else: # choose a diretion to turn.
+            #             pass
+            #             # if current_pos.x < 376 and current_pos.y < 376: # 2
+            #             #     if (center_rad * 180 / math.pi) > -45 and (center_rad * 180 / math.pi) < 135:
+            #             #         InputControl.kbDown("d")
+            #             #     else:
+            #             #         InputControl.kbDown("a")
+
+            #             # elif current_pos.x >= 376 and current_pos.y < 376: # 1
+            #             #     if (center_rad * 180 / math.pi) > 45 and (center_rad * 180 / math.pi) < 225:
+            #             #         InputControl.kbDown("a")
+            #             #     else:
+            #             #         InputControl.kbDown("d")
+            #             # elif current_pos.x >= 376 and current_pos.y >= 376: # 4
+            #             #     if (center_rad * 180 / math.pi) > -45 and (center_rad * 180 / math.pi) < 135:
+            #             #         InputControl.kbDown("a")
+            #             #     else:
+            #             #         InputControl.kbDown("d")
+            #             # elif current_pos.x < 376 and current_pos.y >= 376: # 3
+
+            #             #     if (center_rad * 180 / math.pi) > 45 and (center_rad * 180 / math.pi) < 225:
+            #             #         InputControl.kbDown("d")
+            #             #     else:
+            #             #         InputControl.kbDown("a")
+            #             # else:
+            #             #     InputControl.kbDown("d")
+            #             # InputControl.kbDown("spacebar")
+
+            #     else: # this means close up its still pretty far, don't need to slow down.
+            #         pass
+
+
+
+            #             # if current_pos.x < 376 and current_pos.y < 376: # 2
+            #             #     if (center_rad * 180 / math.pi) > -45 and (center_rad * 180 / math.pi) < 135:
+            #             #         InputControl.kbDown("d")
+            #             #     else:
+            #             #         InputControl.kbDown("a")
+
+            #             # elif current_pos.x >= 376 and current_pos.y < 376: # 1
+            #             #     if (center_rad * 180 / math.pi) > 45 and (center_rad * 180 / math.pi) < 225:
+            #             #         InputControl.kbDown("a")
+            #             #     else:
+            #             #         InputControl.kbDown("d")
+            #             # elif current_pos.x >= 376 and current_pos.y >= 376: # 4
+            #             #     if (center_rad * 180 / math.pi) > -45 and (center_rad * 180 / math.pi) < 135:
+            #             #         InputControl.kbDown("a")
+            #             #     else:
+            #             #         InputControl.kbDown("d")
+            #             # elif current_pos.x < 376 and current_pos.y >= 376: # 3
+
+            #             #     if (center_rad * 180 / math.pi) > 45 and (center_rad * 180 / math.pi) < 225:
+            #             #         InputControl.kbDown("d")
+            #             #     else:
+            #             #         InputControl.kbDown("a")
+            #             # else:
+            #             #     InputControl.kbDown("d")
+            
+        #     else:
+        #         pass
+
+        #     time.sleep(0.1)
+        # else:
+        #     InputControl.kbUp("a")
+        #     InputControl.kbUp("s")
+        #     InputControl.kbUp("d")
+
+        #     time.sleep(0.1)
+
+
+    def __calcDistance(self, pos1: Point, pos2: Point) -> float:
+        if (pos1 == pos2):
+            return 0
+        return math.sqrt((pos1.x - pos2.x) * (pos1.x - pos2.x) + (pos1.y - pos2.y) * (pos1.y - pos2.y))
 
 
     # check if a point is on white / black on mask
@@ -506,7 +735,7 @@ class InCombatVehicleControlThread(Thread):
         return False if self.mask[int(pos.y), int(pos.x)] == 0 else True
     
     # Calculate the detection point.
-    def __calcEndPoint(self, data: const.VehicleMovementData, distance: float) -> Point:
-        pos_x = data.pos.x + distance * math.cos(data.rad)
-        pos_y = data.pos.y - distance * math.sin(data.rad)
+    def __calcEndPoint(self, pos: Point, rad: float, distance: float) -> Point:
+        pos_x = pos.x + distance * math.cos(rad)
+        pos_y = pos.y - distance * math.sin(rad)
         return Point(pos_x, pos_y)
