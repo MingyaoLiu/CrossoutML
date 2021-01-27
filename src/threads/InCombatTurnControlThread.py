@@ -45,7 +45,7 @@ class InCombatVehicleTurnControlThread(Thread):
         lr_low_detect_distance = 20
         lr_mid_detect_distance = 50
         center_low_distance = 25
-        center_mid_distance = 40
+        center_mid_distance = 30
         center_far_distance = 60 # not used
 
         left_rad = center_rad + detect_angle_rad

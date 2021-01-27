@@ -311,7 +311,7 @@ Steps = [
     Step(
         id = "in_game_map_name_label",
         action = Action.textDetect,
-        area = Area(1440, 37, 1830, 73), 
+        area = Area(1420, 37, 1830, 73), 
         point = None,
         strings = list(map_mask_file_path.keys()),
         waitBefore = 5,
@@ -329,7 +329,7 @@ Steps = [
     Step(
         id = "finish_battle_close_btn_label",
         action = Action.textDetect,
-        area = Area(1190, 955, 1310, 1004), 
+        area = Area(1200, 955, 1300, 995), 
         point = None,
         strings = ["close", "c1ose"],
         waitBefore = 10,
@@ -339,7 +339,7 @@ Steps = [
         id = "finish_battle_close_btn_click",
         action = Action.mouseClick,
         area = None, 
-        point = Point(1230, 1000),
+        point = Point(1230, 970),
         strings = None,
         waitBefore = 1,
         waitAfter = 2
