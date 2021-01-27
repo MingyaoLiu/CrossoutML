@@ -300,12 +300,12 @@ Steps = [
         waitAfter = 0.5
     ),
     Step(
-        id = "before_game_wait", # wait for a minute before start to detect, a minute of peace.
+        id = "before_game_wait", # wait for 30 sec before start to detect, a minute of peace.
         action = Action.wait,
         area = None, 
         point = Point(10,10),
         strings = None,
-        waitBefore = 60,
+        waitBefore = 30,
         waitAfter = 1
     ),
     Step(
@@ -323,7 +323,7 @@ Steps = [
         area = None, 
         point = Point(10,10),
         strings = None,
-        waitBefore = 10,
+        waitBefore = 60,
         waitAfter = 0.5
     ),
     Step(
@@ -332,7 +332,7 @@ Steps = [
         area = Area(1180, 955, 1310, 1025), 
         point = None,
         strings = ["close", "c1ose"],
-        waitBefore = 1,
+        waitBefore = 10,
         waitAfter = 0.5
     ),
     Step(

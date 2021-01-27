@@ -323,7 +323,7 @@ class DetectClickThread(Thread):
 
                 setRunningStepId('finish_battle_close_btn_click')
             else: # If no battle close button has  been detected, go back to wait for 30 seconds.
-                setRunningStepId('in_game_wait_for_finish')
+                setRunningStepId('finish_battle_close_btn_label')
 
         elif step == "finish_battle_close_btn_click":
             self.terminateAllThreads()
