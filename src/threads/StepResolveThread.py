@@ -240,8 +240,7 @@ class DetectClickThread(Thread):
                     InputControl.kbUp('esc')
                     time.sleep(0.5)
             
-        
-            if (time.time() - self.lastLoginTime > 3600):
+            elif (time.time() - self.lastLoginTime > 3600):
                 const.loadNewUser()
                 InputControl.kbDown('esc')
                 time.sleep(0.01)
@@ -294,7 +293,7 @@ class DetectClickThread(Thread):
                 if const.isDevEnvironment():
                     frame = getDCapture().getFrame(0)
                     minimap = frame[const.BattleMiniMapArea.y:const.BattleMiniMapArea.ys, const.BattleMiniMapArea.x:const.BattleMiniMapArea.xs]
-                    cv2.imwrite("map-" + str(self.thisMapName) + "-minimap-" + str(time.time()) + ".jpg", minimap ) 
+                    cv2.imwrite("logmap/map-" + str(self.thisMapName) + "-minimap-" + str(time.time()) + ".jpg", minimap ) 
 
                 self.battleVehicleCalcThread = InCombatVehicleDataCalculationThread(self.thisMap)
                 self.battleVehicleCalcThread.start()
