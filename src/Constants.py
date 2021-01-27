@@ -441,7 +441,7 @@ def loadNewUser():
         playModes.append('battle_select_wire_click')
     if newAccount.playPatrol:
         playModes.append('battle_select_patrol_click')        
-    print("Account now switched to " + username + ", modes are: " + playModes)
+    print("Account now switched to " + username + ", modes are: " + "".join(playModes))
     return True
 
 def getUsername():
