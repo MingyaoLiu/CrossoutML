@@ -228,42 +228,6 @@ Steps = [
         waitAfter = 0.5
     ),
     Step(
-        id = "in_game_map_name_label",
-        action = Action.textDetect,
-        area = Area(1440, 37, 1830, 73), 
-        point = None,
-        strings = list(map_mask_file_path.keys()),
-        waitBefore = 1,
-        waitAfter = 0.5
-    ),    
-    Step(
-        id = "in_game_wait_for_finish",
-        action = Action.mouseClick,
-        area = None, 
-        point = Point(10,10),
-        strings = None,
-        waitBefore = 30,
-        waitAfter = 0.5
-    ),
-    Step(
-        id = "finish_battle_close_btn_label",
-        action = Action.textDetect,
-        area = Area(1180, 955, 1310, 1025), 
-        point = None,
-        strings = ["close", "c1ose"],
-        waitBefore = 1,
-        waitAfter = 0.5
-    ),
-    Step(
-        id = "finish_battle_close_btn_click",
-        action = Action.mouseClick,
-        area = None, 
-        point = Point(1230, 1000),
-        strings = None,
-        waitBefore = 1,
-        waitAfter = 0.5
-    ),
-    Step(
         id = "mainmenu_battle_label",
         action = Action.textDetect,
         area = Area(883,143, 1032, 187), 
@@ -318,6 +282,51 @@ Steps = [
         waitAfter = 0.5
     ),
     Step(
+        id = "before_game_wait",
+        action = Action.mouseClick,
+        area = None, 
+        point = Point(10,10),
+        strings = None,
+        waitBefore = 10,
+        waitAfter = 1
+    ),
+    Step(
+        id = "in_game_map_name_label",
+        action = Action.textDetect,
+        area = Area(1440, 37, 1830, 73), 
+        point = None,
+        strings = list(map_mask_file_path.keys()),
+        waitBefore = 1,
+        waitAfter = 0.5
+    ),    
+    Step(
+        id = "in_game_wait_for_finish",
+        action = Action.mouseClick,
+        area = None, 
+        point = Point(10,10),
+        strings = None,
+        waitBefore = 30,
+        waitAfter = 0.5
+    ),
+    Step(
+        id = "finish_battle_close_btn_label",
+        action = Action.textDetect,
+        area = Area(1180, 955, 1310, 1025), 
+        point = None,
+        strings = ["close", "c1ose"],
+        waitBefore = 1,
+        waitAfter = 0.5
+    ),
+    Step(
+        id = "finish_battle_close_btn_click",
+        action = Action.mouseClick,
+        area = None, 
+        point = Point(1230, 1000),
+        strings = None,
+        waitBefore = 1,
+        waitAfter = 2
+    ),
+    Step(
         id = "mainmenu_welcome_close_btn_label",
         action = Action.textDetect,
         area = Area(1478, 981, 1558,1009), 
@@ -362,15 +371,7 @@ Steps = [
         waitBefore = 1,
         waitAfter = 10
     ),
-    Step(
-        id = "before_game_wait",
-        action = Action.mouseClick,
-        area = None, 
-        point = Point(10,10),
-        strings = None,
-        waitBefore = 10,
-        waitAfter = 1
-    ),
+
     Step(
         id = "TEMPLATE",
         action = Action.mouseClick,

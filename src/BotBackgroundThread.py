@@ -1,6 +1,8 @@
 
 from PyQt5.QtCore import QThread
-from ProcessFrameClass import DebugThread, DetectClickThread, InCombatVehicleDataCalculationThread
+from threads.StepResolveThread import DetectClickThread
+
+from threads.DebugThread import DebugThread
 from DCaptureClass import getDCapture
 
 class BotBackgroundThread(QThread):
@@ -19,16 +21,24 @@ class BotBackgroundThread(QThread):
             self.bot.isRunning = False
             self.bot = None
         if self.bot2:
-            if self.bot2.battleVehicleCalcThread:
-                self.bot2.battleVehicleCalcThread.isRunning = False
-                self.bot2.battleVehicleCalcThread = None
-            if self.bot2.battleControlThread:
-                self.bot2.battleControlThread.isRunning = False
-                self.bot2.battleControlThread = None
-            if self.bot2.weaponFirethread:
-                self.bot2.weaponFirethread.isRunning = False
-                self.bot2.weaponFirethread = None
             self.bot2.isRunning = False
+            self.bot2.join()
+            # if self.bot2.battleVehicleCalcThread:
+            #     self.bot2.battleVehicleCalcThread.isRunning = False
+            #     self.bot2.join()
+            #     self.bot2.battleVehicleCalcThread = None
+            # if self.bot2.speedControlThread:
+            #     self.bot2.speedControlThread.isRunning = False
+            #     self.bot2.speedControlThread.join()
+            #     self.bot2.speedControlThread = None
+            # if self.bot2.turnControlThread:
+            #     self.bot2.turnControlThread.isRunning = False
+            #     self.bot2.turnControlThread.join()
+            #     self.bot2.turnControlThread = None
+            # if self.bot2.weaponFirethread:
+            #     self.bot2.weaponFirethread.isRunning = False
+            #     self.bot2.weaponFirethread.join()
+            #     self.bot2.weaponFirethread = None
             self.bot2 = None
         
         if self.debugBot:
