@@ -122,11 +122,11 @@ class InCombatVehicleTurnControlThread(Thread):
         else:
             pass
         
-        time.sleep(0.15)
+        time.sleep(0.12)
         InputControl.kbUp("a")
         InputControl.kbUp("s")
         InputControl.kbUp("d")
-        time.sleep(0.25)
+        time.sleep(0.23)
 
 
         # if center_data.far.isOutside or center_data.mid.isOutside or center_data.low.isOutside or left_low_pd.isOutside or right_low_pd.isOutside:
