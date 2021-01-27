@@ -291,12 +291,21 @@ Steps = [
         waitAfter = 0.5
     ),
     Step(
-        id = "before_game_wait",
+        id = "battle_select_battle_patrol_start_click", # different from above, patrol has different click target.
         action = Action.mouseClick,
+        area = None, 
+        point = Point(556,789),
+        strings = None,
+        waitBefore = 0.5,
+        waitAfter = 0.5
+    ),
+    Step(
+        id = "before_game_wait", # wait for a minute before start to detect, a minute of peace.
+        action = Action.wait,
         area = None, 
         point = Point(10,10),
         strings = None,
-        waitBefore = 10,
+        waitBefore = 60,
         waitAfter = 1
     ),
     Step(
@@ -305,12 +314,12 @@ Steps = [
         area = Area(1440, 37, 1830, 73), 
         point = None,
         strings = list(map_mask_file_path.keys()),
-        waitBefore = 1,
+        waitBefore = 5,
         waitAfter = 0.5
     ),    
     Step(
         id = "in_game_wait_for_finish",
-        action = Action.mouseClick,
+        action = Action.wait,
         area = None, 
         point = Point(10,10),
         strings = None,

@@ -14,19 +14,21 @@ class UIAddAccountWindow(QtWidgets.QDialog):
         uic.loadUi("uis/ui_addaccount.ui", self)
         
         self.saveBtn.clicked.connect(self.__saveAccount)
-        
 
 
     def __saveAccount(self):
         setting = getGlobalSetting().settings
-        # acct_proto = getGlobalSetting().acct_proto
 
         new_acct = setting.accounts.add()
         new_acct.username = self.usernameInput.text()
         new_acct.password = self.passwordInput.text()
+        new_acct.playBattery = self.playForBatteryCB.isChecked()
+        new_acct.playScrap = self.playForScrapCB.isChecked()
+        new_acct.playWire = self.playForWireCB.isChecked()
+        new_acct.playPatrol = self.playForPatrolCB.isChecked()
 
         getGlobalSetting().saveSettings()
         self.close()
 
-
-        print("save")
+    def __loadAccount(self): # implement a edit account feature.
+        pass

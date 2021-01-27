@@ -46,6 +46,8 @@ class DetectClickThread(Thread):
 
         self.lastLoginTime = time.time()
 
+        self.fullStuckTimer = time.time() # this is going to check if nothing has succeed in 10 mins, it will reset.
+
         InputControl.mouseClick(getCorrectPos(Point(10, 10)))
         print("Step Resolve Thread Init")
 
@@ -53,6 +55,11 @@ class DetectClickThread(Thread):
     def run(self):
         while self.isRunning:
             if (self.isProcessingFrameIndication == False and self.disableProcessing == False):
+
+                if (self.fullStuckTimer and (time.time() - self.fullStuckTimer > 600)):
+                    self.fullStuckTimer = time.time()
+                    setRunningStepId("finish_battle_close_btn_click")
+                    continue
                 frame = getDCapture().getFrame(0)
                 self.isProcessingFrameIndication = True
                 step = findStepById(getRunningStepId())
@@ -126,9 +133,6 @@ class DetectClickThread(Thread):
                 self.thisMapName = textMatch
                 self.thisMask = cv2.imread( const.map_mask_file_path[textMatch], 0)
 
-
-                        
-
             print("text detection executed")
 
         elif (step.action == Action.mouseClick):
@@ -145,6 +149,9 @@ class DetectClickThread(Thread):
             else:
                 InputControl.fillInputWithString(random.choice(step.strings))
             print("text input executed")
+
+        elif (step.action == Action.wait):
+            print("wait action step")
 
         if (step.waitAfter > 0):
             time.sleep(step.waitAfter)
@@ -164,6 +171,9 @@ class DetectClickThread(Thread):
     def goToNextStep(self, thisStepResult: bool):
         step = getRunningStepId()
         print('current step is ' + step)
+
+        if thisStepResult == True:
+            self.fullStuckTimer = time.time()
         
         if step == 'login_disconnect_btn_text':
             setRunningStepId('login_disconnect_click')
@@ -257,10 +267,19 @@ class DetectClickThread(Thread):
         
         elif (step == 'battle_select_scrap_click' or step == 'battle_select_battery_click' or step == 'battle_select_wire_click'):
             setRunningStepId('battle_select_battle_start_click')
-        
+
+        elif (step == 'battle_select_patrol_click'):
+            setRunningStepId('battle_select_battle_patrol_start_click')     
+
+        elif step == 'battle_select_battle_patrol_start_click':
+                setRunningStepId('before_game_wait')
+
         elif step == 'battle_select_battle_start_click':
                 setRunningStepId('before_game_wait')
 
+
+        elif step == 'before_game_wait':
+                setRunningStepId('in_game_map_name_label')
 
         elif step == 'before_game_wait':
                 setRunningStepId('in_game_map_name_label')
@@ -286,7 +305,7 @@ class DetectClickThread(Thread):
                 
                 setRunningStepId('in_game_wait_for_finish')
             else: # If no battle close button has  been detected, go back to wait for 30 seconds.
-                setRunningStepId('before_game_wait')
+                setRunningStepId('in_game_map_name_label')
 
 
         elif step == "in_game_wait_for_finish":
@@ -301,15 +320,15 @@ class DetectClickThread(Thread):
                 InputControl.kbUp("w")
                 InputControl.kbUp("spacebar")
                 time.sleep(0.01)
-                self.terminateAllThreads()
-                self.thisMap = None
-                self.thisMask = None
 
                 setRunningStepId('finish_battle_close_btn_click')
             else: # If no battle close button has  been detected, go back to wait for 30 seconds.
                 setRunningStepId('in_game_wait_for_finish')
 
         elif step == "finish_battle_close_btn_click":
+            self.terminateAllThreads()
+            self.thisMap = None
+            self.thisMask = None
             InputControl.kbDown('esc')
             time.sleep(0.01)
             InputControl.kbUp('esc')
