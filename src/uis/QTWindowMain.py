@@ -5,8 +5,6 @@ from PyQt5.QtCore import QTimer
 from uis.QTWindowSettings import UI_SettingWindow
 import threading
 from BotBackgroundThread import BotBackgroundThread
-from DebugClass import getDebugger
-
 from uis.QTWindowOverlay import getOverlay
 
 from DCaptureClass import getDCapture
@@ -37,7 +35,6 @@ class UI_MainWindow(QtWidgets.QMainWindow):
         self.settingBtn.clicked.connect(self.goToSettingWindow)
         self.quitBtn.clicked.connect(self.closeApp)
 
-        self.debugger = getDebugger()
 
     def __enableClick(self):
         self.isAllowedClick = True
@@ -50,7 +47,6 @@ class UI_MainWindow(QtWidgets.QMainWindow):
 
     def stopApp(self):
         if self.isAllowedClick and self.botWorker is not None:
-            self.debugger.closeDebugWindow()
             self.__disableClick()
             # self.botWorker.stopBot()
             # self.botWorker.quit()
@@ -60,7 +56,6 @@ class UI_MainWindow(QtWidgets.QMainWindow):
     def startApp(self):
 
         if self.isAllowedClick and self.botWorker is None:
-            # self.debugger.createDebugWindow()  # will no longer use the debug window
             self.__disableClick()
 
             overlay = getOverlay()
@@ -80,7 +75,6 @@ class UI_MainWindow(QtWidgets.QMainWindow):
             self.ui.show()
 
     def closeApp(self):
-        self.debugger.closeDebugWindow()
         self.close()
         QtWidgets.QApplication.quit()
         return sys.exit(0)

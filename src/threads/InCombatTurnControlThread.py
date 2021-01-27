@@ -91,8 +91,8 @@ class InCombatVehicleTurnControlThread(Thread):
         cv2.line(debugShowMap,
                          (int(current_pos.x),
                           int(current_pos.y)), (int(right_low_pd.pos.x), int(right_low_pd.pos.y)), (255, 0, 0), 1)
-
-        cv2.imshow("MaskMap", debugShowMap)
+        if (const.isDevEnvironment()):
+            cv2.imshow("MaskMap", debugShowMap)
 
         # Calculation Done
 

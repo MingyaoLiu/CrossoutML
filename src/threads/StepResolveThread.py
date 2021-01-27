@@ -75,7 +75,8 @@ class DetectClickThread(Thread):
                     self.retryCount = 0
                     if (getRunningStepId() == 'in_game_map_name_label'): # update map frame for in battle use
                         self.thisMap = frame[const.BattleFullMap.y:const.BattleFullMap.ys, const.BattleFullMap.x:const.BattleFullMap.xs]
-                        cv2.imwrite("map-" + str(self.thisMapName) + "-fullmap-" + str(time.time()) + ".jpg", self.thisMap ) 
+                        if const.isDevEnvironment():
+                            cv2.imwrite("map-" + str(self.thisMapName) + "-fullmap-" + str(time.time()) + ".jpg", self.thisMap ) 
                     self.goToNextStep(isSuccess)
                 else:
                     self.retryCount += 1
@@ -260,6 +261,7 @@ class DetectClickThread(Thread):
         elif step == 'mainmenu_battle_label':
             if thisStepResult == True:
                 setRunningStepId('mainmenu_select_click')
+                
 
         elif step == 'mainmenu_select_click':
             modes = const.getPlayMode()

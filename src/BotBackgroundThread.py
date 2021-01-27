@@ -4,6 +4,7 @@ from threads.StepResolveThread import DetectClickThread
 
 from threads.DebugThread import DebugThread
 from DCaptureClass import getDCapture
+import Constants as const
 
 class BotBackgroundThread(QThread):
     def __init__(self):
@@ -11,6 +12,7 @@ class BotBackgroundThread(QThread):
         self.debugBot = None
         self.bot = None
         self.bot2 = None
+        self.name = "BackgroundThread"
         
     def __del__(self):
         self.wait()
@@ -47,7 +49,7 @@ class BotBackgroundThread(QThread):
         getDCapture().stopCapture()
 
     def startBot(self):
-        if self.bot:
+        if (self.bot or self.bot2):
             pass
         else:
             getDCapture().startCapture()
@@ -59,8 +61,9 @@ class BotBackgroundThread(QThread):
             if (self.debugBot is not None):
                 self.debugBot.start()
             else:
-                self.bot = DebugThread()
-                self.bot.start()
+                if (const.isDevEnvironment()):
+                    self.bot = DebugThread()
+                    self.bot.start()
                 self.bot2 = DetectClickThread()
                 self.bot2.start()
 

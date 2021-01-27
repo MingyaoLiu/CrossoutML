@@ -11,7 +11,7 @@ from uis.QTWindowOverlay import getOverlay
 import cv2
 import pytesseract
 import numpy
-
+import Constants as const
 
 import ctypes
 
@@ -41,6 +41,12 @@ from SettingsClass import getGlobalSetting
 
 
 if __name__ == "__main__":
+    
+    for i, arg in enumerate(sys.argv):
+        print(f"Argument {i:>6}: {arg}")
+        if (arg == '--dev'):
+            const.setDevEnv()
+
     
     
     getGlobalSetting()

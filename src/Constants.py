@@ -496,6 +496,15 @@ def setRunningStepId(id: str):
     currentRunningStep = id
 
 
+isDev = False
+def isDevEnvironment():
+    global isDev
+    return isDev
+
+def setDevEnv():
+    global isDev
+    isDev = True
+    return isDev
 
 
 

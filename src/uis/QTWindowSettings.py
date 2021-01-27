@@ -24,6 +24,7 @@ class UI_SettingWindow(QtWidgets.QMainWindow):
         
         self.saveBtn.clicked.connect(self.saveSettings)
         self.addAcctBtn.clicked.connect(self.__goToAddAcct)
+        self.EditAccountBtn.clicked.connect(self.__editAcct)
         self.delAcctBtn.clicked.connect(self.__deleteCurrentAcct)
         self.detectAllSettingBtn.clicked.connect(self.__detectAllSettings)
 
@@ -105,7 +106,12 @@ class UI_SettingWindow(QtWidgets.QMainWindow):
 
     def __goToAddAcct(self):
         self.window = QtWidgets.QDialog()
-        self.ui = UIAddAccountWindow(self.window)
+        self.ui = UIAddAccountWindow(self.window, None)
+        self.ui.show()
+
+    def __editAcct(self):
+        index = self.acctDropdown.currentIndex()
+        self.ui = UIAddAccountWindow(self.window, index)
         self.ui.show()
 
     def __deleteCurrentAcct(self):
