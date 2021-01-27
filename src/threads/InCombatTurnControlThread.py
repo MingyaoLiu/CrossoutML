@@ -84,7 +84,7 @@ class InCombatVehicleTurnControlThread(Thread):
                                             int(current_pos.y)), 1, (0, 0, 255), 2)
         cv2.line(debugShowMap,
                          (int(current_pos.x),
-                          int(current_pos.y)), (int(center_mid_dist_pos.x), int(center_mid_dw
+                          int(current_pos.y)), (int(center_mid_dist_pos.x), int(center_mid_dist_pos.y)), (255, 0, 0), 2)
         cv2.line(debugShowMap,
                          (int(current_pos.x),
                           int(current_pos.y)), (int(left_low_pd.pos.x), int(left_low_pd.pos.y)), (255, 0, 0), 1)
