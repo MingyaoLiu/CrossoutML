@@ -71,7 +71,7 @@ class DetectClickThread(Thread):
                     self.goToNextStep(isSuccess)
                 else:
                     self.retryCount += 1
-                    if (self.retryCount > 20):
+                    if (self.retryCount > 10):
                         self.retryCount = 0
                         self.goToNextStep(isSuccess)
                 self.isProcessingFrameIndication = False

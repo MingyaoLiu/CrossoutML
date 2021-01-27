@@ -28,7 +28,7 @@ map_mask_file_path = {
     "crater": "./assets/maps_masks/crater_mask_v2.png",
     "clean island": "./assets/maps_masks/clean_island_mask_v2.png",
     "ravagers foothold": "./assets/maps_masks/ravagers_foothold_mask_v2.png",
-    "ashen ring": "./assets/maps_masks/garage_map_2_mask.png",
+    "ashen ring": "./assets/maps_masks/ashen_ring_mask_v2.png",
 }
 
 #######################################################
@@ -305,7 +305,7 @@ Steps = [
         area = None, 
         point = Point(10,10),
         strings = None,
-        waitBefore = 30,
+        waitBefore = 10,
         waitAfter = 0.5
     ),
     Step(
@@ -491,7 +491,7 @@ def getVehicleMovementStack():
 def updateVehicleMovementStack(newData: VehicleMovementData):
     global vehicleMovementStack
     vehicleMovementStack.insert(0, newData)
-    if len(vehicleMovementStack) > 50:
+    if len(vehicleMovementStack) > 30:
         vehicleMovementStack.pop()
 
 def clearVehicleMovementStack():

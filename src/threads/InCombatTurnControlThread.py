@@ -41,10 +41,10 @@ class InCombatVehicleTurnControlThread(Thread):
         center_rad = data.rad
         current_pos = data.pos
         
-        detect_angle_rad = math.radians(45)
-        lr_low_detect_distance = 12
+        detect_angle_rad = math.radians(35)
+        lr_low_detect_distance = 20
         lr_mid_detect_distance = 50
-        center_low_distance = 12
+        center_low_distance = 25
         center_mid_distance = 40
         center_far_distance = 60 # not used
 
@@ -84,7 +84,7 @@ class InCombatVehicleTurnControlThread(Thread):
                                             int(current_pos.y)), 1, (0, 0, 255), 2)
         cv2.line(debugShowMap,
                          (int(current_pos.x),
-                          int(current_pos.y)), (int(center_mid_dist_pos.x), int(center_mid_dist_pos.y)), (255, 0, 0), 2)
+                          int(current_pos.y)), (int(center_mid_dist_pos.x), int(center_mid_dw
         cv2.line(debugShowMap,
                          (int(current_pos.x),
                           int(current_pos.y)), (int(left_low_pd.pos.x), int(left_low_pd.pos.y)), (255, 0, 0), 1)
@@ -126,7 +126,7 @@ class InCombatVehicleTurnControlThread(Thread):
         InputControl.kbUp("a")
         InputControl.kbUp("s")
         InputControl.kbUp("d")
-        time.sleep(0.23)
+        time.sleep(0.25)
 
 
         # if center_data.far.isOutside or center_data.mid.isOutside or center_data.low.isOutside or left_low_pd.isOutside or right_low_pd.isOutside:

@@ -28,8 +28,8 @@ class InCombatDeployWeaponThread(Thread):
                 time.sleep(1)
 
             movementStack = const.getVehicleMovementStack()
-            if len(movementStack) == 50:
-                if ((movementStack[0].pos.x == movementStack[49].pos.x) and (movementStack[0].pos.y == movementStack[49].pos.y)):
+            if len(movementStack) == 30:
+                if ((movementStack[0].pos.x == movementStack[29].pos.x) and (movementStack[0].pos.y == movementStack[29].pos.y)):
                     if (self.stuckTimer is None):
                         self.stuckTimer = movementStack[0].time
                     elif (movementStack[0].time - self.stuckTimer > 5):

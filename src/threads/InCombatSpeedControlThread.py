@@ -38,8 +38,8 @@ class InCombatVehicleSpeedControlThread(Thread):
                 else:
                     InputControl.kbUp("w")
                     InputControl.kbUp("spacebar")
-                time.sleep(0.2)
-        time.sleep(0.1)
+                time.sleep(0.15)
+        time.sleep(0.05)
         InputControl.kbUp("w")
         InputControl.kbUp("spacebar")
         print("In Combat Speed Control Exit")
