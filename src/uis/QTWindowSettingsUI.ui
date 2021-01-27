@@ -1072,7 +1072,7 @@
              </property>
              <property name="maximumSize">
               <size>
-               <width>60</width>
+               <width>40</width>
                <height>16777215</height>
               </size>
              </property>
@@ -1087,6 +1087,27 @@
             </widget>
            </item>
            <item>
+            <widget class="QPushButton" name="EditAccountBtn">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>40</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>12</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Edit</string>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QPushButton" name="delAcctBtn">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
@@ -1096,7 +1117,7 @@
              </property>
              <property name="maximumSize">
               <size>
-               <width>60</width>
+               <width>50</width>
                <height>16777215</height>
               </size>
              </property>

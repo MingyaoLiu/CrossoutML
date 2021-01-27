@@ -273,6 +273,15 @@ Steps = [
         waitAfter = 0.5
     ),
     Step(
+        id = "battle_select_patrol_click",
+        action = Action.mouseClick,
+        area = None, 
+        point = Point(962,352),
+        strings = None,
+        waitBefore = 0.5,
+        waitAfter = 0.5
+    ),
+    Step(
         id = "battle_select_battle_start_click",
         action = Action.mouseClick,
         area = None, 
@@ -415,13 +424,24 @@ import random
 
 username = None
 password = None
+playModes = []
 def loadNewUser():
     global username
     global password
+    global playModes
     newAccount = random.choice(getGlobalSetting().settings.accounts)
     username = newAccount.username
     password = newAccount.password
-    print("Account now switched to " + username)
+    playModes = []
+    if newAccount.playBattery:
+        playModes.append('battle_select_battery_click')
+    if newAccount.playScrap:
+        playModes.append('battle_select_scrap_click')
+    if newAccount.playWire:
+        playModes.append('battle_select_wire_click')
+    if newAccount.playPatrol:
+        playModes.append('battle_select_patrol_click')        
+    print("Account now switched to " + username + ", modes are: " + playModes)
     return True
 
 def getUsername():
@@ -439,6 +459,14 @@ def getPassword():
     else:
         loadNewUser()
         return password
+
+def getPlayMode():
+    global playModes
+    if playModes:
+        return playModes
+    else:
+        loadNewUser()
+        return playModes
 
 
 currentRunningStep = None

@@ -25,4 +25,8 @@ message CrossoutMLSetting {
 message CrossoutMLAccount {
     string username = 1;
     string password = 2;
+    bool playBattery = 3;
+    bool playScrap = 4;
+    bool playWire = 5;
+    bool playPatrol = 6;
 }

@@ -18,6 +18,7 @@ from threads.InCombatSpeedControlThread import InCombatVehicleSpeedControlThread
 from threads.InCombatTurnControlThread import InCombatVehicleTurnControlThread
 from threads.InCombatDeployWeaponThread import InCombatDeployWeaponThread
 from threads.InCombatDataCalcThread import InCombatVehicleDataCalculationThread
+from SettingsClass import getGlobalSetting
 
 
 #
@@ -57,10 +58,10 @@ class DetectClickThread(Thread):
                 step = findStepById(getRunningStepId())
                 if (getRunningStepId() == 'in_game_map_name_label'):
                     InputControl.kbUp('tab')
-                    time.sleep(1)
+                    time.sleep(0.1)
                     InputControl.kbDown('tab')
-                    time.sleep(2)
-                isSuccess = self.processThisFrame(frame, step, isFirst = self.retryCount == 0, randomizeData = self.retryCount > 5)
+                    time.sleep(1)
+                isSuccess = self.processThisFrame(frame, step, isFirst = self.retryCount == 0, randomizeData = self.retryCount > 3)
                 
                 
                 if (isSuccess):
@@ -251,7 +252,7 @@ class DetectClickThread(Thread):
                 setRunningStepId('mainmenu_select_click')
 
         elif step == 'mainmenu_select_click':
-            modes = ['battle_select_scrap_click', 'battle_select_battery_click', 'battle_select_wire_click']
+            modes = const.getPlayMode()
             setRunningStepId(random.choice(modes))
         
         elif (step == 'battle_select_scrap_click' or step == 'battle_select_battery_click' or step == 'battle_select_wire_click'):
