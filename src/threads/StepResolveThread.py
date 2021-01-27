@@ -20,7 +20,6 @@ from threads.InCombatDeployWeaponThread import InCombatDeployWeaponThread
 from threads.InCombatDataCalcThread import InCombatVehicleDataCalculationThread
 from SettingsClass import getGlobalSetting
 
-
 #
 # Thread for deciding which step it is at and execute detection accordingly. 
 # This thread is blocking.
@@ -76,7 +75,8 @@ class DetectClickThread(Thread):
                     if (getRunningStepId() == 'in_game_map_name_label'): # update map frame for in battle use
                         self.thisMap = frame[const.BattleFullMap.y:const.BattleFullMap.ys, const.BattleFullMap.x:const.BattleFullMap.xs]
                         if const.isDevEnvironment():
-                            cv2.imwrite("map-" + str(self.thisMapName) + "-fullmap-" + str(time.time()) + ".jpg", self.thisMap ) 
+                            cv2.imwrite("logmap/map-" + str(self.thisMapName) + "-fullmap-" + str(time.time()) + ".jpg", self.thisMap ) 
+                            
                     self.goToNextStep(isSuccess)
                 else:
                     self.retryCount += 1
@@ -291,10 +291,10 @@ class DetectClickThread(Thread):
                 
                 InputControl.kbUp('tab')
                 time.sleep(10)
-
-                # frame = getDCapture().getFrame(0)
-                # minimap = frame[const.BattleMiniMapArea.y:const.BattleMiniMapArea.ys, const.BattleMiniMapArea.x:const.BattleMiniMapArea.xs]
-                # cv2.imwrite("map-" + str(self.thisMapName) + "-minimap-" + str(time.time()) + ".jpg", minimap ) 
+                if const.isDevEnvironment():
+                    frame = getDCapture().getFrame(0)
+                    minimap = frame[const.BattleMiniMapArea.y:const.BattleMiniMapArea.ys, const.BattleMiniMapArea.x:const.BattleMiniMapArea.xs]
+                    cv2.imwrite("map-" + str(self.thisMapName) + "-minimap-" + str(time.time()) + ".jpg", minimap ) 
 
                 self.battleVehicleCalcThread = InCombatVehicleDataCalculationThread(self.thisMap)
                 self.battleVehicleCalcThread.start()

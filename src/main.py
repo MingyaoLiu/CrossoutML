@@ -14,6 +14,7 @@ import numpy
 import Constants as const
 
 import ctypes
+import os, errno
 
 # import torch
 # import cv2
@@ -46,7 +47,12 @@ if __name__ == "__main__":
         print(f"Argument {i:>6}: {arg}")
         if (arg == '--dev'):
             const.setDevEnv()
-
+    try:
+        if not os.path.exists("logmap"):
+            os.makedirs("logmap")
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise
     
     
     getGlobalSetting()
