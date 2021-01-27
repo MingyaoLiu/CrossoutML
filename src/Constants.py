@@ -329,7 +329,7 @@ Steps = [
     Step(
         id = "finish_battle_close_btn_label",
         action = Action.textDetect,
-        area = Area(1180, 955, 1310, 1025), 
+        area = Area(1190, 955, 1310, 1004), 
         point = None,
         strings = ["close", "c1ose"],
         waitBefore = 10,
