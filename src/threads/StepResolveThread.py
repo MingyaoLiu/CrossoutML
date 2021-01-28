@@ -46,6 +46,8 @@ class DetectClickThread(Thread):
         self.lastLoginTime = time.time()
 
         self.fullStuckTimer = time.time() # this is going to check if nothing has succeed in 10 mins, it will reset.
+        self.gameEndedEarlierJustWaiting = False
+
 
         InputControl.mouseClick(getCorrectPos(Point(10, 10)))
         print("Step Resolve Thread Init")
@@ -55,14 +57,23 @@ class DetectClickThread(Thread):
         while self.isRunning:
             if (self.isProcessingFrameIndication == False and self.disableProcessing == False):
 
+
+
+                stepId = getRunningStepId()
+                print('current step is ' + getRunningStepId())
+                step = findStepById(getRunningStepId())
+
                 if (self.fullStuckTimer and (time.time() - self.fullStuckTimer > 600)):
+                    # implement an method for checking all possible stuck position (what esc shows), and click out of it.
                     self.fullStuckTimer = time.time()
                     setRunningStepId("finish_battle_close_btn_click")
                     continue
                 frame = getDCapture().getFrame(0)
                 self.isProcessingFrameIndication = True
-                step = findStepById(getRunningStepId())
-                if (getRunningStepId() == 'in_game_map_name_label'):
+
+
+
+                if (stepId == 'in_game_map_name_label'):
                     InputControl.kbUp('tab')
                     time.sleep(0.1)
                     InputControl.kbDown('tab')
@@ -72,23 +83,23 @@ class DetectClickThread(Thread):
                 
                 if (isSuccess):
                     self.retryCount = 0
-                    if (getRunningStepId() == 'in_game_map_name_label'): # update map frame for in battle use
-                        self.thisMap = frame[const.BattleFullMap.y:const.BattleFullMap.ys, const.BattleFullMap.x:const.BattleFullMap.xs]
+                    if (stepId == 'in_game_map_name_label'):
+                        self.thisMap = frame[const.BattleFullMap.y:const.BattleFullMap.ys, const.BattleFullMap.x:const.BattleFullMap.xs] # update map frame for in battle use
                         if const.isDevEnvironment():
                             cv2.imwrite("logmap/map-" + str(self.thisMapName) + "-fullmap-" + str(time.time()) + ".jpg", self.thisMap ) 
                             
-                    self.goToNextStep(isSuccess)
+                    self.goToNextStep(stepId, isSuccess)
                 else:
                     self.retryCount += 1
                     if (self.retryCount > 10):
                         self.retryCount = 0
-                        self.goToNextStep(isSuccess)
+                        self.goToNextStep(stepId, isSuccess)
                 self.isProcessingFrameIndication = False
 
-        self.terminateAllThreads()
+        self.terminateAllCombatThreads()
         print("Step Resolve Thread Exit")
 
-    def terminateAllThreads(self):
+    def terminateAllCombatThreads(self):
         if (self.battleVehicleCalcThread):
             self.battleVehicleCalcThread.isRunning = False
             self.battleVehicleCalcThread.join()
@@ -169,9 +180,8 @@ class DetectClickThread(Thread):
         print('text match failed')
         return None
 
-    def goToNextStep(self, thisStepResult: bool):
-        step = getRunningStepId()
-        print('current step is ' + step)
+    def goToNextStep(self, step, thisStepResult: bool):
+
 
         if thisStepResult == True:
             self.fullStuckTimer = time.time()
@@ -179,13 +189,13 @@ class DetectClickThread(Thread):
         if step == 'login_disconnect_btn_text':
             setRunningStepId('login_disconnect_click')
         elif step == 'login_disconnect_click':
-            setRunningStepId('login_button')
-        elif step == 'login_button':
+            setRunningStepId('login_button_label')
+        elif step == 'login_button_label':
             if thisStepResult == True:
                 setRunningStepId('login_username_click')
             else:
-                setRunningStepId('login_button_steam')
-        elif step == 'login_button_steam':
+                setRunningStepId('login_button_steam_label')
+        elif step == 'login_button_steam_label':
             if thisStepResult == True:
                 setRunningStepId('login_username_click')
             else:
@@ -302,6 +312,7 @@ class DetectClickThread(Thread):
                 self.speedControlThread = InCombatVehicleSpeedControlThread()
                 self.speedControlThread.start()
                 self.weaponFirethread = InCombatDeployWeaponThread()
+                self.weaponFirethread.parentThread = self
                 self.weaponFirethread.start()
                 
                 setRunningStepId('in_game_wait_for_finish')
@@ -309,16 +320,25 @@ class DetectClickThread(Thread):
                 InputControl.kbDown("w")
                 time.sleep(0.1)
                 InputControl.kbUp("w")
-                InputControl.kbDown("spacebar")
-                time.sleep(0.5)
-                InputControl.kbUp("spacebar")
-                time.sleep(0.1)
                 setRunningStepId('in_game_map_name_label')
 
-
         elif step == "in_game_wait_for_finish":
-            setRunningStepId('finish_battle_close_btn_label')
+            if  self.gameEndedEarlierJustWaiting == True:
+                self.terminateAllCombatThreads()
+            if getRunningStepId() == 'in_game_early_finish_esc_return_to_garage_label':
+                InputControl.kbDown('esc')
+                time.sleep(0.02)
+                InputControl.kbUp('esc')
+            else:
+                setRunningStepId('in_game_detect_chat_callout')
         
+        elif step == "in_game_detect_chat_callout": # happens fter a min of game
+            if thisStepResult == True:
+                if self.weaponFirethread is not None:
+                    self.weaponFirethread.callout()
+
+            setRunningStepId('finish_battle_close_btn_label')
+
         elif step == 'finish_battle_close_btn_label':
             if thisStepResult == True:
                 
@@ -330,11 +350,12 @@ class DetectClickThread(Thread):
                 time.sleep(0.01)
 
                 setRunningStepId('finish_battle_close_btn_click')
-            else: # If no battle close button has  been detected, go back to wait for 30 seconds.
-                setRunningStepId('finish_battle_close_btn_label')
+            else:
+                setRunningStepId('in_game_detect_chat_callout')
 
         elif step == "finish_battle_close_btn_click":
-            self.terminateAllThreads()
+            self.gameEndedEarlierJustWaiting = False
+            self.terminateAllCombatThreads()
             self.thisMap = None
             self.thisMask = None
             InputControl.kbDown('esc')
@@ -358,5 +379,20 @@ class DetectClickThread(Thread):
             InputControl.kbUp('esc')
             time.sleep(0.5)
             setRunningStepId('mainmenu_esc_return_btn_label')
+
+        #############################################
+        # Early finish combat flow
+        #############################################
+        elif step == "in_game_early_finish_esc_return_to_garage_label":
+            if thisStepResult == True:
+                setRunningStepId('in_game_early_finish_esc_return_to_garage_click')
+            else:
+                InputControl.kbDown('esc')
+                time.sleep(0.02)
+                InputControl.kbUp('esc')
+        elif step == "in_game_early_finish_esc_return_to_garage_click":
+            setRunningStepId('in_game_early_finish_confirm_return_garage_click')
+        elif step == "in_game_early_finish_confirm_return_garage_click":
+            setRunningStepId('finish_battle_close_btn_click')
         
 

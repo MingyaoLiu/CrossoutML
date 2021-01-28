@@ -21,6 +21,7 @@ class BotBackgroundThread(QThread):
     def stopBot(self):
         if self.bot:
             self.bot.isRunning = False
+            self.bot.join()
             self.bot = None
         if self.bot2:
             self.bot2.isRunning = False
@@ -58,7 +59,7 @@ class BotBackgroundThread(QThread):
             # self.debugBot = DetectClickThread()
             # self.debugBot = DebugThread()
 
-            if (self.debugBot is not None):
+            if (self.debugBot is not None): # used for launching only one thread
                 self.debugBot.start()
             else:
                 if (const.isDevEnvironment()):

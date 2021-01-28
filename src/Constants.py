@@ -138,7 +138,7 @@ class Step(tuple):
 Steps = [
 
     Step(
-        id = "login_button",
+        id = "login_button_label",
         action = Action.textDetect,
         area = Area(229, 512, 290, 538), 
         point = None,
@@ -156,7 +156,7 @@ Steps = [
         waitAfter = 1 # it will click the steam one after, so delay will be there.
     ),
     Step(
-        id = "login_button_steam",
+        id = "login_button_steam_label",
         action = Action.textDetect,
         area = Area(229, 464, 290, 490), 
         point = None,
@@ -323,7 +323,43 @@ Steps = [
         area = None, 
         point = Point(10,10),
         strings = None,
-        waitBefore = 60,
+        waitBefore = 30,
+        waitAfter = 0.5
+    ),
+    Step(
+        id = "in_game_detect_chat_callout",
+        action = Action.textDetect,
+        area = Area(11, 968, 580, 1033), 
+        point = None,
+        strings = ['tensor', 'daddy', 'igor', 'mom', 'shtick', 'vortex', 'dick', 'long', 'plz'],
+        waitBefore = 0.5,
+        waitAfter = 0.5
+    ),
+    Step(
+        id = "in_game_early_finish_esc_return_to_garage_label",
+        action = Action.textDetect,
+        area = Area(845, 621, 1076, 665), 
+        point = None,
+        strings = ["return to garage", "garage", "return"],
+        waitBefore = 0.5,
+        waitAfter = 0.5
+    ),
+    Step(
+        id = "in_game_early_finish_esc_return_to_garage_click",
+        action = Action.mouseClick,
+        area = None, 
+        point = Point(950, 640),
+        strings = None,
+        waitBefore = 0.5,
+        waitAfter = 0.5
+    ),
+    Step(
+        id = "in_game_early_finish_confirm_return_garage_click",
+        action = Action.mouseClick,
+        area = None, 
+        point = Point(850, 600),
+        strings = None,
+        waitBefore = 0.5,
         waitAfter = 0.5
     ),
     Step(
@@ -488,7 +524,7 @@ def getRunningStepId():
         if getGlobalSetting().settings.startScreen is not None:
             currentRunningStep = Steps[getGlobalSetting().settings.startScreen].id
         else:
-            currentRunningStep = "login_disconnect_btn_text"
+            currentRunningStep = "login_button_label"
         return currentRunningStep
 
 def setRunningStepId(id: str):
