@@ -300,12 +300,12 @@ Steps = [
         waitAfter = 0.5
     ),
     Step(
-        id = "before_game_wait", # wait for 30 sec before start to detect, a minute of peace.
+        id = "before_game_wait", # wait for 10 sec before start to detect.
         action = Action.wait,
         area = None, 
         point = Point(10,10),
         strings = None,
-        waitBefore = 30,
+        waitBefore = 10,
         waitAfter = 1
     ),
     Step(
@@ -314,7 +314,7 @@ Steps = [
         area = Area(1420, 37, 1830, 73), 
         point = None,
         strings = list(map_mask_file_path.keys()),
-        waitBefore = 5,
+        waitBefore = 1,
         waitAfter = 0.5
     ),    
     Step(
