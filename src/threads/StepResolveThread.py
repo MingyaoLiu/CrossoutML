@@ -306,6 +306,13 @@ class DetectClickThread(Thread):
                 
                 setRunningStepId('in_game_wait_for_finish')
             else: # If no battle close button has  been detected, go back to wait for 30 seconds.
+                InputControl.kbDown("w")
+                time.sleep(0.1)
+                InputControl.kbUp("w")
+                InputControl.kbDown("spacebar")
+                time.sleep(0.5)
+                InputControl.kbUp("spacebar")
+                time.sleep(0.1)
                 setRunningStepId('in_game_map_name_label')
 
 

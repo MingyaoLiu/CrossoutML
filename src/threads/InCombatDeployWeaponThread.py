@@ -17,13 +17,11 @@ class InCombatDeployWeaponThread(Thread):
     def run(self):
         while self.isRunning:
             frame = getDCapture().getFrame(0)
-            thisMinimap = frame[const.BattleMiniMapArea.y + 20:const.BattleMiniMapArea.ys - 20, const.BattleMiniMapArea.x + 20:const.BattleMiniMapArea.xs - 20]
-            if (self.__isEnemyNear(thisMinimap) and (time.time() - self.lastPulledOut > 5)):
-            # if self.__isEnemyNear(thisMinimap):
-                print("shoot")
+            thisSmallerMinimap = frame[const.BattleMiniMapArea.y + 35:const.BattleMiniMapArea.ys - 35, const.BattleMiniMapArea.x + 35:const.BattleMiniMapArea.xs - 35]
+            if (self.__isEnemyNear(thisSmallerMinimap) and (time.time() - self.lastPulledOut > 3)):
                 self.lastPulledOut = time.time()
                 InputControl.kbDown('1')
-                time.sleep(0.2)
+                time.sleep(0.1)
                 InputControl.kbUp('1')
                 time.sleep(1)
 
