@@ -323,7 +323,7 @@ Steps = [
         area = None, 
         point = Point(10,10),
         strings = None,
-        waitBefore = 30,
+        waitBefore = 47,
         waitAfter = 0.5
     ),
     Step(
