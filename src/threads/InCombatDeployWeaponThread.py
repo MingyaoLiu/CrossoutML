@@ -39,18 +39,26 @@ class InCombatDeployWeaponThread(Thread):
                     if (self.stuckTimer is None):
                         self.stuckTimer = movementStack[0].time
                     elif (movementStack[0].time - self.stuckTimer > 5):
+                        self.parentThread.gameEndedEarlierJustWaiting = True
                         InputControl.kbDown('backspace')
                         time.sleep(5)
                         InputControl.kbUp('backspace')
                         time.sleep(0.1)
                         self.alreadyExplode = True
                         if (time.time() - self.initTime < 30):
-                            self.parentThread.gameEndedEarlierJustWaiting = True
                             const.setRunningStepId('in_game_early_finish_esc_return_to_garage_label')
                         break
                     
                 else:
                     self.stuckTimer = None
+
+            if (time.time() - self.initTime > 120):
+                InputControl.kbDown('backspace')
+                time.sleep(5)
+                InputControl.kbUp('backspace')
+                time.sleep(0.1)
+                self.parentThread.gameEndedEarlierJustWaiting = True
+                break
         print("Weapon Deploy Thread Exit")
 
 

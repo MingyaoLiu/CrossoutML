@@ -333,6 +333,8 @@ class DetectClickThread(Thread):
                 setRunningStepId('in_game_detect_chat_callout')
         
         elif step == "in_game_detect_chat_callout": # happens fter a min of game
+            if  self.gameEndedEarlierJustWaiting == True:
+                self.terminateAllCombatThreads()
             if thisStepResult == True:
                 if self.weaponFirethread is not None:
                     self.weaponFirethread.callout()
