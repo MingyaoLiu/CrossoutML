@@ -29,23 +29,26 @@ class InCombatVehicleDataCalculationThread(Thread):
 
             frame = getDCapture().getFrame(0)
             thisMinimap = frame[const.BattleMiniMapArea.y:const.BattleMiniMapArea.ys, const.BattleMiniMapArea.x:const.BattleMiniMapArea.xs]
-            # cv2.imwrite("mini.jpg", thisMinimap ) 
+
             pos = self.__getMiniMapReadLoc(self.thisMap, thisMinimap)
-            if (pos):
-                updateMap = cv2.circle(self.thisMap, (int(pos.x), int(pos.y)), 1, (0, 0, 255), 2)
+            
 
             minimap_arrow_frame = frame[const.BattleMiniMapCenter.y - 15:const.BattleMiniMapCenter.y + 15, const.BattleMiniMapCenter.x - 15: const.BattleMiniMapCenter.x + 15] 
-            # minimap_arrow_frame2 = frame[847:869, 1688: 1710] 
-            # cv2.imshow("MiniArrow", minimap_arrow_frame2)
+
             center_rad = self.__calcRadWithContour(minimap_arrow_frame)
-            if ((center_rad is not None) and (center_rad != 0)):
-                cv2.putText(updateMap, str(center_rad * 180 / math.pi), (50, 50) , cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0) , 1, cv2.LINE_AA) 
-
-
+            
             if (pos and center_rad):
                 vehicleData = const.VehicleMovementData(time.time(), pos, center_rad)
                 const.updateVehicleMovementStack(vehicleData)
 
+            if const.isDevEnvironment:
+                if (pos):
+                    updateMap = cv2.circle(self.thisMap, (int(pos.x), int(pos.y)), 1, (0, 0, 255), 2)
+                if ((center_rad is not None) and (center_rad != 0)):
+                    cv2.putText(updateMap, str(center_rad * 180 / math.pi), (50, 50) , cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0) , 1, cv2.LINE_AA) 
+
+                # cv2.imshow("MiniArrow", minimap_arrow_frame)
+                cv2.waitKey(1)
         print("In Combat Data Calculation Thread Exit")
 
 
@@ -89,8 +92,10 @@ class InCombatVehicleDataCalculationThread(Thread):
             upperImg = newImg[0:14,0:30]
             lowerImg = newImg[16:30,0:30]
 
-            # sideBySideArrow = np.hstack((upperImg, lowerImg))
-            # cv2.imshow("MiniArrow2", sideBySideArrow)
+            if const.isDevEnvironment:
+                # sideBySideArrow = np.hstack((upperImg, lowerImg))
+                # cv2.imshow("MiniArrow2", sideBySideArrow)
+                pass
 
             if cv2.countNonZero(upperImg) < cv2.countNonZero(lowerImg):
                 # print("Going through 1 and 4 Quadrant")

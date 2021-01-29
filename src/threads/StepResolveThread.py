@@ -39,7 +39,7 @@ class DetectClickThread(Thread):
         self.speedControlThread = None
         self.turnControlThread = None
         self.weaponFirethread = None
-        self.thisMap = None
+        self.frame = None
         self.thisMask = None
         self.thisMapName = '' # this is used to save the filename with map name
 
@@ -66,28 +66,15 @@ class DetectClickThread(Thread):
                 if (self.fullStuckTimer and (time.time() - self.fullStuckTimer > 600)):
                     # implement an method for checking all possible stuck position (what esc shows), and click out of it.
                     self.fullStuckTimer = time.time()
-                    setRunningStepId("finish_battle_close_btn_click")
+                    setRunningStepId("mainmenu_reset_after_finish_battle")
                     continue
-                frame = getDCapture().getFrame(0)
+                self.frame = getDCapture().getFrame(0)
                 self.isProcessingFrameIndication = True
 
-
-
-                if (stepId == 'in_game_map_name_label'):
-                    InputControl.kbUp('tab')
-                    time.sleep(0.1)
-                    InputControl.kbDown('tab')
-                    time.sleep(1)
-                isSuccess = self.processThisFrame(frame, step, isFirst = self.retryCount == 0, randomizeData = self.retryCount > 3)
-                
+                isSuccess = self.processThisFrame(self.frame, step, isFirst = self.retryCount == 0, randomizeData = self.retryCount > 3)
                 
                 if (isSuccess):
                     self.retryCount = 0
-                    if (stepId == 'in_game_map_name_label'):
-                        self.thisMap = frame[const.BattleFullMap.y:const.BattleFullMap.ys, const.BattleFullMap.x:const.BattleFullMap.xs] # update map frame for in battle use
-                        if const.isDevEnvironment():
-                            cv2.imwrite("logmap/map-" + str(self.thisMapName) + "-fullmap-" + str(time.time()) + ".jpg", self.thisMap ) 
-                            
                     self.goToNextStep(stepId, isSuccess)
                 else:
                     self.retryCount += 1
@@ -290,22 +277,28 @@ class DetectClickThread(Thread):
 
 
         elif step == 'before_game_wait':
-                setRunningStepId('in_game_map_name_label')
+            setRunningStepId('before_game_hold_tab')
 
-        elif step == 'before_game_wait':
-                setRunningStepId('in_game_map_name_label')
+        elif step == 'before_game_hold_tab':
+            InputControl.kbUp('tab')
+            time.sleep(0.1)
+            InputControl.kbDown('tab')
+            time.sleep(1)
+            setRunningStepId('in_game_map_name_label')
 
         elif step == 'in_game_map_name_label':
             if thisStepResult == True:
                 
                 InputControl.kbUp('tab')
                 time.sleep(10)
+
+                thisMap = self.frame[const.BattleFullMap.y:const.BattleFullMap.ys, const.BattleFullMap.x:const.BattleFullMap.xs]
                 if const.isDevEnvironment():
-                    frame = getDCapture().getFrame(0)
-                    minimap = frame[const.BattleMiniMapArea.y:const.BattleMiniMapArea.ys, const.BattleMiniMapArea.x:const.BattleMiniMapArea.xs]
+                    cv2.imwrite("logmap/map-" + str(self.thisMapName) + "-fullmap-" + str(time.time()) + ".jpg", thisMap ) 
+                    minimap = self.frame[const.BattleMiniMapArea.y:const.BattleMiniMapArea.ys, const.BattleMiniMapArea.x:const.BattleMiniMapArea.xs]
                     cv2.imwrite("logmap/map-" + str(self.thisMapName) + "-minimap-" + str(time.time()) + ".jpg", minimap ) 
 
-                self.battleVehicleCalcThread = InCombatVehicleDataCalculationThread(self.thisMap)
+                self.battleVehicleCalcThread = InCombatVehicleDataCalculationThread(thisMap)
                 self.battleVehicleCalcThread.start()
                 self.turnControlThread = InCombatVehicleTurnControlThread(self.thisMask)
                 self.turnControlThread.start()
@@ -320,7 +313,7 @@ class DetectClickThread(Thread):
                 InputControl.kbDown("w")
                 time.sleep(0.1)
                 InputControl.kbUp("w")
-                setRunningStepId('in_game_map_name_label')
+                setRunningStepId('before_game_hold_tab')
 
         elif step == "in_game_wait_for_finish":
             if  self.gameEndedEarlierJustWaiting == True:
@@ -356,30 +349,34 @@ class DetectClickThread(Thread):
                 setRunningStepId('in_game_detect_chat_callout')
 
         elif step == "finish_battle_close_btn_click":
+            
+            setRunningStepId('mainmenu_reset_after_finish_battle')
+
+        elif step == "mainmenu_reset_after_finish_battle":
             self.gameEndedEarlierJustWaiting = False
             self.terminateAllCombatThreads()
-            self.thisMap = None
             self.thisMask = None
             InputControl.kbDown('esc')
             time.sleep(0.01)
             InputControl.kbUp('esc')
-            time.sleep(0.5)
+            time.sleep(0.2)
             InputControl.kbDown('esc')
             time.sleep(0.01)
             InputControl.kbUp('esc')
-            time.sleep(0.5)
+            time.sleep(0.2)
             InputControl.kbDown('esc')
             time.sleep(0.01)
             InputControl.kbUp('esc')
-            time.sleep(0.5)
+            time.sleep(0.2)
             InputControl.kbDown('esc')
             time.sleep(0.01)
             InputControl.kbUp('esc')
-            time.sleep(0.5)
+            time.sleep(0.2)
             InputControl.kbDown('esc')
             time.sleep(0.01)
             InputControl.kbUp('esc')
-            time.sleep(0.5)
+            time.sleep(0.2)
+
             setRunningStepId('mainmenu_esc_return_btn_label')
 
         #############################################
@@ -395,6 +392,6 @@ class DetectClickThread(Thread):
         elif step == "in_game_early_finish_esc_return_to_garage_click":
             setRunningStepId('in_game_early_finish_confirm_return_garage_click')
         elif step == "in_game_early_finish_confirm_return_garage_click":
-            setRunningStepId('finish_battle_close_btn_click')
+            setRunningStepId('mainmenu_reset_after_finish_battle')
         
 

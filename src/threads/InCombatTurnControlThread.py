@@ -25,9 +25,9 @@ class InCombatVehicleTurnControlThread(Thread):
             if len(movements) > 0:
                 self.__applyMovement(movements)
 
-
-        
-            cv2.waitKey(1)
+            if const.isDevEnvironment:
+                cv2.waitKey(1)
+                
         time.sleep(0.15)
         InputControl.kbUp("a")
         InputControl.kbUp("s")

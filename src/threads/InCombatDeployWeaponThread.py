@@ -31,11 +31,11 @@ class InCombatDeployWeaponThread(Thread):
                 self.callout()
 
             frame = getDCapture().getFrame(0)
-            thisSmallerMinimap = frame[const.BattleMiniMapArea.y + 35:const.BattleMiniMapArea.ys - 35, const.BattleMiniMapArea.x + 35:const.BattleMiniMapArea.xs - 35]
-            if (self.__isEnemyNear(thisSmallerMinimap) and (time.time() - self.lastPulledOut > 5)):
+            thisSmallerMinimap = frame[const.BattleMiniMapArea.y + 37:const.BattleMiniMapArea.ys - 37, const.BattleMiniMapArea.x + 37:const.BattleMiniMapArea.xs - 37]
+            if (self.__isEnemyNear(thisSmallerMinimap) and (time.time() - self.lastPulledOut > 3)):
                 self.lastPulledOut = time.time()
                 InputControl.kbDown('1')
-                time.sleep(0.1)
+                time.sleep(0.05)
                 InputControl.kbUp('1')
 
             movementStack = const.getVehicleMovementStack()
@@ -50,7 +50,8 @@ class InCombatDeployWeaponThread(Thread):
                         InputControl.kbUp('backspace')
                         time.sleep(0.1)
                         self.alreadyExplode = True
-                        if (time.time() - self.initTime < 30):
+                        if (time.time() - self.initTime < 40):
+                            print("Early Return Initiated")
                             const.setRunningStepId('in_game_early_finish_esc_return_to_garage_label')
                         break
                     

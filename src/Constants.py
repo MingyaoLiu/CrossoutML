@@ -171,7 +171,7 @@ Steps = [
         point = Point(251,475),
         strings = None,
         waitBefore = 1,
-        waitAfter = 20
+        waitAfter = 15
     ),
     Step(
         id = "login_username_click",
@@ -303,10 +303,19 @@ Steps = [
         id = "before_game_wait", # wait for 10 sec before start to detect.
         action = Action.wait,
         area = None, 
-        point = Point(10,10),
+        point = None,
         strings = None,
         waitBefore = 10,
         waitAfter = 1
+    ),
+    Step(
+        id = "before_game_hold_tab", # wait for 10 sec before start to detect.
+        action = Action.wait,
+        area = None, 
+        point = None,
+        strings = None,
+        waitBefore = 0.5,
+        waitAfter = 0.5
     ),
     Step(
         id = "in_game_map_name_label",
@@ -323,7 +332,7 @@ Steps = [
         area = None, 
         point = Point(10,10),
         strings = None,
-        waitBefore = 47,
+        waitBefore = 50,
         waitAfter = 0.5
     ),
     Step(
@@ -377,8 +386,17 @@ Steps = [
         area = None, 
         point = Point(1230, 970),
         strings = None,
-        waitBefore = 1,
-        waitAfter = 2
+        waitBefore = 0.5,
+        waitAfter = 1.5
+    ),
+    Step(
+        id = "mainmenu_reset_after_finish_battle",
+        action = Action.wait,
+        area = None, 
+        point = None,
+        strings = None,
+        waitBefore = 0.5,
+        waitAfter = 0.5
     ),
     Step(
         id = "mainmenu_welcome_close_btn_label",
@@ -395,8 +413,8 @@ Steps = [
         area = Area(910,417,1007,447), 
         point = None,
         strings = ['return'],
-        waitBefore = 1,
-        waitAfter = 1
+        waitBefore = 0.5,
+        waitAfter = 0.5
     ),
     Step(
         id = "mainmenu_esc_return_btn_click",
@@ -404,8 +422,8 @@ Steps = [
         area = None, 
         point = Point(950,430),
         strings = None,
-        waitBefore = 1,
-        waitAfter = 1
+        waitBefore = 0.5,
+        waitAfter = 0.5
     ),
     Step(
         id = "mainmenu_esc_titlescreen_btn_click",
@@ -413,8 +431,8 @@ Steps = [
         area = None, 
         point = Point(954,672),
         strings = None,
-        waitBefore = 1,
-        waitAfter = 1
+        waitBefore = 0.5,
+        waitAfter = 0.5
     ),
     Step(
         id = "mainmenu_esc_titlescreen_confirm_btn_click",
@@ -422,7 +440,7 @@ Steps = [
         area = None, 
         point = Point(846,587),
         strings = None,
-        waitBefore = 1,
+        waitBefore = 0.5,
         waitAfter = 10
     ),
 
