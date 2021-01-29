@@ -41,7 +41,7 @@ class InCombatVehicleSpeedControlThread(Thread):
                 time.sleep(0.15)
             else:
                 InputControl.kbDown("w")
-                time.sleep(0.05)
+                time.sleep(0.2)
                 InputControl.kbUp("w")
                 time.sleep(1)
 

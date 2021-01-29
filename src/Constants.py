@@ -331,7 +331,7 @@ Steps = [
         action = Action.textDetect,
         area = Area(11, 968, 580, 1033), 
         point = None,
-        strings = ['tensor', 'daddy', 'igor', 'mom', 'shtick', 'vortex', 'dick', 'long', 'plz'],
+        strings = ['bot', 'tensor', 'daddy', 'igor', 'mom', 'shtick', 'vortex', 'dick', 'long', 'plz'],
         waitBefore = 0.5,
         waitAfter = 0.5
     ),

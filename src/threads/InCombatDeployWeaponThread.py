@@ -21,6 +21,11 @@ class InCombatDeployWeaponThread(Thread):
 
     def run(self):
         while self.isRunning:
+            
+            InputControl.kbDown('r')
+            time.sleep(0.05)
+            InputControl.kbUp('r')
+
             if (self.doRandomCallout):
                 self.doRandomCallout = False
                 self.callout()
