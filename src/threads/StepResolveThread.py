@@ -57,8 +57,8 @@ class DetectClickThread(Thread):
 
 
                 stepId = getRunningStepId()
-                print('current step is ' + getRunningStepId())
-                step = findStepById(getRunningStepId())
+                print('current step is ' + stepId)
+                step = findStepById(stepId)
 
                 if (self.fullStuckTimer and ((time.time() - self.fullStuckTimer) > getGlobalSetting().settings.fullStuckTimer)):
                     # implement an method for checking all possible stuck position (what esc shows), and click out of it.

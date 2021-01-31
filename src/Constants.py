@@ -335,16 +335,15 @@ Steps = [
         waitBefore = 50,
         waitAfter = 0.5
     ),
-    Step(
-        id = "in_game_detect_chat_callout",
-        action = Action.textDetect,
-        area = Area(11, 968, 580, 1033), 
-        point = None,
-        strings = ['defaultstring'],
-        # strings = ['bot', 'tensor', 'daddy', 'igor', 'mom', 'shtick', 'vortex', 'dick', 'long', 'plz'],
-        waitBefore = 0.5,
-        waitAfter = 0.5
-    ),
+    # Step(
+    #     id = "in_game_detect_chat_callout",
+    #     action = Action.textDetect,
+    #     area = Area(11, 968, 580, 1033), 
+    #     point = None,
+    #     strings = ['defaultstring'],
+    #     waitBefore = 0.5,
+    #     waitAfter = 0.5
+    # ),
     Step(
         id = "in_game_early_finish_esc_return_to_garage_label",
         action = Action.textDetect,

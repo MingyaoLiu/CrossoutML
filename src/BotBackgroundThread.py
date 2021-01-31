@@ -5,6 +5,7 @@ from threads.StepResolveThread import DetectClickThread
 from threads.DebugThread import DebugThread
 from DCaptureClass import getDCapture
 import Constants as const
+from Constants import Step, Action, Area
 from SettingsClass import getGlobalSetting
 from Utils import findStepById
 
@@ -33,8 +34,16 @@ class BotBackgroundThread(QThread):
     def startBot(self):
 
         # temporary update chat detection list
-        step = findStepById('in_game_detect_chat_callout')
-        step.strings = getGlobalSetting().settings.chatDetectKeywords.split(',')
+        calloutStep = Step(
+            id = "in_game_detect_chat_callout",
+            action = Action.textDetect,
+            area = Area(11, 968, 580, 1033), 
+            point = None,
+            strings = getGlobalSetting().settings.chatDetectKeywords.split(','), # bot,tensor,daddy,igor,mom,shtick,vortex,dick,long,plz
+            waitBefore = 0.5,
+            waitAfter = 0.5
+        )
+        const.Steps.append(calloutStep)
 
         if (self.debugThread or self.detectThread):
             self.stopBot() # reset if there is unclean bot thread.
