@@ -2,23 +2,20 @@
 import time
 from DCaptureClass import getDCapture
 import pytesseract
-from Constants import Area, Point, findStepById, Step, loadNewUser, Action, getPassword, getUsername, getRunningStepId, setRunningStepId
+from Constants import Area, Point, Step, Action
 import Constants as const
-import d3dshot
-
-from Utils import getCorrectPos
 from threading import Thread
 import cv2
 import InputControl
 import math
-from Utils import imgRotate
+from Utils import getCorrectPos, imgRotate, findStepById
 import numpy as np
 import random
 from threads.InCombatSpeedControlThread import InCombatVehicleSpeedControlThread
 from threads.InCombatTurnControlThread import InCombatVehicleTurnControlThread
 from threads.InCombatDeployWeaponThread import InCombatDeployWeaponThread
 from threads.InCombatDataCalcThread import InCombatVehicleDataCalculationThread
-from SettingsClass import getGlobalSetting
+from SettingsClass import getGlobalSetting, getRunningStepId, setRunningStepId
 
 #
 # Thread for deciding which step it is at and execute detection accordingly. 
@@ -30,8 +27,8 @@ class DetectClickThread(Thread):
     def __init__(self):
         Thread.__init__(self)
 
-        self.disableProcessing = False
-        # self.disableProcessing = True # For debug
+        self.showMapTrackingDebug = getGlobalSetting().settings.showMapTrackingDebugWindow
+        self.showMinimapDebug = getGlobalSetting().settings.showMinimapTrackingDebugWindow
         self.isRunning = True
         self.isProcessingFrameIndication = False
         self.retryCount = 0
@@ -55,7 +52,7 @@ class DetectClickThread(Thread):
 
     def run(self):
         while self.isRunning:
-            if (self.isProcessingFrameIndication == False and self.disableProcessing == False):
+            if (self.isProcessingFrameIndication == False):
 
 
 
@@ -63,7 +60,7 @@ class DetectClickThread(Thread):
                 print('current step is ' + getRunningStepId())
                 step = findStepById(getRunningStepId())
 
-                if (self.fullStuckTimer and (time.time() - self.fullStuckTimer > 600)):
+                if (self.fullStuckTimer and ((time.time() - self.fullStuckTimer) > getGlobalSetting().settings.fullStuckTimer)):
                     # implement an method for checking all possible stuck position (what esc shows), and click out of it.
                     self.fullStuckTimer = time.time()
                     setRunningStepId("mainmenu_reset_after_finish_battle")
@@ -142,9 +139,9 @@ class DetectClickThread(Thread):
 
         elif (step.action == Action.textInput):
             if getRunningStepId() == 'login_username_input':
-                InputControl.fillInputWithString(const.getUsername())
+                InputControl.fillInputWithString(getUsername())
             elif getRunningStepId() == 'login_password_input':
-                InputControl.fillInputWithString(const.getPassword())
+                InputControl.fillInputWithString(getPassword())
             else:
                 InputControl.fillInputWithString(random.choice(step.strings))
             print("text input executed")
@@ -229,7 +226,7 @@ class DetectClickThread(Thread):
                 
 
                 if (time.time() - self.lastLoginTime > 3600):
-                    const.loadNewUser()
+                    loadNewUser()
                     setRunningStepId('mainmenu_esc_titlescreen_btn_click')
                 else:
                     InputControl.kbDown('esc')
@@ -238,7 +235,7 @@ class DetectClickThread(Thread):
                     time.sleep(0.5)
             
             elif (time.time() - self.lastLoginTime > 3600):
-                const.loadNewUser()
+                loadNewUser()
                 InputControl.kbDown('esc')
                 time.sleep(0.01)
                 InputControl.kbUp('esc')
@@ -260,7 +257,7 @@ class DetectClickThread(Thread):
                 
 
         elif step == 'mainmenu_select_click':
-            modes = const.getPlayMode()
+            modes = getPlayMode()
             setRunningStepId(random.choice(modes))
         
         elif (step == 'battle_select_scrap_click' or step == 'battle_select_battery_click' or step == 'battle_select_wire_click'):
@@ -293,9 +290,12 @@ class DetectClickThread(Thread):
                 time.sleep(10)
 
                 thisMap = self.frame[const.BattleFullMap.y:const.BattleFullMap.ys, const.BattleFullMap.x:const.BattleFullMap.xs]
-                if const.isDevEnvironment():
+                if self.showMapTrackingDebug:
                     cv2.imwrite("logmap/map-" + str(self.thisMapName) + "-fullmap-" + str(time.time()) + ".jpg", thisMap ) 
-                    minimap = self.frame[const.BattleMiniMapArea.y:const.BattleMiniMapArea.ys, const.BattleMiniMapArea.x:const.BattleMiniMapArea.xs]
+
+                if self.showMinimapDebug:
+                    newFrame = getDCapture().getFrame(0)
+                    minimap = newFrame[const.BattleMiniMapArea.y:const.BattleMiniMapArea.ys, const.BattleMiniMapArea.x:const.BattleMiniMapArea.xs]
                     cv2.imwrite("logmap/map-" + str(self.thisMapName) + "-minimap-" + str(time.time()) + ".jpg", minimap ) 
 
                 self.battleVehicleCalcThread = InCombatVehicleDataCalculationThread(thisMap)
@@ -395,3 +395,52 @@ class DetectClickThread(Thread):
             setRunningStepId('mainmenu_reset_after_finish_battle')
         
 
+
+username = None
+password = None
+playModes = []
+def loadNewUser():
+    global username
+    global password
+    global playModes
+    newAccount = random.choice(getGlobalSetting().settings.accounts)
+    if newAccount.enabled == False:
+        return loadNewUser()
+    else:
+        username = newAccount.username
+        password = newAccount.password
+        playModes = []
+        if newAccount.playBattery:
+            playModes.append('battle_select_battery_click')
+        if newAccount.playScrap:
+            playModes.append('battle_select_scrap_click')
+        if newAccount.playWire:
+            playModes.append('battle_select_wire_click')
+        if newAccount.playPatrol:
+            playModes.append('battle_select_patrol_click')        
+        print("Account now switched to ign: " + newAccount.ign + ", user: " + username + ", modes are: " + "".join(playModes))
+        return True
+
+def getUsername():
+    global username
+    if username:
+        return username
+    else:
+        loadNewUser()
+        return username
+
+def getPassword():
+    global password
+    if password:
+        return password
+    else:
+        loadNewUser()
+        return password
+
+def getPlayMode():
+    global playModes
+    if playModes:
+        return playModes
+    else:
+        loadNewUser()
+        return playModes

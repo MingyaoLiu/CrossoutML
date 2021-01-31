@@ -1,10 +1,9 @@
-
-
-from Constants import Point
-from SettingsClass import getGlobalSetting
+from Constants import Point, Steps
 import threading
 import time
 import cv2
+
+from SettingsClass import getGlobalSetting
 
 
 def getCorrectPos(pos: Point) -> Point:
@@ -43,3 +42,11 @@ def imgRotate(image, angle, center = None, scale = 1.0):
     rotated = cv2.warpAffine(image, M, (w, h))
 
     return rotated
+
+
+def findStepById(id: str):
+    for step in Steps:
+        if step.id == id:
+            return step
+    print("can't find step with id: " + id)
+    return None

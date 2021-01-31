@@ -340,7 +340,8 @@ Steps = [
         action = Action.textDetect,
         area = Area(11, 968, 580, 1033), 
         point = None,
-        strings = ['bot', 'tensor', 'daddy', 'igor', 'mom', 'shtick', 'vortex', 'dick', 'long', 'plz'],
+        strings = ['defaultstring'],
+        # strings = ['bot', 'tensor', 'daddy', 'igor', 'mom', 'shtick', 'vortex', 'dick', 'long', 'plz'],
         waitBefore = 0.5,
         waitAfter = 0.5
     ),
@@ -472,94 +473,6 @@ BattleFullMap = Area( # square of in game map
     1337,
     893
 )
-
-def findStepById(id: str):
-    global Steps
-    for step in Steps:
-        if step.id == id:
-            return step
-    print("can't find step with id: " + id)
-    return None
-
-from SettingsClass import getGlobalSetting
-import random
-
-
-username = None
-password = None
-playModes = []
-def loadNewUser():
-    global username
-    global password
-    global playModes
-    newAccount = random.choice(getGlobalSetting().settings.accounts)
-    username = newAccount.username
-    password = newAccount.password
-    playModes = []
-    if newAccount.playBattery:
-        playModes.append('battle_select_battery_click')
-    if newAccount.playScrap:
-        playModes.append('battle_select_scrap_click')
-    if newAccount.playWire:
-        playModes.append('battle_select_wire_click')
-    if newAccount.playPatrol:
-        playModes.append('battle_select_patrol_click')        
-    print("Account now switched to " + username + ", modes are: " + "".join(playModes))
-    return True
-
-def getUsername():
-    global username
-    if username:
-        return username
-    else:
-        loadNewUser()
-        return username
-
-def getPassword():
-    global password
-    if password:
-        return password
-    else:
-        loadNewUser()
-        return password
-
-def getPlayMode():
-    global playModes
-    if playModes:
-        return playModes
-    else:
-        loadNewUser()
-        return playModes
-
-
-currentRunningStep = None
-
-def getRunningStepId():
-    global currentRunningStep
-    if currentRunningStep:
-        return currentRunningStep
-    else:
-        if getGlobalSetting().settings.startScreen is not None:
-            currentRunningStep = Steps[getGlobalSetting().settings.startScreen].id
-        else:
-            currentRunningStep = "login_button_label"
-        return currentRunningStep
-
-def setRunningStepId(id: str):
-    global currentRunningStep
-    currentRunningStep = id
-
-
-isDev = False
-def isDevEnvironment():
-    global isDev
-    return isDev
-
-def setDevEnv():
-    global isDev
-    isDev = True
-    return isDev
-
 
 
 class PointData(tuple):

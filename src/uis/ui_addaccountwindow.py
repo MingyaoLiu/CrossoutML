@@ -23,22 +23,20 @@ class UIAddAccountWindow(QtWidgets.QDialog):
     def __saveAccount(self):
         setting = getGlobalSetting().settings
 
+        thisAccount = None
         if self.index is not None:
-            acct = setting.accounts[self.index]
-            acct.username = self.usernameInput.text()
-            acct.password = self.passwordInput.text()
-            acct.playBattery = self.playForBatteryCB.isChecked()
-            acct.playScrap = self.playForScrapCB.isChecked()
-            acct.playWire = self.playForWireCB.isChecked()
-            acct.playPatrol = self.playForPatrolCB.isChecked()
+            thisAccount = setting.accounts[self.index]
         else:
-            new_acct = setting.accounts.add()
-            new_acct.username = self.usernameInput.text()
-            new_acct.password = self.passwordInput.text()
-            new_acct.playBattery = self.playForBatteryCB.isChecked()
-            new_acct.playScrap = self.playForScrapCB.isChecked()
-            new_acct.playWire = self.playForWireCB.isChecked()
-            new_acct.playPatrol = self.playForPatrolCB.isChecked()
+            thisAccount = setting.accounts.add()
+            
+        thisAccount.username = self.usernameInput.text()
+        thisAccount.password = self.passwordInput.text()
+        thisAccount.playBattery = self.playForBatteryCB.isChecked()
+        thisAccount.playScrap = self.playForScrapCB.isChecked()
+        thisAccount.playWire = self.playForWireCB.isChecked()
+        thisAccount.playPatrol = self.playForPatrolCB.isChecked()
+        thisAccount.ign = self.inGameNameInput.text()
+        thisAccount.enabled = self.enabledForBottingCB.isChecked()
 
         getGlobalSetting().saveSettings()
         self.close()
@@ -52,3 +50,5 @@ class UIAddAccountWindow(QtWidgets.QDialog):
         self.playForScrapCB.setChecked(acct.playScrap)
         self.playForWireCB.setChecked(acct.playWire)
         self.playForPatrolCB.setChecked(acct.playPatrol)
+        self.inGameNameInput.setText(acct.ign)
+        self.enabledForBottingCB.setChecked(acct.enabled)

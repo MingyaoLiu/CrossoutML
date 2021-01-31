@@ -7,8 +7,6 @@ import threading
 from BotBackgroundThread import BotBackgroundThread
 from uis.QTWindowOverlay import getOverlay
 
-from DCaptureClass import getDCapture
-from SettingsClass import getGlobalSetting
 
 game_main_window = None
 
@@ -57,11 +55,6 @@ class UI_MainWindow(QtWidgets.QMainWindow):
 
         if self.isAllowedClick and self.botWorker is None:
             self.__disableClick()
-
-            overlay = getOverlay()
-            if (getGlobalSetting().settings.showDebugWindow):
-                overlay.autoResize()
-                overlay.show()
 
             self.botWorker = BotBackgroundThread()
             self.botWorker.start()

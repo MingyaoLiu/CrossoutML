@@ -1,24 +1,35 @@
 syntax = "proto3";
 
 message CrossoutMLSetting {
-    int32 displayIndex = 1;
-    bool fullAuto = 2;
-    int32 displayShiftX = 3;
-    int32 displayShiftY = 4;
-    int32 mouseShiftX = 5;
-    int32 mouseShiftY = 6;
-    int32 carMaxSpeed = 7;
-    int32 centerFarDetectDistance = 8;
-    int32 centerLowDetectDistance = 9;
-    int32 lrDetectDistance = 10;
-    int32 frontDetectDegree = 11;
-    int32 targetDisplayFPS = 12;
-    int32 detectionFPS = 13;
-    bool showDebugWindow = 14;
-    int32 checkStuckFrameCount = 15;
-    string gameTitle = 16;
-    int32 startScreen = 17;
-    repeated CrossoutMLAccount accounts = 18;
+    int32 startScreen = 1;
+    int32 displayIndex = 2;
+    int32 targetDisplayFPS = 3;
+    string gameTitle = 4;
+    bool autoDetect = 5;
+    int32 displayShiftX = 6;
+    int32 displayShiftY = 7;
+    int32 mouseShiftX = 8;
+    int32 mouseShiftY = 9;
+    bool showOverlay = 10;
+    bool showDetectClickDebugWindow = 11;
+    bool showMapTrackingDebugWindow = 12;
+    bool showMinimapTrackingDebugWindow = 13;
+    int32 centerDetectDistance = 14;
+    int32 lrDetectDistance = 15;
+    int32 frontDetectDegree = 16;
+    int32 carMinSpeed = 17;
+    int32 carMaxSpeed = 18;
+    sint32 enemyDetectionSizeMidifier = 19;
+    float turnHoldDuration = 20;
+    float turnAfterWaitDuration = 21;
+    float speedHoldDuration = 22;
+    float speedAfterWaitDuration = 23;
+    int32 fullStuckTimer =24;
+    string weaponKey = 25;
+    string selfExplodeKey = 26;
+    string calloutKeys = 27;
+    string chatDetectKeywords = 28;
+    repeated CrossoutMLAccount accounts = 29;
 }
 
 
@@ -29,4 +40,6 @@ message CrossoutMLAccount {
     bool playScrap = 4;
     bool playWire = 5;
     bool playPatrol = 6;
+    string ign = 7;
+    bool enabled = 8;
 }

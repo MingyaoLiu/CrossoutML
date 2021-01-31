@@ -4,16 +4,11 @@ from PyQt5 import uic
 import time
 from SettingsClass import getGlobalSetting
 from uis.ui_addaccountwindow import UIAddAccountWindow
-from operator import itemgetter
 import cv2
 from uis.QTWindowOverlay import getOverlay
-import ctypes
 from DCaptureClass import getDCapture
 import Constants as const
-
-class TITLEBARINFO(ctypes.Structure):
-    _fields_ = [("cbSize", ctypes.wintypes.DWORD), ("rcTitleBar", ctypes.wintypes.RECT),
-                ("rgstate", ctypes.wintypes.DWORD * 6)]
+import Utils
 
 class UI_SettingWindow(QtWidgets.QMainWindow):
     
@@ -21,88 +16,15 @@ class UI_SettingWindow(QtWidgets.QMainWindow):
         super().__init__(*args, **kwargs)
         uic.loadUi("uis/QTWindowSettingsUI.ui", self)
         self.loadSettings()
-        
         self.saveBtn.clicked.connect(self.saveSettings)
         self.addAcctBtn.clicked.connect(self.__goToAddAcct)
         self.EditAccountBtn.clicked.connect(self.__editAcct)
         self.delAcctBtn.clicked.connect(self.__deleteCurrentAcct)
         self.detectAllSettingBtn.clicked.connect(self.__detectAllSettings)
-
-    def __GetWindowRectFromName(self, name:str)-> tuple:
-        hwnd = ctypes.windll.user32.FindWindowW(0, name)
-
-        # This rect return the window rect with titlebar but no shadow.
-        rect = ctypes.wintypes.RECT()
-        foundwindow = ctypes.windll.dwmapi.DwmGetWindowAttribute
-        if foundwindow:
-            rect = ctypes.wintypes.RECT()
-            DWMWA_EXTENDED_FRAME_BOUNDS = 9
-            foundwindow(
-                hwnd,
-                ctypes.wintypes.DWORD(DWMWA_EXTENDED_FRAME_BOUNDS),
-                ctypes.byref(rect), ctypes.sizeof(rect))
-
-        # this rect return the outer window, with titlebar and 4 side shadow.
-        rect2 = ctypes.wintypes.RECT() 
-        ctypes.windll.user32.GetWindowRect(hwnd, ctypes.pointer(rect2))
-
-        # this returns the title bar rect, bottom would be the top of the inner window.
-        title_info = TITLEBARINFO()
-        title_info.cbSize = ctypes.sizeof(title_info)
-        ctypes.windll.user32.GetTitleBarInfo(hwnd, ctypes.byref(title_info))
-
-        return (rect.left, title_info.rcTitleBar.bottom, rect.right, rect.bottom) # return only inner window rect.
     
-    def __detectAllSettings(self): ## This only support less than 2 monitor of same resolution from left to right arranged. left is the main monitor.
-        innerWindow = self.__GetWindowRectFromName(self.gameTitleInput.text())
-        left = innerWindow[0]
-        top = innerWindow[1]
-        right = innerWindow[2]
-        bottom = innerWindow[3]
-        width = innerWindow[2] - innerWindow[0]
-        height = innerWindow[3] - innerWindow[1]
-        getOverlay().resize((left, top, width, height))
-        if (self.showDebugCheckbox.isChecked()):
-            getOverlay().show()
-        d = getDCapture().d
-        d.display = d.displays[int(self.displayIndex.text())]
-        if (left > d.displays[0].resolution[0]):
-            self.displayIndex.setText(str(1))
-            self.displayShiftX.setText(str(left - d.displays[0].resolution[0]))
-        else:
-            self.displayShiftX.setText(str(left))
-        
-        self.displayShiftY.setText(str(top))
-
-        self.mouseShiftX.setText(str(left))
-        self.mouseShiftY.setText(str(top))
-
-        
-
-    def __goToSelectDisplayShift(self): # NOT USED RN
-        d = getDCapture()
-        d.display = d.displays[int(self.displayIndex.text())]
-        currentScreen = d.screenshot()
-        fullScreenShot = cv2.cvtColor(currentScreen, cv2.COLOR_BGR2GRAY)
-        selectFrameX = 400
-        selectFrameY = 200
-        enlargeFactor = 4
-        selectFrame = fullScreenShot[0: selectFrameY, 0: selectFrameX]
-        enlargedFrameSize = (selectFrameX * enlargeFactor, selectFrameY * enlargeFactor) # Choose the top left corner of the inner window.
-        resized = cv2.resize(selectFrame, enlargedFrameSize, interpolation = cv2.INTER_AREA)
-        resizedAddDot = cv2.circle(resized, (int(self.displayShiftX.text()) * enlargeFactor, int(self.displayShiftY.text()) * enlargeFactor),1, (255, 255, 255), -1)
-        cv2.imshow("ChooseGameWindowTopLeftCorner", resizedAddDot )
-        cv2.namedWindow('ChooseGameWindowTopLeftCorner', cv2.WINDOW_AUTOSIZE)
-        def on_click(event, x, y, p1, p2):
-            print(event)
-            if event == cv2.EVENT_LBUTTONDOWN:
-                print('mouse down')
-                print(x)
-                print(y)
-                self.displayShiftX.setText(str(round(x / enlargeFactor)))
-                self.displayShiftY.setText(str(round(y / enlargeFactor)))
-                cv2.destroyWindow('ChooseGameWindowTopLeftCorner') 
-        cv2.setMouseCallback('ChooseGameWindowTopLeftCorner', on_click)
+    def __detectAllSettings(self):
+        getGlobalSetting().updateDisplayMouseShift()
+        getGlobalSetting().saveSettings()
 
     def __goToAddAcct(self):
         self.window = QtWidgets.QDialog()
@@ -123,71 +45,91 @@ class UI_SettingWindow(QtWidgets.QMainWindow):
         
     def loadSettings(self):
         setting = getGlobalSetting().settings
-        self.displayIndex.setText(str(setting.displayIndex))
-        self.gameTitleInput.setText(setting.gameTitle)
-        self.displayShiftX.setText(str(setting.displayShiftX))
-        self.displayShiftY.setText(str(setting.displayShiftY))
-        self.mouseShiftX.setText(str(setting.mouseShiftX))
-        self.mouseShiftY.setText(str(setting.mouseShiftY))
-        
-        self.targetFPSInput.setText(str(setting.targetDisplayFPS or 20))
-        self.centerFarDetectDistance.setText(
-            str(setting.centerFarDetectDistance or 3 * (setting.lrDetectDistance or 10)))
-        self.centerLowDetectDistance.setText(
-            str(setting.centerLowDetectDistance or (setting.lrDetectDistance or 10)))
-        
-        self.lrDetectDistance.setText(str(setting.lrDetectDistance or 10))
-        self.detectRadius.setText(str(setting.frontDetectDegree or 45))
-        self.detectFPS.setText(str(setting.detectionFPS))
-        self.showDebugCheckbox.setChecked(setting.showDebugWindow)
-        self.checkStuckFrameCount.setText(
-            str(setting.checkStuckFrameCount or 20))
+
+        self.acctDropdown.clear()
+        self.acctDropdown.addItems(str(i) + " - " + (x.ign if x.ign != '' else x.username) for i,x in enumerate(setting.accounts))
 
         self.startScreenDropDown.clear()
         self.stepIds = [val.id for val in const.Steps]
-
         self.startScreenDropDown.addItems(self.stepIds)
-
         if (setting.startScreen is not None):
             self.startScreenDropDown.setCurrentIndex(setting.startScreen)
         else:
             self.startScreenDropDown.setCurrentIndex(0)
 
+        self.targetFPSInput.setText(str(setting.targetDisplayFPS))
+        self.displayIndexInput.setText(str(setting.displayIndex))
+        self.gameTitleInput.setText(setting.gameTitle)
+        self.autoUpdateWindowSettingCheckbox.setChecked(setting.autoDetect)
 
-        self.acctDropdown.clear()
-        self.acctDropdown.addItems(str(i) + " - " + x.username for i,x in enumerate(setting.accounts))
-            
-        
+        self.displayShiftXInput.setText(str(setting.displayShiftX))
+        self.displayShiftYInput.setText(str(setting.displayShiftY))
+        self.mouseShiftXInput.setText(str(setting.mouseShiftX))
+        self.mouseShiftYInput.setText(str(setting.mouseShiftY))
+
+        self.showDetectClickCB.setChecked(setting.showDetectClickDebugWindow)
+        self.showMapTrackingCB.setChecked(setting.showMapTrackingDebugWindow)
+        self.showMinimapDebugWindowCB.setChecked(setting.showMinimapTrackingDebugWindow)
+        self.showOverlayWindowCB.setChecked(setting.showOverlay)
+
+        self.centerDetectDistanceInput.setText(str(setting.centerDetectDistance))
+        self.lrDetectDistanceInput.setText(str(setting.lrDetectDistance))
+        self.detectRadiusInput.setText(str(setting.frontDetectDegree))
+        self.speedMinInput.setText(str(setting.carMinSpeed))
+        self.speedMaxInput.setText(str(setting.carMaxSpeed))
+        self.enemyDetectSizeAdjustInput.setText(str(setting.enemyDetectionSizeMidifier))
+
+        self.takeTurnHoldADDurationInput.setText(format(setting.turnHoldDuration, '.2f'))
+        self.afterTurnWaitForNextCalcDurationInput.setText(format(setting.turnAfterWaitDuration, '.2f'))
+        self.speedChangeHoldKeyDurationInput.setText(format(setting.speedHoldDuration, '.2f'))
+        self.afterSpeedChangeWaitDurationInput.setText(format(setting.speedAfterWaitDuration, '.2f'))
+        self.fullStuckForceResetTimerInput.setText(str(setting.fullStuckTimer))
+
+        self.weaponDeployKeyInput.setText(setting.weaponKey)
+        self.selfExplodeKeyInput.setText(setting.selfExplodeKey)
+        self.calloutKeyInput.setText(setting.calloutKeys)
+        self.chatKeywordInput.setText(setting.chatDetectKeywords)
+
         
     def saveSettings(self):
         setting = getGlobalSetting().settings
-        setting.displayIndex = int(self.displayIndex.text())
-        setting.gameTitle = self.gameTitleInput.text() or 'Crossout X.XX.XX.XXXXXX'
-        setting.displayShiftX = int(self.displayShiftX.text())
-        setting.displayShiftY = int(self.displayShiftY.text())
-        setting.mouseShiftX = int(self.mouseShiftX.text())
-        setting.mouseShiftY = int(self.mouseShiftY.text())
-        setting.targetDisplayFPS = int(self.targetFPSInput.text()) or 20
-        setting.centerFarDetectDistance = int(
-            self.centerFarDetectDistance.text()) or 3 * (setting.lrDetectDistance or 10)
-        setting.centerLowDetectDistance = int(
-            self.centerLowDetectDistance.text()) or (setting.lrDetectDistance or 10)
-        setting.lrDetectDistance = int(self.lrDetectDistance.text()) or 10
-        setting.frontDetectDegree = int(self.detectRadius.text()) or 45
-        setting.detectionFPS = int(self.detectFPS.text())
-        setting.showDebugWindow = self.showDebugCheckbox.isChecked()
-        setting.checkStuckFrameCount = int(
-            self.checkStuckFrameCount.text()) or 20
-        
+
         setting.startScreen = self.startScreenDropDown.currentIndex()
+
+        setting.displayIndex = int(self.displayIndexInput.text())
+        setting.targetDisplayFPS = int(self.targetFPSInput.text())
+        setting.gameTitle = self.gameTitleInput.text()
+        setting.autoDetect = self.autoUpdateWindowSettingCheckbox.isChecked()
+
+        setting.displayShiftX = int(self.displayShiftXInput.text())
+        setting.displayShiftY = int(self.displayShiftYInput.text())
+        setting.mouseShiftX = int(self.mouseShiftXInput.text())
+        setting.mouseShiftY = int(self.mouseShiftYInput.text())
+
+        setting.showDetectClickDebugWindow = self.showDetectClickCB.isChecked()
+        setting.showMapTrackingDebugWindow = self.showMapTrackingCB.isChecked()
+        setting.showMinimapTrackingDebugWindow = self.showMinimapDebugWindowCB.isChecked()
+        setting.showOverlay = self.showOverlayWindowCB.isChecked()
+
+        setting.centerDetectDistance = int(self.centerDetectDistanceInput.text())
+        setting.lrDetectDistance = int(self.lrDetectDistanceInput.text())
+        setting.frontDetectDegree = int(self.detectRadiusInput.text())
+        setting.carMinSpeed = int(self.speedMinInput.text())
+        setting.carMaxSpeed = int(self.speedMaxInput.text())
+        setting.enemyDetectionSizeMidifier = int(self.enemyDetectSizeAdjustInput.text())
+
+        setting.turnHoldDuration = float(self.takeTurnHoldADDurationInput.text())
+        setting.turnAfterWaitDuration = float(self.afterTurnWaitForNextCalcDurationInput.text())
+        setting.speedHoldDuration = float(self.speedChangeHoldKeyDurationInput.text())
+        setting.speedAfterWaitDuration = float(self.afterSpeedChangeWaitDurationInput.text())
+        setting.fullStuckTimer = int(self.fullStuckForceResetTimerInput.text())
+
+
+        setting.weaponKey = self.weaponDeployKeyInput.text()
+        setting.selfExplodeKey = self.selfExplodeKeyInput.text()
+        setting.calloutKeys = self.calloutKeyInput.text()
+        setting.chatDetectKeywords = self.chatKeywordInput.text()
 
         getGlobalSetting().saveSettings()
         self.close()
-        
-        
-        
-        
-        
-        
-        
         
